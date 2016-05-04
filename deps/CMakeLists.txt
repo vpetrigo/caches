@@ -3,6 +3,13 @@ if(${BUILD_TEST})
     set(gtest_disable_pthreads ON CACHE BOOL "Force gtest to disable pthreads")
   endif()
 
+  if(MSVC)
+    # By default, GTest compiles on Windows in CRT static linkage mode. We use this
+    # variable to force it into using the CRT in dynamic linkage (DLL), just as CPR
+    # does.
+    set(gtest_force_shared_crt ON CACHE BOOL "Force gtest to use the shared c runtime")
+  endif()
+
   add_subdirectory(googletest)
 
   set(GTEST_FOUND TRUE CACHE INTERNAL "Set if libgtest was found or built")

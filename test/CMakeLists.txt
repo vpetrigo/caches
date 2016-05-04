@@ -14,3 +14,4 @@ include_directories(
 
 add_cache_test(lru_cache)
 add_cache_test(fifo_cache)
+add_cache_test(lfu_cache)

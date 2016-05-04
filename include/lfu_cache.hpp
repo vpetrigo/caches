@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <list>
+#include <atomic>
 #include <mutex>
 #include <tuple>
 #include <unordered_map>
@@ -50,14 +51,14 @@ class lfu_cache {
     }
   }
 
-  const Value& Get(const Key& key) {
-    operation_guard og{safe_op};
+  const Value& Get(const Key& key) const {
     auto it = cache_items_map.find(key);
 
     if (it == cache_items_map.end()) {
       throw std::range_error("No such key in the cache");
     }
     else {
+      operation_guard og{safe_op};
       // increment the frequency of the "key"-element
       ++(std::get<frequency_f>(*it->second));
 
@@ -65,20 +66,16 @@ class lfu_cache {
     }
   }
 
-  bool Exists(const Key& key) const {
-    operation_guard og{safe_op};
-
+  bool Exists(const Key& key) const noexcept {
     return cache_items_map.find(key) != cache_items_map.end();
   }
 
-  size_t Size() const {
-    operation_guard og{safe_op};
-
+  size_t Size() const noexcept {
     return cache_items_map.size();
   }
 
  private:
-  std::list<value_type> cache_items_list;
+  mutable std::list<value_type> cache_items_list;
   std::unordered_map<Key, value_it> cache_items_map;
   size_t max_cache_size;
   mutable std::mutex safe_op;

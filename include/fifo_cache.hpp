@@ -40,8 +40,7 @@ class fifo_cache {
     }
   }
 
-  const Value& Get(const Key& key) {
-    operation_guard og{safe_op};
+  const Value& Get(const Key& key) const {
     auto it = cache_items_map.find(key);
 
     if (it == cache_items_map.end()) {
@@ -51,15 +50,11 @@ class fifo_cache {
     return it->second->second;
   }
 
-  bool Exists(const Key& key) const {
-    operation_guard og{safe_op};
-
+  bool Exists(const Key& key) const noexcept {
     return cache_items_map.find(key) != cache_items_map.end();
   }
 
-  size_t Size() const {
-    operation_guard og{safe_op};
-
+  size_t Size() const noexcept {
     return cache_items_map.size();
   }
 

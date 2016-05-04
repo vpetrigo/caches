@@ -20,7 +20,11 @@ class lfu_cache {
 
   enum VTFields { key_f = 0, value_f = 1, frequency_f = 2 };
 
-  lfu_cache(size_t max_size) : max_cache_size{max_size} {}
+  lfu_cache(size_t max_size) : max_cache_size{max_size} {
+    if (max_size == 0) {
+      max_cache_size = std::numeric_limits<size_t>::max();
+    }
+  }
 
   void Put(const Key& key, const Value& value) {
     constexpr unsigned INIT_FREQ = 1;
@@ -52,13 +56,13 @@ class lfu_cache {
   }
 
   const Value& Get(const Key& key) const {
+    operation_guard og{safe_op};
     auto it = cache_items_map.find(key);
 
     if (it == cache_items_map.end()) {
       throw std::range_error("No such key in the cache");
     }
     else {
-      operation_guard og{safe_op};
       // increment the frequency of the "key"-element
       ++(std::get<frequency_f>(*it->second));
 
@@ -67,10 +71,14 @@ class lfu_cache {
   }
 
   bool Exists(const Key& key) const noexcept {
+    operation_guard og{safe_op};
+
     return cache_items_map.find(key) != cache_items_map.end();
   }
 
   size_t Size() const noexcept {
+    operation_guard og{safe_op};
+    
     return cache_items_map.size();
   }
 

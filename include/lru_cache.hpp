@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
+#include <limits>
 
 namespace caches {
 
@@ -17,7 +18,11 @@ class lru_cache {
   using value_it = typename std::list<value_type>::iterator;
   using operation_guard = typename std::lock_guard<std::mutex>;
 
-  lru_cache(size_t max_size) : max_cache_size{max_size} {}
+  lru_cache(size_t max_size) : max_cache_size{max_size} {
+    if (max_size == 0) {
+      max_cache_size = std::numeric_limits<size_t>::max();
+    }
+  }
 
   void Put(const Key& key, const Value& value) {
     operation_guard og{safe_op};
@@ -43,14 +48,13 @@ class lru_cache {
   }
 
   const Value& Get(const Key& key) const {
+    operation_guard og{safe_op};
     auto it = cache_items_map.find(key);
 
     if (it == cache_items_map.end()) {
       throw std::range_error("No such key in the cache");
     }
     else {
-      operation_guard og{safe_op};
-
       cache_items_list.splice(cache_items_list.begin(), cache_items_list,
                               it->second);
 
@@ -59,10 +63,14 @@ class lru_cache {
   }
 
   bool Exists(const Key& key) const noexcept {
+    operation_guard og{safe_op};
+
     return cache_items_map.find(key) != cache_items_map.end();
   }
 
   size_t Size() const noexcept {
+    operation_guard og{safe_op};
+
     return cache_items_map.size();
   }
 

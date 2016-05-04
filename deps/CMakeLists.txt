@@ -1,10 +1,9 @@
 if(${BUILD_TEST})
-  add_subdirectory(googletest)
-
-  if(MINGW)
-    message("MinGW is used. Disable pthreads for gtest...")
-    set(gtest_disable_pthreads ON)
+  if (MINGW)
+    set(gtest_disable_pthreads ON CACHE BOOL "Force gtest to disable pthreads")
   endif()
+
+  add_subdirectory(googletest)
 
   set(GTEST_FOUND TRUE CACHE INTERNAL "Set if libgtest was found or built")
   set(GTEST_LIBRARIES gtest CACHE INTERNAL "Location of libgtest")

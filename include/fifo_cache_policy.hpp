@@ -8,6 +8,7 @@ namespace caches {
 template <typename Key>
 class FIFOCachePolicy : public ICachePolicy<Key> {
  public:
+  FIFOCachePolicy() = default;
   ~FIFOCachePolicy() = default;
   
   void Insert(const Key& key) override {
@@ -18,12 +19,12 @@ class FIFOCachePolicy : public ICachePolicy<Key> {
     // nothing to do here in the FIFO strategy
   }
   // handle element deletion from a cache
-  virtual void Erase(const Key& key) override {
+  void Erase(const Key& key) override {
     fifo_queue.pop_back();
   }
 
   // return a key of a displacement candidate
-  virtual const Key& DispCandidate() const {
+  const Key& DispCandidate() const {
     return fifo_queue.back();
   }
  private:

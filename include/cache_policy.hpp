@@ -6,6 +6,7 @@ namespace caches {
 template <typename Key>
 class ICachePolicy {
  public:
+  virtual ~ICachePolicy() {}
   // handle element insertion in a cache
   virtual void Insert(const Key& key) = 0;
   // handle request to the key-element in a cache

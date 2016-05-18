@@ -1,5 +1,5 @@
-#ifndef LRU_CACHE_POLICY_HPP
-#define LRU_CACHE_POLICY_HPP
+#ifndef FIFO_CACHE_POLICY_HPP
+#define FIFO_CACHE_POLICY_HPP
 
 #include "cache_policy.hpp"
 #include <list>
@@ -32,4 +32,4 @@ class FIFOCachePolicy : public ICachePolicy<Key> {
 };
 } // namespace caches
 
-#endif // LRU_CACHE_POLICY_HPP
+#endif // FIFO_CACHE_POLICY_HPP

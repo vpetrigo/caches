@@ -7,8 +7,6 @@
 #include <mutex>
 #include <unordered_map>
 #include "cache_policy.hpp"
-#include "fifo_cache_policy.hpp"
-#include "lru_cache_policy.hpp"
 
 namespace caches {
 
@@ -23,7 +21,7 @@ class fixed_sized_cache {
 
   fixed_sized_cache(size_t max_size,
                     std::unique_ptr<ICachePolicy<Key>> p =
-                        std::make_unique<FIFOCachePolicy<Key>>())
+                        std::make_unique<NoCachePolicy<Key>>())
       : max_cache_size{max_size}, cache_policy{std::move(p)} {
     if (max_cache_size == 0) {
       max_cache_size = std::numeric_limits<size_t>::max();
@@ -37,7 +35,7 @@ class fixed_sized_cache {
     if (elem_it == cache_items_map.end()) {
       // add new element to the cache
       if (Size() + 1 > max_cache_size) {
-        auto disp_candidate_key = cache_policy->DispCandidate();
+        auto disp_candidate_key = cache_policy->ReplCandidate();
 
         Erase(disp_candidate_key);
       }

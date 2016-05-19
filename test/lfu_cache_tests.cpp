@@ -1,57 +1,89 @@
 #include <gtest/gtest.h>
-#include "lfu_cache.hpp"
+#include "cache.hpp"
+#include "lfu_cache_policy.hpp"
 
-TEST(LFU_Cache, Simple_Test) {
+template <typename Key, typename Value>
+using lfu_cache_t = typename caches::fixed_sized_cache<Key, Value>;
+
+template <typename Key>
+using lfu_policy_t = typename caches::LFUCachePolicy<Key>;
+
+TEST(LFUCache, Simple_Test) {
   constexpr size_t FIRST_FREQ = 10;
   constexpr size_t SECOND_FREQ = 9;
   constexpr size_t THIRD_FREQ = 8;
-  caches::lfu_cache<std::string, int> lfu(3);
+  lfu_cache_t<std::string, int> cache(3, std::make_unique<lfu_policy_t<std::string>>());
 
-  lfu.Put("A", 1);
-  lfu.Put("B", 2);
-  lfu.Put("C", 3);
-
-  EXPECT_TRUE(lfu.Exists("A"));
-  EXPECT_TRUE(lfu.Exists("B"));
-  EXPECT_TRUE(lfu.Exists("C"));
-  EXPECT_EQ(lfu.Size(), 3);
+  cache.Put("A", 1);
+  cache.Put("B", 2);
+  cache.Put("C", 3);
 
   for (size_t i = 0; i < FIRST_FREQ; ++i) {
-    EXPECT_EQ(lfu.Get("B"), 2);
+    EXPECT_EQ(cache.Get("B"), 2);
   }
 
   for (size_t i = 0; i < SECOND_FREQ; ++i) {
-    EXPECT_EQ(lfu.Get("A"), 1);
+    EXPECT_EQ(cache.Get("C"), 3);
   }
 
   for (size_t i = 0; i < THIRD_FREQ; ++i) {
-    EXPECT_EQ(lfu.Get("C"), 3);
+    EXPECT_EQ(cache.Get("A"), 1);
   }
 
-  lfu.Put("D", 4);
+  cache.Put("D", 4);
 
-  EXPECT_TRUE(lfu.Exists("A"));
-  EXPECT_TRUE(lfu.Exists("B"));
-  EXPECT_TRUE(lfu.Exists("D"));
-  EXPECT_THROW(lfu.Get("C"), std::range_error);
-  EXPECT_EQ(lfu.Size(), 3);
+  EXPECT_EQ(cache.Get("B"), 2);
+  EXPECT_EQ(cache.Get("C"), 3);
+  EXPECT_EQ(cache.Get("D"), 4);
+  EXPECT_THROW(cache.Get("A"), std::range_error);
 }
 
-TEST(LFU_Cache, Single_Slot) {
+TEST(LFUCache, Single_Slot) {
   constexpr size_t TEST_SIZE = 5;
-  caches::lfu_cache<int, int> lfu(1);
+  lfu_cache_t<int, int> cache(1, std::make_unique<lfu_policy_t<int>>());
 
-  lfu.Put(1, 10);
+  cache.Put(1, 10);
 
   for (size_t i = 0; i < TEST_SIZE; ++i) {
-    lfu.Put(1, i);
+    cache.Put(1, i);
   }
 
-  EXPECT_EQ(lfu.Get(1), 4);
+  EXPECT_EQ(cache.Get(1), 4);
 
-  lfu.Put(2, 20);
+  cache.Put(2, 20);
 
-  EXPECT_THROW(lfu.Get(1), std::range_error);
-  EXPECT_EQ(lfu.Get(2), 20);
-  EXPECT_EQ(lfu.Size(), 1);
+  EXPECT_THROW(cache.Get(1), std::range_error);
+  EXPECT_EQ(cache.Get(2), 20);
+}
+
+TEST(LFUCache, FrequencyIssue) {
+  constexpr size_t TEST_SIZE = 50;
+  lfu_cache_t<int, int> cache(3, std::make_unique<lfu_policy_t<int>>());
+
+  cache.Put(1, 10);
+  cache.Put(2, 1);
+  cache.Put(3, 2);
+
+  // cache value with key '1' will have the counter 50
+  for (size_t i = 0; i < TEST_SIZE; ++i) {
+    EXPECT_NO_THROW(cache.Get(1));
+  }
+
+  cache.Put(4, 3);
+  cache.Put(5, 4);
+
+  EXPECT_EQ(cache.Get(1), 10);
+  EXPECT_EQ(cache.Get(2), 1);
+  EXPECT_EQ(cache.Get(5), 4);
+  EXPECT_THROW(cache.Get(3), std::range_error);
+  EXPECT_THROW(cache.Get(4), std::range_error);
+
+  cache.Put(6, 5);
+  cache.Put(7, 6);
+
+  EXPECT_EQ(cache.Get(1), 10);
+  EXPECT_EQ(cache.Get(5), 4);
+  EXPECT_EQ(cache.Get(7), 6);
+  EXPECT_THROW(cache.Get(3), std::range_error);
+  EXPECT_THROW(cache.Get(6), std::range_error);
 }

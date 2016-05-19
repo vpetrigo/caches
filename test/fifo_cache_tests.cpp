@@ -2,9 +2,11 @@
 #include "cache.hpp"
 #include "fifo_cache_policy.hpp"
 
+template<typename Key>
+using fifo_policy_t = typename caches::FIFOCachePolicy<Key>;
+
 TEST(FIFOCache, Simple_Test) {
-  caches::fixed_sized_cache<int, int> fc(
-      2, std::make_unique<caches::FIFOCachePolicy<int>>());
+  caches::fixed_sized_cache<int, int, fifo_policy_t<int>> fc(2);
 
   fc.Put(1, 10);
   fc.Put(2, 20);
@@ -24,8 +26,7 @@ TEST(FIFOCache, Simple_Test) {
 }
 
 TEST(FIFOCache, Missing_Value) {
-  caches::fixed_sized_cache<int, int> fc(
-      2, std::make_unique<caches::FIFOCachePolicy<int>>());
+  caches::fixed_sized_cache<int, int, fifo_policy_t<int>> fc(2);
 
   fc.Put(1, 10);
 
@@ -36,8 +37,7 @@ TEST(FIFOCache, Missing_Value) {
 
 TEST(FIFOCache, Sequence_Test) {
   constexpr int TEST_SIZE = 10;
-  caches::fixed_sized_cache<std::string, int> fc(
-      TEST_SIZE, std::make_unique<caches::FIFOCachePolicy<std::string>>());
+  caches::fixed_sized_cache<std::string, int, fifo_policy_t<std::string>> fc(TEST_SIZE);
 
   for (size_t i = 0; i < TEST_SIZE; ++i) {
     fc.Put(std::to_string('0' + i), i);

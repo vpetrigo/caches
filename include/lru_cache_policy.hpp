@@ -31,7 +31,7 @@ class LRUCachePolicy : public ICachePolicy<Key> {
   }
 
   // return a key of a displacement candidate
-  const Key& DispCandidate() const override {
+  const Key& ReplCandidate() const override {
     return lru_queue.back();
   }
   

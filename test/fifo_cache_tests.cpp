@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "cache.hpp"
+#include "fifo_cache_policy.hpp"
 
 TEST(FIFOCache, Simple_Test) {
   caches::fixed_sized_cache<int, int> fc(

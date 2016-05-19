@@ -1,8 +1,8 @@
 #ifndef FIFO_CACHE_POLICY_HPP
 #define FIFO_CACHE_POLICY_HPP
 
-#include "cache_policy.hpp"
 #include <list>
+#include "cache_policy.hpp"
 
 namespace caches {
 template <typename Key>
@@ -10,7 +10,7 @@ class FIFOCachePolicy : public ICachePolicy<Key> {
  public:
   FIFOCachePolicy() = default;
   ~FIFOCachePolicy() = default;
-  
+
   void Insert(const Key& key) override {
     fifo_queue.emplace_front(key);
   }
@@ -23,8 +23,8 @@ class FIFOCachePolicy : public ICachePolicy<Key> {
     fifo_queue.pop_back();
   }
 
-  // return a key of a displacement candidate
-  const Key& DispCandidate() const {
+  // return a key of a replacement candidate
+  const Key& ReplCandidate() const override {
     return fifo_queue.back();
   }
  private:

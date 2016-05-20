@@ -27,6 +27,7 @@ Example for the LRU policy:
 #include "cache.hpp"
 #include "lru_cache_policy.hpp"
 
+// alias for easy class typing
 template <typename Key, typename Value>
 using lru_cache_t = typename caches::fixed_size_cache<Key, Value, LRUCachePolicy<Key>>;
 
@@ -48,7 +49,7 @@ The only requirement is a compatible C++11 compiler.
 
 This project was tested in the environments listed below:
 
-  * MinGW64 ([MSYS2 project](https://msys2.github.io/)
+  * MinGW64 ([MSYS2 project](https://msys2.github.io/))
     * Clang 3.8.0
     * GCC 5.3.0
   * MSVC (VS 2015)

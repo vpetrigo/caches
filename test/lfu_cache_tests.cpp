@@ -66,7 +66,6 @@ TEST(LFUCache, FrequencyIssue) {
     EXPECT_NO_THROW(cache.Get(1));
   }
 
->>>>>>> policy
   cache.Put(4, 3);
   cache.Put(5, 4);
 

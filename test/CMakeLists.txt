@@ -8,7 +8,7 @@ macro(add_cache_test _TEST_NAME)
 endmacro()
 
 include_directories(
-  ${GTEST_INCLUDE_DIRS},
+  ${GTEST_INCLUDE_DIRS}
   ${CACHE_INCLUDE_DIRS}
 )
 

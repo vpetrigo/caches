@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/vpetrigo/caches.svg?branch=master)](https://travis-ci.org/vpetrigo/caches)
+
 # C++ Cache implementation
 
 This project implements a simple thread-safe cache with several page replacement policies:

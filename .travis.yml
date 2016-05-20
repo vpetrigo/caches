@@ -1,0 +1,54 @@
+language: cpp
+
+sudo: false
+
+compiler: g++
+# main: g++ 4.9
+addons:
+  apt:
+    sources: &sources
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.7
+      - llvm-toolchain-precise-3.8
+      - llvm-toolchain-precise
+    packages:
+      - g++-4.9
+
+env:
+  - CCOMPILER="gcc-4.9" CXXCOMPILER="g++-4.9"
+
+# additional compilers  
+matrix:
+  include:
+    - env: CCOMPILER="clang-3.6" CXXCOMPILER="clang++-3.6"
+      addons:
+        apt:
+          packages: clang-3.6
+          sources: *sources
+
+    - env: CCOMPILER="clang-3.7" CXXCOMPILER="clang++-3.7"
+      addons:
+        apt:
+          packages: clang-3.7
+          sources: *sources
+
+    - env: CCOMPILER="clang-3.8" CXXCOMPILER="clang++-3.8"
+      addons:
+        apt:
+          packages: clang-3.8
+          sources: *sources
+
+before_script:
+  - export CXX=$CXXCOMPILER CC=$CCOMPILER
+  - mkdir build
+  - cmake --version
+  - $CXX --version
+  - cd build
+  - cmake ..
+
+script:
+  - make
+
+after_script:
+  - ctest

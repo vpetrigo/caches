@@ -1,0 +1,26 @@
+init:
+  - git config --global core.autocrlf input
+
+os: Visual Studio 2015
+
+install: 
+  - cinst cmake
+
+platform:
+  - Win32
+
+configuration:
+  - Debug
+  - Release
+
+before_build:
+  - git submodule update --init --recursive
+  - mkdir build
+  - cd build
+  - cmake ..
+
+build:
+  project: C:/projects/caches/build/caches.sln
+
+test_script:
+  - cmd: ctest -C %CONFIGURATION% -V 

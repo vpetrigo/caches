@@ -1,10 +1,9 @@
 init:
   - git config --global core.autocrlf input
 
-image: Visual Studio 2015
-
-#install: 
-#  - cinst cmake
+matrix:
+  - image: Visual Studio 2015
+  - image: Visual Studio 2017
 
 platform:
   - Win32

@@ -15,9 +15,10 @@ configuration:
 before_build:
   - git submodule update --init --recursive
   - mkdir build
-  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
+  - IF %APPVEYOR_BUILD_WORKER_IMAGE% == "Visual Studio 2015" ( set GEN="Visual Studio 14 2015") ELSE (set GEN="Visual Studio 15 2017")
+  - echo %GEN%
   - cd build
-  - cmake ..
+  - cmake .. -G%GEN%
 
 build:
   project: C:/projects/caches/build/caches.sln

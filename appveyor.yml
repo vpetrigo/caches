@@ -16,6 +16,7 @@ configuration:
 before_build:
   - git submodule update --init --recursive
   - mkdir build
+  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
   - cd build
   - cmake ..
 

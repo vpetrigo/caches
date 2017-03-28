@@ -40,7 +40,7 @@ class NoCachePolicy : public ICachePolicy<Key> {
 
   // return a key of a displacement candidate
   const Key& ReplCandidate() const override {
-    return *key_storage.crbegin();
+    return *key_storage.cbegin();
   }
  private:
   std::unordered_set<Key> key_storage;

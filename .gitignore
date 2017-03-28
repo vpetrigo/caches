@@ -1,5 +1,8 @@
 # VS Code
 .vscode/
 
+# IDEA
+.idea/
+
 # CMake build folder
-build/
+**/*build*/

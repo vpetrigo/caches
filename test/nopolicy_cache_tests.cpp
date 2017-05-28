@@ -9,7 +9,6 @@ TEST(NoPolicyCache, Add_one_element) {
   caches::fixed_sized_cache<std::string, int> cache(cache_size);
 
   cache.Put("Hello", 1);
-
   ASSERT_EQ(cache.Get("Hello"), 1);
 }
 
@@ -19,7 +18,6 @@ TEST(NoPolicyCache, Add_delete_add_one_element) {
 
   cache.Put("Hello", 1);
   cache.Put("World", 2);
-
   ASSERT_THROW(cache.Get("Hello"), std::range_error);
   ASSERT_EQ(cache.Get("World"), 2);
 }

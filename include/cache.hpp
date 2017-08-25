@@ -63,6 +63,25 @@ class fixed_sized_cache {
     return cache_items_map.size();
   }
 
+  /**
+   * Remove an element specified by key
+   * @param key
+   * @return
+   * @retval true if an element specified by key was found and deleted
+   * @retval false if an element is not present in a cache
+   */
+  bool Remove(const Key& key) {
+    operation_guard{safe_op};
+
+    if (cache_items_map.find(key) == cache_items_map.cend()) {
+      return false;
+    }
+
+    Erase(key);
+
+    return true;
+  }
+
  protected:
   void Insert(const Key& key, const Value& value) {
     cache_policy.Insert(key);

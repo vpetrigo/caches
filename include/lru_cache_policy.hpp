@@ -10,21 +10,21 @@ template <typename Key>
 class LRUCachePolicy : public ICachePolicy<Key> {
  public:
   using lru_iterator = typename std::list<Key>::const_iterator;
-  
+
   LRUCachePolicy() = default;
   ~LRUCachePolicy() = default;
-  
+
   void Insert(const Key& key) override {
     lru_queue.emplace_front(key);
     key_finder[key] = lru_queue.cbegin();
   }
-  
+
   void Touch(const Key& key) override {
     // move the touched element at the beginning of the lru_queue 
     lru_queue.splice(lru_queue.cbegin(), lru_queue, key_finder[key]);
   }
-  
-  void Erase(const Key& key) override {
+
+  void Erase(const Key&) override {
     // remove the least recently used element
     key_finder.erase(lru_queue.back());
     lru_queue.pop_back();
@@ -34,7 +34,7 @@ class LRUCachePolicy : public ICachePolicy<Key> {
   const Key& ReplCandidate() const override {
     return lru_queue.back();
   }
-  
+
  private:
   std::list<Key> lru_queue;
   std::unordered_map<Key, lru_iterator> key_finder; 

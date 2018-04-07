@@ -75,17 +75,18 @@ class fixed_sized_cache {
   void Clear() {
     operation_guard{safe_op};
 
-    for (auto it = cache_items_map.begin(); it != cache_items_map.end(); ++it) {
+    for (auto it = begin(); it != end(); ++it) {
       cache_policy.Erase(it->first);
+      OnEraseCallback(it->first, it->second);
     }
     cache_items_map.clear();
   }
 
-  typename std::unordered_map<Key, Value>::const_iterator Begin() const {
+  typename std::unordered_map<Key, Value>::const_iterator begin() const {
     return cache_items_map.begin();
   }
 
-  typename std::unordered_map<Key, Value>::const_iterator End() const {
+  typename std::unordered_map<Key, Value>::const_iterator end() const {
     return cache_items_map.end();
   }
 

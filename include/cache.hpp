@@ -18,13 +18,17 @@ class fixed_sized_cache {
   using const_iterator =
       typename std::unordered_map<Key, Value>::const_iterator;
   using operation_guard = typename std::lock_guard<std::mutex>;
+  using Callback = typename std::function<void(const Key& key, const Value& value)>;
 
-  fixed_sized_cache(size_t max_size, const Policy& policy = Policy())
-      : max_cache_size{max_size}, cache_policy(policy) {
+  fixed_sized_cache(size_t max_size, const Policy& policy = Policy(),
+                    Callback OnErase = [](const Key&, const Value&) {})
+      : cache_policy(policy), max_cache_size(max_size), OnEraseCallback(OnErase) {
     if (max_cache_size == 0) {
       max_cache_size = std::numeric_limits<size_t>::max();
     }
   }
+
+  ~fixed_sized_cache() { Clear(); }
 
   void Put(const Key& key, const Value& value) {
     operation_guard{safe_op};
@@ -57,10 +61,33 @@ class fixed_sized_cache {
     return elem_it->second;
   }
 
-  const size_t Size() const {
+  bool Cached(const Key& key) const {
+    operation_guard{safe_op};
+    return FindElem(key) != cache_items_map.end();
+  }
+
+  size_t Size() const {
     operation_guard{safe_op};
 
     return cache_items_map.size();
+  }
+
+  void Clear() {
+    operation_guard{safe_op};
+
+    for (auto it = begin(); it != end(); ++it) {
+      cache_policy.Erase(it->first);
+      OnEraseCallback(it->first, it->second);
+    }
+    cache_items_map.clear();
+  }
+
+  typename std::unordered_map<Key, Value>::const_iterator begin() const {
+    return cache_items_map.begin();
+  }
+
+  typename std::unordered_map<Key, Value>::const_iterator end() const {
+    return cache_items_map.end();
   }
 
  protected:
@@ -71,7 +98,10 @@ class fixed_sized_cache {
 
   void Erase(const Key& key) {
     cache_policy.Erase(key);
-    cache_items_map.erase(key);
+
+    auto elem_it = FindElem(key);
+    OnEraseCallback(key, elem_it->second);
+    cache_items_map.erase(elem_it);
   }
 
   void Update(const Key& key, const Value& value) {
@@ -88,6 +118,7 @@ class fixed_sized_cache {
   mutable Policy cache_policy;
   mutable std::mutex safe_op;
   size_t max_cache_size;
+  Callback OnEraseCallback;
 };
 }
 

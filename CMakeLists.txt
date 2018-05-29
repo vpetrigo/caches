@@ -10,7 +10,7 @@ set(CACHE_INCLUDE_DIRS ${caches_SOURCE_DIR}/include CACHE INTERNAL "")
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	add_definitions(/std:c++latest -DGTEST_LANG_CXX11=1)
+	add_definitions(/std:c++latest -DGTEST_LANG_CXX11=1 /DGTEST_HAS_TR1_TUPLE=0)
 endif()
 
 option(BUILD_TEST "Build tests for the project" ON)

@@ -2,7 +2,9 @@
 #define CACHE_HPP
 
 #include "cache_policy.hpp"
+
 #include <cstddef>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <mutex>

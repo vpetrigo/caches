@@ -73,7 +73,7 @@ before_script:
   - cmake ..
 
 script:
-  - make
+  - cmake --build . -- -j4
 
 after_script:
   - ctest

@@ -49,7 +49,7 @@ class fixed_sized_cache
         if (elem_it == cache_items_map.end())
         {
             // add new element to the cache
-            if (Size() + 1 > max_cache_size)
+            if (cache_items_map.size() + 1 > max_cache_size)
             {
                 auto disp_candidate_key = cache_policy.ReplCandidate();
 

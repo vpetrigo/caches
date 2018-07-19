@@ -43,13 +43,13 @@ class fixed_sized_cache
 
     void Put(const Key &key, const Value &value)
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
         auto elem_it = FindElem(key);
 
         if (elem_it == cache_items_map.end())
         {
             // add new element to the cache
-            if (Size() + 1 > max_cache_size)
+            if (cache_items_map.size() + 1 > max_cache_size)
             {
                 auto disp_candidate_key = cache_policy.ReplCandidate();
 
@@ -67,7 +67,7 @@ class fixed_sized_cache
 
     const Value &Get(const Key &key) const
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
         auto elem_it = FindElem(key);
 
         if (elem_it == cache_items_map.end())
@@ -81,20 +81,20 @@ class fixed_sized_cache
 
     bool Cached(const Key &key) const
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
         return FindElem(key) != cache_items_map.end();
     }
 
     size_t Size() const
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
 
         return cache_items_map.size();
     }
 
     void Clear()
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
 
         for (auto it = begin(); it != end(); ++it)
         {

@@ -19,7 +19,7 @@ class fixed_sized_cache {
       typename std::unordered_map<Key, Value>::const_iterator;
   using operation_guard = typename std::lock_guard<std::mutex>;
 
-  fixed_sized_cache(size_t max_size, const Policy& policy = Policy())
+  explicit fixed_sized_cache(size_t max_size, const Policy& policy = Policy())
       : max_cache_size{max_size}, cache_policy(policy) {
     if (max_cache_size == 0) {
       max_cache_size = std::numeric_limits<size_t>::max();
@@ -57,7 +57,7 @@ class fixed_sized_cache {
     return elem_it->second;
   }
 
-  const size_t Size() const {
+  size_t Size() const {
     operation_guard{safe_op};
 
     return cache_items_map.size();

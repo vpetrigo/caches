@@ -8,15 +8,22 @@ addons:
   apt:
     sources: &sources
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.6
-      - llvm-toolchain-precise-3.7
-      - llvm-toolchain-precise-3.8
-      - llvm-toolchain-precise
+      - llvm-toolchain-trusty
+      - llvm-toolchain-trusty-3.9
+      - llvm-toolchain-trusty-4.0
+      - llvm-toolchain-trusty-5.0
+      - llvm-toolchain-trusty-6.0
     packages:
       - g++-4.9
+      - g++-5
+      - g++-6
+      - g++-7
 
 env:
   - CCOMPILER="gcc-4.9" CXXCOMPILER="g++-4.9"
+  - CCOMPILER="gcc-5" CXXCOMPILER="g++-5"
+  - CCOMPILER="gcc-6" CXXCOMPILER="g++-6"
+  - CCOMPILER="gcc-7" CXXCOMPILER="g++-7"
 
 # additional compilers  
 matrix:
@@ -27,16 +34,34 @@ matrix:
           packages: clang-3.6
           sources: *sources
 
-    - env: CCOMPILER="clang-3.7" CXXCOMPILER="clang++-3.7"
-      addons:
-        apt:
-          packages: clang-3.7
-          sources: *sources
-
     - env: CCOMPILER="clang-3.8" CXXCOMPILER="clang++-3.8"
       addons:
         apt:
           packages: clang-3.8
+          sources: *sources
+    
+    - env: CCOMPILER="clang-3.9" CXXCOMPILER="clang++-3.9"
+      addons:
+        apt:
+          packages: clang-3.9
+          sources: *sources
+
+    - env: CCOMPILER="clang-4.0" CXXCOMPILER="clang++-4.0"
+      addons:
+        apt:
+          packages: clang-4.0
+          sources: *sources
+
+    - env: CCOMPILER="clang-5.0" CXXCOMPILER="clang++-5.0"
+      addons:
+        apt:
+          packages: clang-5.0
+          sources: *sources
+
+    - env: CCOMPILER="clang-6.0" CXXCOMPILER="clang++-6.0"
+      addons:
+        apt:
+          packages: clang-6.0
           sources: *sources
 
 before_script:
@@ -48,7 +73,7 @@ before_script:
   - cmake ..
 
 script:
-  - make
+  - cmake --build . -- -j4
 
 after_script:
   - ctest

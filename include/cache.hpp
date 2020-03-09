@@ -25,8 +25,9 @@ class fixed_sized_cache
     using Callback =
         typename std::function<void(const Key &key, const Value &value)>;
 
-    fixed_sized_cache(size_t max_size, const Policy &policy = Policy(),
-                      Callback OnErase = [](const Key &, const Value &) {})
+    explicit fixed_sized_cache(
+        size_t max_size, const Policy &policy = Policy(),
+        Callback OnErase = [](const Key &, const Value &) {})
         : cache_policy(policy), max_cache_size(max_size),
           OnEraseCallback(OnErase)
     {
@@ -79,8 +80,6 @@ class fixed_sized_cache
         return elem_it->second;
     }
 
-  size_t Size() const {
-    operation_guard{safe_op};
     bool Cached(const Key &key) const
     {
         operation_guard lock{safe_op};
@@ -94,30 +93,28 @@ class fixed_sized_cache
         return cache_items_map.size();
     }
 
-  /**
-   * Remove an element specified by key
-   * @param key
-   * @return
-   * @retval true if an element specified by key was found and deleted
-   * @retval false if an element is not present in a cache
-   */
-  bool Remove(const Key& key) {
-    operation_guard{safe_op};
+    /**
+     * Remove an element specified by key
+     * @param key
+     * @return
+     * @retval true if an element specified by key was found and deleted
+     * @retval false if an element is not present in a cache
+     */
+    bool Remove(const Key &key)
+    {
+        operation_guard{safe_op};
 
-    if (cache_items_map.find(key) == cache_items_map.cend()) {
-      return false;
+        if (cache_items_map.find(key) == cache_items_map.cend())
+        {
+            return false;
+        }
+
+        Erase(key);
+
+        return true;
     }
 
-    Erase(key);
-
-    return true;
-  }
-
- protected:
-  void Insert(const Key& key, const Value& value) {
-    cache_policy.Insert(key);
-    cache_items_map.emplace(std::make_pair(key, value));
-  }
+  protected:
     void Clear()
     {
         operation_guard lock{safe_op};
@@ -174,6 +171,6 @@ class fixed_sized_cache
     size_t max_cache_size;
     Callback OnEraseCallback;
 };
-}
+} // namespace caches
 
 #endif // CACHE_HPP

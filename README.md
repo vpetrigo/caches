@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/vpetrigo/caches.svg?branch=master)](https://travis-ci.org/vpetrigo/caches)
-[![Build status](https://ci.appveyor.com/api/projects/status/5tcwwry337fbjgcb/branch/master?svg=true)](https://ci.appveyor.com/project/vpetrigo/caches/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/kawd812e48065r7a?svg=true)](https://ci.appveyor.com/project/vpetrigo/caches)
 
 # C++ Cache implementation
 

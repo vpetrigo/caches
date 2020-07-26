@@ -93,3 +93,24 @@ TEST(LFUCache, FrequencyIssue)
     EXPECT_THROW(cache.Get(3), std::range_error);
     EXPECT_THROW(cache.Get(6), std::range_error);
 }
+
+TEST(LFUCache, Remove_Test) {
+  constexpr std::size_t TEST_SIZE = 10;
+  lfu_cache_t <std::string, int> fc(TEST_SIZE);
+
+  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
+    fc.Put(std::to_string(i), i);
+  }
+
+  EXPECT_EQ(fc.Size(), TEST_SIZE);
+
+  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
+    EXPECT_TRUE(fc.Remove(std::to_string(i)));
+  }
+
+  EXPECT_EQ(fc.Size(), 0);
+
+  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
+    EXPECT_FALSE(fc.Remove(std::to_string(i)));
+  }
+}

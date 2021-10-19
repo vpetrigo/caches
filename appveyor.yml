@@ -18,11 +18,16 @@ before_build:
   - git submodule update --init --recursive
   - echo %arch%
   - mkdir build
-  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" ( SET GEN="Visual Studio 14 2015" )
-  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" ( SET GEN="Visual Studio 15 2017" )
+  - if "%arch%" == "x64" ( SET arch="Win64" )
+  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" ( SET GEN="Visual Studio 14 2015 %arch%" )
+  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" ( SET GEN="Visual Studio 15 2017 %arch%" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" ( SET GEN="Visual Studio 16 2019" )
   - cd build
-  - cmake .. -G "%GEN%" -A "%arch%"
+  - IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" (
+      cmake .. -G "%GEN%"
+    ) ELSE (
+      cmake .. -G "%GEN%" -A "%arch%"
+    )
 
 build:
   project: C:/projects/caches/build/caches.sln

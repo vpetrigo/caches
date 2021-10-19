@@ -28,10 +28,8 @@ before_build:
       cmake .. -G %GEN% -A %PLATFORM%
     )
 
-#build:
-#  project: C:/projects/caches/build/caches.sln
 build_script:
   - cmake --build . --config %CONFIGURATION%
 
 test_script:
-  - cmd: ctest -C %CONFIGURATION% -V 
+  - ctest -C %CONFIGURATION% -V

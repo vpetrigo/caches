@@ -41,7 +41,15 @@ jobs:
           chmod +x ./llvm.sh
           sudo ./llvm.sh ${{ matrix.tag }}
         shell: bash
-      - run: make && make test
+      - run: |
+          mkdir build
+          cmake --version
+          $CC --version
+          $CXX --version
+          cd build
+          cmake ..
+          cmake --build . -- -j$(nproc)
+          ctest
         shell: bash
   build-gcc:
     runs-on: ubuntu-latest
@@ -55,5 +63,13 @@ jobs:
       CXX: g++
     steps:
       - uses: actions/checkout@v2
-      - run: make && make test
+      - run: |
+          mkdir build
+          cmake --version
+          $CC --version
+          $CXX --version
+          cd build
+          cmake ..
+          cmake --build . -- -j$(nproc)
+          ctest
         shell: bash

@@ -46,7 +46,7 @@ TEST(FIFOCache, Sequence_Test)
 
     for (size_t i = 0; i < TEST_SIZE; ++i)
     {
-        fc.Put(std::to_string('0' + i), i);
+        fc.Put(std::to_string('0' + i), static_cast<int>(i));
     }
 
     EXPECT_EQ(fc.Size(), TEST_SIZE);
@@ -59,7 +59,7 @@ TEST(FIFOCache, Sequence_Test)
     // replace a half
     for (size_t i = 0; i < TEST_SIZE / 2; ++i)
     {
-        fc.Put(std::to_string('a' + i), i);
+        fc.Put(std::to_string('a' + i), static_cast<int>(i));
     }
 
     EXPECT_EQ(fc.Size(), TEST_SIZE);

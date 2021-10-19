@@ -49,7 +49,7 @@ TEST(LFUCache, Single_Slot)
 
     for (size_t i = 0; i < TEST_SIZE; ++i)
     {
-        cache.Put(1, i);
+        cache.Put(1, static_cast<int>(i));
     }
 
     EXPECT_EQ(cache.Get(1), 4);

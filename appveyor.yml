@@ -24,9 +24,9 @@ before_build:
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" ( SET GEN="Visual Studio 16 2019" )
   - cd build
   - IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" (
-      cmake .. -G "%GEN%"
+      cmake .. -G %GEN%
     ) ELSE (
-      cmake .. -G "%GEN%" -A "%arch%"
+      cmake .. -G %GEN% -A %arch%
     )
 
 build:

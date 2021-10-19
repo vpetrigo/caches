@@ -18,7 +18,6 @@ before_build:
   - git submodule update --init --recursive
   - echo %arch%
   - mkdir build
-  - if "%PLATFORM%" == "x64" ( SET arch="Win64" ) else ( SET arch="Win32" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" ( SET GEN="Visual Studio 14 2015" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" ( SET GEN="Visual Studio 15 2017" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" ( SET GEN="Visual Studio 16 2019" )
@@ -26,7 +25,7 @@ before_build:
   - IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" (
       cmake .. -G %GEN%
     ) ELSE (
-      cmake .. -G %GEN% -A %arch%
+      cmake .. -G %GEN% -A %PLATFORM%
     )
 
 build:

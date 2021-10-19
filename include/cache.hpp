@@ -102,7 +102,7 @@ class fixed_sized_cache
      */
     bool Remove(const Key &key)
     {
-        operation_guard{safe_op};
+        operation_guard lock{safe_op};
 
         if (cache_items_map.find(key) == cache_items_map.cend())
         {

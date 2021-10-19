@@ -82,7 +82,7 @@ TEST(FIFOCache, Sequence_Test)
 
 TEST(FIFOCache, Remove_Test) {
   constexpr std::size_t TEST_SIZE = 10;
-  fifo_cache_t <std::string, int> fc(TEST_SIZE);
+  fifo_cache_t <std::string, std::size_t> fc(TEST_SIZE);
 
   for (std::size_t i = 0; i < TEST_SIZE; ++i) {
     fc.Put(std::to_string(i), i);

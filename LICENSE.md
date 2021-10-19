@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2015-2017, Vladimir Petrigo
+Copyright (c) 2015-2021, Vladimir Petrigo
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

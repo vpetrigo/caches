@@ -34,6 +34,8 @@ jobs:
         with:
           submodules: 'true'
       - name: Run tests with coverage options
+        run: sudo apt-get install gcov lcov -y
+      - name: Run tests with coverage options
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |

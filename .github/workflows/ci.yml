@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - run: |
+      - name: "Run tests"
+        run: |
           mkdir build
           cmake --version
           $CC --version
@@ -26,6 +27,28 @@ jobs:
           cmake --build . -- -j$(nproc)
           ctest
         shell: bash
+  build-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Run tests with coverage options
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
+          cmake --build . -- -j$(nproc)
+          ctest
+          mkdir coverage
+          cd coverage
+          lcov --directory ../ -c -o coverage.info
+          lcov --remove coverage.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov -t ${CODECOV_TOKEN} -R .
   build-clang:
     runs-on: ubuntu-latest
     strategy:
@@ -45,7 +68,8 @@ jobs:
           chmod +x ./llvm.sh
           sudo ./llvm.sh ${{ matrix.tag }}
         shell: bash
-      - run: |
+      - name: "Run tests"
+        run: |
           mkdir build
           cmake --version
           $CC --version
@@ -70,7 +94,8 @@ jobs:
         with:
           submodules: 'true'
       - uses: lukka/get-cmake@latest
-      - run: |
+      - name: "Run tests"
+        run: |
           mkdir build
           cmake --version
           $CC --version

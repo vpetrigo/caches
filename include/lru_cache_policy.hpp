@@ -7,7 +7,8 @@
 
 namespace caches
 {
-template <typename Key> class LRUCachePolicy : public ICachePolicy<Key>
+template <typename Key>
+class LRUCachePolicy : public ICachePolicy<Key>
 {
   public:
     using lru_iterator = typename std::list<Key>::iterator;

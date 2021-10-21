@@ -6,12 +6,11 @@
 namespace caches
 {
 
-template <typename Key> class ICachePolicy
+template <typename Key>
+class ICachePolicy
 {
   public:
-    virtual ~ICachePolicy()
-    {
-    }
+    virtual ~ICachePolicy() = default;
     // handle element insertion in a cache
     virtual void Insert(const Key &key) = 0;
     // handle request to the key-element in a cache
@@ -23,7 +22,8 @@ template <typename Key> class ICachePolicy
     virtual const Key &ReplCandidate() const = 0;
 };
 
-template <typename Key> class NoCachePolicy : public ICachePolicy<Key>
+template <typename Key>
+class NoCachePolicy : public ICachePolicy<Key>
 {
   public:
     NoCachePolicy() = default;

@@ -9,7 +9,8 @@
 
 namespace caches
 {
-template <typename Key> class LFUCachePolicy : public ICachePolicy<Key>
+template <typename Key>
+class LFUCachePolicy : public ICachePolicy<Key>
 {
   public:
     using lfu_iterator = typename std::multimap<std::size_t, Key>::iterator;

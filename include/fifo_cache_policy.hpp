@@ -6,7 +6,8 @@
 
 namespace caches
 {
-template <typename Key> class FIFOCachePolicy : public ICachePolicy<Key>
+template <typename Key>
+class FIFOCachePolicy : public ICachePolicy<Key>
 {
   public:
     FIFOCachePolicy() = default;

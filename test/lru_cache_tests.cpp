@@ -1,6 +1,9 @@
 #include "cache.hpp"
 #include "lru_cache_policy.hpp"
+
 #include <gtest/gtest.h>
+
+#include <stdexcept>
 
 template <typename Key, typename Value>
 using lru_cache_t =
@@ -13,6 +16,29 @@ TEST(CacheTest, SimplePut)
     cache.Put("test", 666);
 
     EXPECT_EQ(cache.Get("test"), 666);
+}
+
+TEST(CacheTest, PutWithUpdate)
+{
+    constexpr std::size_t TEST_CASE = 4;
+    lru_cache_t<std::string, std::size_t> cache{TEST_CASE};
+
+    for (size_t i = 0; i < TEST_CASE; ++i)
+    {
+        cache.Put(std::to_string(i), i);
+
+        const auto value = cache.Get(std::to_string(i));
+        ASSERT_EQ(i, value);
+    }
+
+    for (size_t i = 0; i < TEST_CASE; ++i)
+    {
+        ASSERT_TRUE(cache.Cached(std::to_string(i)));
+        cache.Put(std::to_string(i), i * 10);
+
+        const auto value = cache.Get(std::to_string(i));
+        ASSERT_EQ(i * 10, value);
+    }
 }
 
 TEST(CacheTest, MissingValue)
@@ -44,23 +70,55 @@ TEST(CacheTest, KeepsAllValuesWithinCapacity)
     }
 }
 
-TEST(LRUCache, Remove_Test) {
-  constexpr std::size_t TEST_SIZE = 10;
-  lru_cache_t <std::string, std::size_t> fc(TEST_SIZE);
+TEST(LRUCache, Remove_Test)
+{
+    constexpr std::size_t TEST_SIZE = 10;
+    lru_cache_t<std::string, std::size_t> fc(TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    fc.Put(std::to_string(i), i);
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        fc.Put(std::to_string(i), i);
+    }
 
-  EXPECT_EQ(fc.Size(), TEST_SIZE);
+    EXPECT_EQ(fc.Size(), TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_TRUE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_TRUE(fc.Remove(std::to_string(i)));
+    }
 
-  EXPECT_EQ(fc.Size(), 0);
+    EXPECT_EQ(fc.Size(), 0);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_FALSE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_FALSE(fc.Remove(std::to_string(i)));
+    }
+}
+
+TEST(LRUCache, CachedCheck)
+{
+    constexpr std::size_t TEST_SUITE = 4;
+    lru_cache_t<std::string, std::size_t> cache(TEST_SUITE);
+
+    for (std::size_t i = 0; i < TEST_SUITE; ++i)
+    {
+        cache.Put(std::to_string(i), i);
+    }
+
+    for (std::size_t i = 0; i < TEST_SUITE; ++i)
+    {
+        EXPECT_TRUE(cache.Cached(std::to_string(i)));
+    }
+
+    for (std::size_t i = TEST_SUITE; i < TEST_SUITE * 2; ++i)
+    {
+        EXPECT_FALSE(cache.Cached(std::to_string(i)));
+    }
+}
+
+TEST(LRUCache, ConstructCache)
+{
+    EXPECT_THROW((lru_cache_t<std::string, std::size_t>(0)),
+                 std::invalid_argument);
+    EXPECT_NO_THROW((lru_cache_t<std::string, std::size_t>(1024)));
 }

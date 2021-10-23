@@ -14,7 +14,7 @@ namespace caches
 {
 
 // Base class for caching algorithms
-template <typename Key, typename Value, template <typename ...> class Policy = NoCachePolicy>
+template <typename Key, typename Value, template <typename> class Policy = NoCachePolicy>
 class fixed_sized_cache
 {
   public:

@@ -14,7 +14,7 @@ namespace caches
 {
 
 // Base class for caching algorithms
-template <typename Key, typename Value, typename Policy = NoCachePolicy<Key>>
+template <typename Key, typename Value, template <typename> class Policy = NoCachePolicy>
 class fixed_sized_cache
 {
   public:
@@ -24,7 +24,7 @@ class fixed_sized_cache
     using Callback = typename std::function<void(const Key &key, const Value &value)>;
 
     explicit fixed_sized_cache(
-        size_t max_size, const Policy policy = Policy{},
+        size_t max_size, const Policy<Key> policy = Policy<Key>{},
         Callback OnErase = [](const Key &, const Value &) {})
         : cache_policy{policy}, max_cache_size{max_size}, OnEraseCallback{OnErase}
     {
@@ -172,7 +172,7 @@ class fixed_sized_cache
 
   private:
     std::unordered_map<Key, Value> cache_items_map;
-    mutable Policy cache_policy;
+    mutable Policy<Key> cache_policy;
     mutable std::mutex safe_op;
     size_t max_cache_size;
     Callback OnEraseCallback;

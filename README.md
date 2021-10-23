@@ -1,6 +1,7 @@
 [![CI](https://github.com/vpetrigo/caches/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/vpetrigo/caches/actions/workflows/ci.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/kawd812e48065r7a?svg=true)](https://ci.appveyor.com/project/vpetrigo/caches)
 [![codecov](https://codecov.io/gh/vpetrigo/caches/branch/master/graph/badge.svg?token=uExJPtyE0o)](https://codecov.io/gh/vpetrigo/caches)
+[![version](https://img.shields.io/github/v/release/vpetrigo/caches)](https://github.com/vpetrigo/caches/releases)
 
 # C++ Cache implementation
 
@@ -33,7 +34,7 @@ Example for the LRU policy:
 
 // alias for easy class typing
 template <typename Key, typename Value>
-using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy<Key>>;
+using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 
 void foo(...) {
   constexpr std::size_t CACHE_SIZE = 256;

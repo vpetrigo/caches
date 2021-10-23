@@ -5,7 +5,7 @@
 template <typename Key, typename Value>
 using fifo_cache_t =
     typename caches::fixed_sized_cache<Key, Value,
-                                       caches::FIFOCachePolicy<Key>>;
+                                       caches::FIFOCachePolicy>;
 
 TEST(FIFOCache, Simple_Test)
 {

@@ -7,7 +7,7 @@
 
 template <typename Key, typename Value>
 using lru_cache_t =
-    typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy<Key>>;
+    typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 
 TEST(CacheTest, SimplePut)
 {

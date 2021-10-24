@@ -3,6 +3,7 @@
 
 #include "cache_policy.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <limits>
@@ -120,11 +121,8 @@ class fixed_sized_cache
     {
         operation_guard lock{safe_op};
 
-        for (auto it = begin(); it != end(); ++it)
-        {
-            cache_policy.Erase(it->first);
-        }
-
+        std::for_each(begin(), end(),
+                      [&](const std::pair<const Key, Value> &el) { cache_policy.Erase(el.first); });
         cache_items_map.clear();
     }
 

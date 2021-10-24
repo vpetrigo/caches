@@ -6,3 +6,9 @@
 
 # CMake build folder
 **/*build*/
+
+# Doxygen configurable files
+docs/Doxygen
+docs/index.md
+### Doxygen output
+docs/html/

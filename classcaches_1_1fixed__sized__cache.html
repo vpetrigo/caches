@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Caches
-   &#160;<span id="projectnumber">0.0.2</span>
+   &#160;<span id="projectnumber">0.0.3</span>
    </div>
    <div id="projectbrief">LRU/LFU/FIFO Caches library</div>
   </td>
@@ -105,8 +105,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a58d60c35df4a45a600401a0c7e1ca04e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a58d60c35df4a45a600401a0c7e1ca04e">Put</a> (const Key &amp;key, const Value &amp;value) noexcept</td></tr>
 <tr class="memdesc:a58d60c35df4a45a600401a0c7e1ca04e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put element into the cache.  <a href="classcaches_1_1fixed__sized__cache.html#a58d60c35df4a45a600401a0c7e1ca04e">More...</a><br /></td></tr>
 <tr class="separator:a58d60c35df4a45a600401a0c7e1ca04e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15624ba97a5e3291946c1855629f3f80"><td class="memItemLeft" align="right" valign="top"><a id="a15624ba97a5e3291946c1855629f3f80"></a>
-std::pair&lt; const_iterator, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>TryGet</b> (const Key &amp;key) const noexcept</td></tr>
+<tr class="memitem:a15624ba97a5e3291946c1855629f3f80"><td class="memItemLeft" align="right" valign="top">std::pair&lt; const_iterator, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a15624ba97a5e3291946c1855629f3f80">TryGet</a> (const Key &amp;key) const noexcept</td></tr>
+<tr class="memdesc:a15624ba97a5e3291946c1855629f3f80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to get an element by the given key from the cache.  <a href="classcaches_1_1fixed__sized__cache.html#a15624ba97a5e3291946c1855629f3f80">More...</a><br /></td></tr>
 <tr class="separator:a15624ba97a5e3291946c1855629f3f80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7213c2508de8563bf1361f2b69ceac6e"><td class="memItemLeft" align="right" valign="top">const Value &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a7213c2508de8563bf1361f2b69ceac6e">Get</a> (const Key &amp;key) const</td></tr>
 <tr class="memdesc:a7213c2508de8563bf1361f2b69ceac6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get element from the cache if present.  <a href="classcaches_1_1fixed__sized__cache.html#a7213c2508de8563bf1361f2b69ceac6e">More...</a><br /></td></tr>
@@ -427,6 +427,43 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 <p>Get number of elements in cache. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of elements currently stored in the cache </dd></dl>
+
+</div>
+</div>
+<a id="a15624ba97a5e3291946c1855629f3f80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15624ba97a5e3291946c1855629f3f80">&#9670;&nbsp;</a></span>TryGet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt;const_iterator, bool&gt; <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::TryGet </td>
+          <td>(</td>
+          <td class="paramtype">const Key &amp;&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Try to get an element by the given key from the cache. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Get element by key </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pair of iterator that points to the element and boolean value that shows whether get operation has been successful or not. If pair's boolean value is false, the element is not presented in the cache. If pair's boolean value is true, returned iterator can be used to get access to the element </dd></dl>
 
 </div>
 </div>

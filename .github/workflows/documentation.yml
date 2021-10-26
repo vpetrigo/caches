@@ -26,4 +26,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.DOCS_TOKEN }}
         run:
-          ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" -b gh-pages
+          ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --commit ${GITHUB_REF} -b gh-pages

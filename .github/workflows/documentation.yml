@@ -3,7 +3,6 @@ on:
   release:
     types:
       - published
-      - created
 
 jobs:
   docs:

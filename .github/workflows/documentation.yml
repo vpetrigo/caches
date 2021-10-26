@@ -26,5 +26,6 @@ jobs:
       - name: "Publish documentation"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run:
+        run: |
+          chmod +x ./docupages.py
           ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" -b gh-pages

@@ -56,7 +56,7 @@ template <typename Key>
 class NoCachePolicy : public ICachePolicy<Key>
 {
   public:
-    NoCachePolicy() noexcept = default;
+    NoCachePolicy() = default;
     ~NoCachePolicy() noexcept override = default;
 
     void Insert(const Key &key) override

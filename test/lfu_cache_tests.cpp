@@ -114,3 +114,27 @@ TEST(LFUCache, Remove_Test) {
     EXPECT_FALSE(fc.Remove(std::to_string(i)));
   }
 }
+
+TEST(LFUCache, TryGet)
+{
+    constexpr std::size_t TEST_CASE{10};
+    lfu_cache_t<std::string, std::size_t> cache{TEST_CASE};
+
+    for (std::size_t i = 0; i < TEST_CASE; ++i)
+    {
+        cache.Put(std::to_string(i), i);
+    }
+
+    for (std::size_t i = 0; i < TEST_CASE; ++i)
+    {
+        auto element = cache.TryGet(std::to_string(i));
+        EXPECT_TRUE(element.second);
+        EXPECT_EQ(element.first->second, i);
+    }
+
+    for (std::size_t i = TEST_CASE; i < TEST_CASE * 2; ++i)
+    {
+        auto element = cache.TryGet(std::to_string(i));
+        EXPECT_FALSE(element.second);
+    }
+}

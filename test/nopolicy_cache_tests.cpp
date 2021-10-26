@@ -1,8 +1,10 @@
 #include "cache.hpp"
-#include "cache_policy.hpp"
 
 #include <gtest/gtest.h>
 #include <stdexcept>
+
+template <typename K, typename V>
+using no_policy_cache_t = typename caches::fixed_sized_cache<K, V, caches::NoCachePolicy>;
 
 TEST(NoPolicyCache, Add_one_element)
 {
@@ -57,23 +59,51 @@ TEST(NoPolicyCache, Small_cache_many_elements)
     ASSERT_EQ(cache.Size(), cache_size);
 }
 
-TEST(NoPolicyCache, Remove_Test) {
-  constexpr std::size_t TEST_SIZE = 10;
-   caches::fixed_sized_cache<std::string, std::size_t> fc(TEST_SIZE);
+TEST(NoPolicyCache, Remove_Test)
+{
+    constexpr std::size_t TEST_SIZE = 10;
+    caches::fixed_sized_cache<std::string, std::size_t> fc(TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    fc.Put(std::to_string(i), i);
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        fc.Put(std::to_string(i), i);
+    }
 
-  EXPECT_EQ(fc.Size(), TEST_SIZE);
+    EXPECT_EQ(fc.Size(), TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_TRUE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_TRUE(fc.Remove(std::to_string(i)));
+    }
 
-  EXPECT_EQ(fc.Size(), 0);
+    EXPECT_EQ(fc.Size(), 0);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_FALSE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_FALSE(fc.Remove(std::to_string(i)));
+    }
+}
+
+TEST(NoPolicyCache, TryGet)
+{
+    constexpr std::size_t TEST_CASE{10};
+    no_policy_cache_t<std::string, std::size_t> cache{TEST_CASE};
+
+    for (std::size_t i = 0; i < TEST_CASE; ++i)
+    {
+        cache.Put(std::to_string(i), i);
+    }
+
+    for (std::size_t i = 0; i < TEST_CASE; ++i)
+    {
+        auto element = cache.TryGet(std::to_string(i));
+        EXPECT_TRUE(element.second);
+        EXPECT_EQ(element.first->second, i);
+    }
+
+    for (std::size_t i = TEST_CASE; i < TEST_CASE * 2; ++i)
+    {
+        auto element = cache.TryGet(std::to_string(i));
+        EXPECT_FALSE(element.second);
+    }
 }

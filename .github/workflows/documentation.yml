@@ -1,0 +1,30 @@
+name: Documentation
+on:
+  release:
+    types:
+      - published
+      - created
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: "Install doxygen"
+        run: sudo apt install doxygen
+      - name: "Configure project"
+        run: |
+          mkdir build
+          cmake -B build -S .
+          cmake --build build
+      - name: "Run tests"
+        run: ctest
+      - name: "Build documentation"
+        run: cmake --build build --target docs
+      - name: "Publish documentation"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" -b gh-pages

@@ -1,3 +1,7 @@
+/**
+ * \file
+ * \brief Cache policy interface declaration
+ */
 #ifndef CACHE_POLICY_HPP
 #define CACHE_POLICY_HPP
 
@@ -6,46 +10,72 @@
 namespace caches
 {
 
+/**
+ * \brief Cache policy abstract base class
+ * \tparam Key Type of a key a policy works with
+ */
 template <typename Key>
 class ICachePolicy
 {
   public:
     virtual ~ICachePolicy() = default;
-    // handle element insertion in a cache
+
+    /**
+     * \brief Handle element insertion in a cache
+     * \param[in] key Key that should be used by the policy
+     */
     virtual void Insert(const Key &key) = 0;
-    // handle request to the key-element in a cache
+
+    /**
+     * \brief Handle request to the key-element in a cache
+     * \param key
+     */
     virtual void Touch(const Key &key) = 0;
-    // handle element deletion from a cache
+    /**
+     * \brief Handle element deletion from a cache
+     * \param[in] key Key that should be used by the policy
+     */
     virtual void Erase(const Key &key) = 0;
 
-    // return a key of a replacement candidate
+    /**
+     * \brief Return a key of a replacement candidate
+     * \return
+     */
     virtual const Key &ReplCandidate() const = 0;
 };
 
+/**
+ * \brief Basic no caching policy class
+ * \details Preserve any key provided. Erase procedure can get rid of any added keys
+ * without specific rules: a replacement candidate will be the first element in the
+ * underlying container. As unordered container can be used in the implementation
+ * there are no warranties that the first/last added key will be erased
+ * \tparam Key Type of a key a policy works with
+ */
 template <typename Key>
 class NoCachePolicy : public ICachePolicy<Key>
 {
   public:
     NoCachePolicy() = default;
-    ~NoCachePolicy() override = default;
+    ~NoCachePolicy() noexcept override = default;
 
     void Insert(const Key &key) override
     {
         key_storage.emplace(key);
     }
 
-    void Touch(const Key &key) override
+    void Touch(const Key &key) noexcept override
     {
         // do not do anything
     }
 
-    void Erase(const Key &key) override
+    void Erase(const Key &key) noexcept override
     {
         key_storage.erase(key);
     }
 
     // return a key of a displacement candidate
-    const Key &ReplCandidate() const override
+    const Key &ReplCandidate() const noexcept override
     {
         return *key_storage.cbegin();
     }

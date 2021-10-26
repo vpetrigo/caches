@@ -3,12 +3,12 @@ from conans import ConanFile, CMake
 
 class CacheConan(ConanFile):
     name = "cache"
-    version = "0.0.2"
+    version = "0.0.3"
     license = "BSD 3-Clause License"
     author = "Vladimir Petrigo <And your email here>"
     url = "https://github.com/vpetrigo/caches"
     description = "C++ LRU/FIFO/LFU Cache implementation"
-    topics = ("header-only", "cache", "lru", "fifo", "lfu")
+    topics = ("header-only", "cache", "lru-cache", "fifo-cache", "lfu-cache")
     exports_sources = "include/*", "CMakeLists.txt", "deps/*", "src/*", "test/*"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"

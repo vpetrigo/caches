@@ -32,6 +32,7 @@ def git_init(repo: str, branch: str, working_dir: Union[str, pathlib.Path]) -> N
 
     subprocess.run(["git", "config", "user.name", "GitHub Actions"], cwd=working_dir, check=True)
     subprocess.run(["git", "config", "user.email", "octocat@github.com"], cwd=working_dir, check=True)
+    subprocess.run(["rm", "-rf", "*"], cwd=working_dir, check=True)
 
 
 def git_add_documentation_files(working_dir: Union[str, pathlib.Path]) -> None:

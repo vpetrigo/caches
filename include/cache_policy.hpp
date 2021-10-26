@@ -39,7 +39,7 @@ class ICachePolicy
 
     /**
      * \brief Return a key of a replacement candidate
-     * \return
+     * \return Replacement candidate according to selected policy
      */
     virtual const Key &ReplCandidate() const = 0;
 };

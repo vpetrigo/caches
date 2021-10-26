@@ -84,6 +84,14 @@ class fixed_sized_cache
         }
     }
 
+    /**
+     * \brief Try to get an element by the given key from the cache
+     * \param[in] key Get element by key
+     * \return Pair of iterator that points to the element and boolean value that shows
+     * whether get operation has been successful or not. If pair's boolean value is false,
+     * the element is not presented in the cache. If pair's boolean value is true,
+     * returned iterator can be used to get access to the element
+     */
     std::pair<const_iterator, bool> TryGet(const Key &key) const noexcept
     {
         operation_guard lock{safe_op};

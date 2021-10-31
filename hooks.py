@@ -15,7 +15,7 @@ def _copy_doxygen(project_root: pathlib.Path, docs_dir: pathlib.Path) -> None:
 
 def copy_files(*_, **kwargs):
     docs_dir = pathlib.Path(kwargs["config"]["docs_dir"]).resolve()
-    project_root = pathlib.Path(__file__).resolve().parent.parent
+    project_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 
     if not docs_dir.joinpath("LICENSE.md").exists():
         _copy_license(project_root)

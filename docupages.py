@@ -30,9 +30,15 @@ def git_init(repo: str, branch: str, working_dir: Union[str, pathlib.Path]) -> N
             ["git", "switch", "--orphan", branch], cwd=working_dir, check=True
         )
 
-    subprocess.run(["git", "config", "user.name", "GitHub Actions"], cwd=working_dir, check=True)
-    subprocess.run(["git", "config", "user.email", "octocat@github.com"], cwd=working_dir, check=True)
-    subprocess.run(["rm", "-rf", "*"], cwd=working_dir, check=True)
+    subprocess.run(
+        ["git", "config", "user.name", "GitHub Actions"], cwd=working_dir, check=True
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "octocat@github.com"],
+        cwd=working_dir,
+        check=True,
+    )
+    subprocess.run(["git", "rm", "-rf", "*"], cwd=working_dir, check=True)
 
 
 def git_add_documentation_files(working_dir: Union[str, pathlib.Path]) -> None:
@@ -54,21 +60,34 @@ def git_push(
     )
 
 
+def generate_documentation(
+    docs_dir: pathlib.Path, working_dir: Union[str, pathlib.Path]
+) -> None:
+    mkdocs_dir = docs_dir.joinpath("mkdocs")
+    subprocess.run(["pipenv", "sync"], cwd=mkdocs_dir)
+    subprocess.run(
+        ["pipenv", "run", "mkdocs", "build"],
+        cwd=mkdocs_dir,
+        check=True,
+    )
+    shutil.copytree(mkdocs_dir.joinpath("site"), working_dir, dirs_exist_ok=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Upload generated documentation to GitHub Pages"
     )
     parser.add_argument("-n", action="store_true")
-    parser.add_argument("-r", "--repo", type=str)
-    parser.add_argument("-b", "--branch", type=str)
-    parser.add_argument("-t", "--token", type=str)
-    parser.add_argument("--commit", type=str)
+    parser.add_argument("-r", "--repo", type=str, required=True)
+    parser.add_argument("-b", "--branch", type=str, required=True)
+    parser.add_argument("-t", "--token", type=str, required=True)
+    parser.add_argument("--commit", type=str, required=True)
     options = parser.parse_args()
 
     with tempfile.TemporaryDirectory() as docudir:
         git_init(options.repo, options.branch, docudir)
-        copy_docs_output_dir(pathlib.Path("docs", "html"), docudir)
         github_pages_nojekyll(docudir)
+        generate_documentation(pathlib.Path("docs").resolve(), docudir)
         git_add_documentation_files(docudir)
         git_commit(f"Update {options.commit} documentation", docudir)
         git_push(options.repo, options.branch, options.token, docudir)

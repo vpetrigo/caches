@@ -8,7 +8,10 @@
 **/*build*/
 
 # Doxygen configurable files
-docs/Doxygen
-docs/index.md
 ### Doxygen output
-docs/html/
+docs/doxygen/
+### Doxybook2 output
+docs/doxy/out/
+### MkDocs output
+docs/mkdocs/docs/doxygen/
+docs/mkdocs/site/

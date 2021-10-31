@@ -1,0 +1,56 @@
+site_name: Cache with LRU/LFU/FIFO policies
+site_url: https://rs-stuff.dev/caches
+
+repo_name: vpetrigo/caches
+repo_url: https://github.com/vpetrigo/caches
+
+copyright: Copyright &copy; 2015-2021 Vladimir Petrigo
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/vpetrigo
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/vladimirpetrigo/
+    - icon: fontawesome/brands/paypal
+      link: https://www.paypal.me/vpetrigo
+
+theme:
+  name: material
+  language: en
+  palette:
+    primary: brown
+    accent: amber
+  font:
+    text: Inconsolata
+    code: Inconsolata
+  features:
+    - tabs
+    - instant
+
+nav:
+  - Home:
+      - Cache library: 'index.md'
+      - License: 'LICENSE.md'
+  - API:
+      - Cache: 'api/cache/fixed_sized_cache.md'
+      - Policies:
+          - Interface: 'api/policy/cache_policy_interface.md'
+          - Least recently used (LRU): 'api/policy/lru_cache_policy.md'
+          - Least frequently used (LFU): 'api/policy/lfu_cache_policy.md'
+          - First in, first out (FIFO): 'api/policy/fifo_cache_policy.md'
+          - No Policy: 'api/policy/no_cache_policy.md'
+  - Doxygen: 'doxygen/index.html'
+
+plugins:
+  - search
+  - mkdocs-simple-hooks:
+      hooks:
+        on_pre_build: "docs.hooks:copy_files"
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets

@@ -42,6 +42,7 @@ if (BUILD_TEST)
 endif ()
 
 if (INSTALL_CACHES)
+    include(GNUInstallDirs)
     configure_file(${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
     include(CMakePackageConfigHelpers)
     configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in

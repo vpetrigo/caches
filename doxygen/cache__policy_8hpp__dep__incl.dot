@@ -1,0 +1,15 @@
+digraph "cache_policy.hpp"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="cache_policy.hpp",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Cache policy interface declaration."];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="cache.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$cache_8hpp.html",tooltip="Generic cache implementation."];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="fifo_cache_policy.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$fifo__cache__policy_8hpp.html",tooltip="FIFO cache policy implementation."];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="lfu_cache_policy.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$lfu__cache__policy_8hpp.html",tooltip="LFU cache policy implementation."];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="lru_cache_policy.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$lru__cache__policy_8hpp.html",tooltip="LRU cache implementation."];
+}

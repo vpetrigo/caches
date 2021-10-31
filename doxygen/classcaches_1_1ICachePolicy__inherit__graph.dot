@@ -1,0 +1,16 @@
+digraph "caches::ICachePolicy&lt; Key &gt;"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="caches::ICachePolicy\l\< Key \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Cache policy abstract base class."];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="caches::FIFOCachePolicy\l\< Key \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcaches_1_1FIFOCachePolicy.html",tooltip="FIFO (First in, first out) cache policy."];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="caches::LFUCachePolicy\l\< Key \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcaches_1_1LFUCachePolicy.html",tooltip="LFU (Least frequently used) cache policy."];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="caches::LRUCachePolicy\l\< Key \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcaches_1_1LRUCachePolicy.html",tooltip="LRU (Least Recently Used) cache policy."];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="caches::NoCachePolicy\l\< Key \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcaches_1_1NoCachePolicy.html",tooltip="Basic no caching policy class."];
+}

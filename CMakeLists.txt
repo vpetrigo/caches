@@ -14,11 +14,11 @@ option(BUILD_TEST "Build tests for the project" ON)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-    configure_file(${PROJECT_SOURCE_DIR}/cmake/Doxygen.in ${PROJECT_SOURCE_DIR}/docs/Doxygen)
-    configure_file(${PROJECT_SOURCE_DIR}/cmake/index.md.in ${PROJECT_SOURCE_DIR}/docs/index.md)
+    configure_file(${PROJECT_SOURCE_DIR}/cmake/Doxygen.in ${PROJECT_SOURCE_DIR}/docs/doxygen/Doxyfile)
+    configure_file(${PROJECT_SOURCE_DIR}/cmake/index.md.in ${PROJECT_SOURCE_DIR}/docs/doxygen/index.md)
 
-    add_custom_target(docs doxygen Doxygen
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs
+    add_custom_target(docs doxygen Doxyfile
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs/doxygen
         COMMENT "Generate library Doxygen documentation")
 endif ()
 

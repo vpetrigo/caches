@@ -12,7 +12,10 @@ jobs:
         with:
           submodules: 'true'
       - name: "Install doxygen"
-        run: sudo apt install doxygen
+        run: |
+          wget -qO- https://www.doxygen.nl/files/doxygen-1.9.2.linux.bin.tar.gz | tar zxf -
+          echo "$(readlink -f doxygen-1.9.2/bin)" >> $GITHUB_PATH
+          sudo apt install libclang-cpp9 libclang1-9
       - name: "Configure project"
         run: |
           mkdir build
@@ -20,8 +23,19 @@ jobs:
           cmake --build build
       - name: "Run tests"
         run: ctest
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Setup pipenv
+        run: python -m pip install --upgrade pipenv wheel
       - name: "Build documentation"
-        run: cmake --build build --target docs
+        run: |
+          cmake --build build --target docs
+          pushd docs/mkdocs
+          pipenv install --deploy
+          pipenv run mkdocs build
+          popd
       - name: "Publish documentation"
         env:
           GITHUB_TOKEN: ${{ secrets.DOCS_TOKEN }}

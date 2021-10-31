@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+mkdocs = "*"
+mkdocs-material = "*"
+mkdocs-simple-hooks = "~=0.1"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

@@ -1,0 +1,14 @@
+{
+  "baseUrl": "/caches/",
+  "indexInFolders": false,
+  "linkSuffix": "/",
+  "mainPageInRoot": true,
+  "filesFilter": [".hpp"],
+  "foldersToGenerate": [
+    "classes",
+    "files",
+    "namespaces",
+    "pages"
+  ],
+  "mainPageName": "index"
+}

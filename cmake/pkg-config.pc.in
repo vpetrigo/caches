@@ -1,4 +1,8 @@
-Name: ${PROJECT_NAME}
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
 Description: LRU/LFU/FIFO caches implementation
-Version: ${PROJECT_VERSION}
-Cflags: -I${CMAKE_INSTALL_FULL_INCLUDEDIR}
+Version: @PROJECT_VERSION@
+Cflags: -I${includedir}

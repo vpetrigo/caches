@@ -7,6 +7,7 @@
 
 #include "cache_policy.hpp"
 #include <list>
+#include <unordered_map>
 
 namespace caches
 {
@@ -40,6 +41,7 @@ class FIFOCachePolicy : public ICachePolicy<Key>
     void Insert(const Key &key) override
     {
         fifo_queue.emplace_front(key);
+        key_lookup[key] = fifo_queue.begin();
     }
     // handle request to the key-element in a cache
     void Touch(const Key &key) noexcept override
@@ -49,7 +51,9 @@ class FIFOCachePolicy : public ICachePolicy<Key>
     // handle element deletion from a cache
     void Erase(const Key &key) noexcept override
     {
-        fifo_queue.pop_back();
+        auto it = key_lookup.find(key);
+        fifo_queue.erase(it->second);
+        key_lookup.erase(key);
     }
 
     // return a key of a replacement candidate
@@ -60,6 +64,8 @@ class FIFOCachePolicy : public ICachePolicy<Key>
 
   private:
     std::list<Key> fifo_queue;
+    using KeyIt = typename std::list<Key>::const_iterator;
+    std::unordered_map<Key, KeyIt> key_lookup;
 };
 } // namespace caches
 

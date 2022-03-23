@@ -35,6 +35,8 @@ template <typename Key>
 class FIFOCachePolicy : public ICachePolicy<Key>
 {
   public:
+    using fifo_iterator = typename std::list<Key>::const_iterator;
+
     FIFOCachePolicy() = default;
     ~FIFOCachePolicy() = default;
 
@@ -64,8 +66,7 @@ class FIFOCachePolicy : public ICachePolicy<Key>
 
   private:
     std::list<Key> fifo_queue;
-    using KeyIt = typename std::list<Key>::const_iterator;
-    std::unordered_map<Key, KeyIt> key_lookup;
+    std::unordered_map<Key, fifo_iterator> key_lookup;
 };
 } // namespace caches
 

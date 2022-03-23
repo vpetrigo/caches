@@ -51,8 +51,8 @@ class FIFOCachePolicy : public ICachePolicy<Key>
     // handle element deletion from a cache
     void Erase(const Key &key) noexcept override
     {
-        auto it = key_lookup.find(key);
-        fifo_queue.erase(it->second);
+        auto element = key_lookup[key];
+        fifo_queue.erase(element);
         key_lookup.erase(key);
     }
 

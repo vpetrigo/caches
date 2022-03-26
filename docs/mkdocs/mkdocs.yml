@@ -4,7 +4,7 @@ site_url: https://rs-stuff.dev/caches
 repo_name: vpetrigo/caches
 repo_url: https://github.com/vpetrigo/caches
 
-copyright: Copyright &copy; 2015-2021 Vladimir Petrigo
+copyright: Copyright &copy; 2015-2022 Vladimir Petrigo
 
 extra:
   social:
@@ -47,6 +47,9 @@ plugins:
   - mkdocs-simple-hooks:
       hooks:
         on_pre_build: "docs.hooks:copy_files"
+  - exclude:
+      glob:
+        - hooks.py
 
 markdown_extensions:
   - admonition

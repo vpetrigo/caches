@@ -63,7 +63,12 @@ def git_push(
 def generate_documentation(
     docs_dir: pathlib.Path, working_dir: Union[str, pathlib.Path]
 ) -> None:
+    # doxygen_dir = docs_dir.joinpath("doxygen")
+    # subprocess.run(["doxygen"], cwd=doxygen_dir)
     mkdocs_dir = docs_dir.joinpath("mkdocs")
+    # copy_docs_output_dir(
+    #     doxygen_dir.joinpath("html"), mkdocs_dir.joinpath("docs", "doxygen")
+    # )
     subprocess.run(["pipenv", "sync"], cwd=mkdocs_dir)
     subprocess.run(
         ["pipenv", "run", "mkdocs", "build"],
@@ -77,11 +82,34 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Upload generated documentation to GitHub Pages"
     )
-    parser.add_argument("-n", action="store_true")
-    parser.add_argument("-r", "--repo", type=str, required=True)
-    parser.add_argument("-b", "--branch", type=str, required=True)
-    parser.add_argument("-t", "--token", type=str, required=True)
-    parser.add_argument("--commit", type=str, required=True)
+    parser.add_argument("-n", action="store_true", help="Dry run enable")
+    parser.add_argument(
+        "-r",
+        "--repo",
+        type=str,
+        required=True,
+        help="Link to repository where documentation should be built",
+    )
+    parser.add_argument(
+        "-b",
+        "--branch",
+        type=str,
+        required=True,
+        help="Branch to put documentation to (e.g. 'gh-pages' for GitHub)",
+    )
+    parser.add_argument(
+        "-t",
+        "--token",
+        type=str,
+        required=True,
+        help="Token that allows push to the specified branch",
+    )
+    parser.add_argument(
+        "--commit",
+        type=str,
+        required=True,
+        help="Commit ID to use for documentation generation",
+    )
     options = parser.parse_args()
 
     with tempfile.TemporaryDirectory() as docudir:
@@ -89,8 +117,10 @@ def main() -> None:
         github_pages_nojekyll(docudir)
         generate_documentation(pathlib.Path("docs").resolve(), docudir)
         git_add_documentation_files(docudir)
-        git_commit(f"Update {options.commit} documentation", docudir)
-        git_push(options.repo, options.branch, options.token, docudir)
+
+        if not options.n:
+            git_commit(f"Update {options.commit} documentation", docudir)
+            git_push(options.repo, options.branch, options.token, docudir)
 
 
 if __name__ == "__main__":

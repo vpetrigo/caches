@@ -9,7 +9,8 @@
 
 # Doxygen configurable files
 ### Doxygen output
-docs/doxygen/
+docs/doxygen/html/
+docs/doxygen/xml/
 ### Doxybook2 output
 docs/doxy/out/
 ### MkDocs output

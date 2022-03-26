@@ -15,7 +15,7 @@ jobs:
         run: |
           wget -qO- https://www.doxygen.nl/files/doxygen-1.9.2.linux.bin.tar.gz | tar zxf -
           echo "$(readlink -f doxygen-1.9.2/bin)" >> $GITHUB_PATH
-          sudo apt install libclang-cpp9 libclang1-9
+          sudo apt install libclang-cpp9 libclang1-9 graphviz
       - name: "Configure project"
         run: |
           mkdir build

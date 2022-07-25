@@ -35,9 +35,8 @@ if (INSTALL_CACHES)
     set(INSTALL_GTEST OFF CACHE STRING "")
 endif ()
 
-add_subdirectory(deps/)
-
 if (BUILD_TEST)
+    add_subdirectory(deps/)
     add_subdirectory(test)
 endif ()
 

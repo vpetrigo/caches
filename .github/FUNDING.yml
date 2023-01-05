@@ -9,4 +9,10 @@ community_bridge: # Replace with a single Community Bridge project-name e.g., cl
 liberapay: # Replace with a single Liberapay username
 issuehunt: # Replace with a single IssueHunt username
 otechie: # Replace with a single Otechie username
-custom: ["paypal.me/vpetrigo", "https://ethblockexplorer.org/address/0x60Fe1F3248E79dEd1285944bC97f4EA44e6c2e39", "https://bitcoinblockexplorers.com/address/18JQRbkXFAFnsDfqFe6xqpcfUV9rKHCGpM", "https://dogeblocks.com/address/DFK2N49MxxhGoo5x44kUUy2Bgpsr6K9Kqy"]
+custom: [
+    "https://boosty.to/vladimir.petrigo",
+    "paypal.me/vpetrigo",
+    "https://ethblockexplorer.org/address/0x60Fe1F3248E79dEd1285944bC97f4EA44e6c2e39",
+    "https://bitcoinblockexplorers.com/address/18JQRbkXFAFnsDfqFe6xqpcfUV9rKHCGpM",
+    "https://dogeblocks.com/address/DFK2N49MxxhGoo5x44kUUy2Bgpsr6K9Kqy"
+]

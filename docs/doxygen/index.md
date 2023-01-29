@@ -16,3 +16,5 @@ These pages contain the API documentation of Caches library that is a header-onl
 \author [Vladimir Petrigo](https://rs-stuff.dev/about/)
 
 \see https://github.com/vpetrigo/caches to download the source code
+
+\version 0.0.4

@@ -1,7 +1,7 @@
 <map id="cache_policy.hpp" name="cache_policy.hpp">
-<area shape="rect" id="node1" title="Cache policy interface declaration." alt="" coords="222,5,354,32"/>
-<area shape="rect" id="node2" href="$cache_8hpp.html" title="Generic cache implementation." alt="" coords="5,80,93,107"/>
-<area shape="rect" id="node3" href="$fifo__cache__policy_8hpp.html" title="FIFO cache policy implementation." alt="" coords="117,80,277,107"/>
-<area shape="rect" id="node4" href="$lfu__cache__policy_8hpp.html" title="LFU cache policy implementation." alt="" coords="302,80,458,107"/>
-<area shape="rect" id="node5" href="$lru__cache__policy_8hpp.html" title="LRU cache implementation." alt="" coords="482,80,638,107"/>
+<area shape="rect" id="node1" title="Cache policy interface declaration." alt="" coords="222,5,354,31"/>
+<area shape="rect" id="node2" href="$cache_8hpp.html" title="Generic cache implementation." alt="" coords="5,79,93,104"/>
+<area shape="rect" id="node3" href="$fifo__cache__policy_8hpp.html" title="FIFO cache policy implementation." alt="" coords="117,79,277,104"/>
+<area shape="rect" id="node4" href="$lfu__cache__policy_8hpp.html" title="LFU cache policy implementation." alt="" coords="302,79,458,104"/>
+<area shape="rect" id="node5" href="$lru__cache__policy_8hpp.html" title="LRU cache implementation." alt="" coords="482,79,638,104"/>
 </map>

@@ -16,3 +16,6 @@ docs/doxy/out/
 ### MkDocs output
 docs/mkdocs/docs/doxygen/
 docs/mkdocs/site/
+
+# Python
+**/__pycache__/

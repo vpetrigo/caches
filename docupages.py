@@ -69,9 +69,9 @@ def generate_documentation(
     # copy_docs_output_dir(
     #     doxygen_dir.joinpath("html"), mkdocs_dir.joinpath("docs", "doxygen")
     # )
-    subprocess.run(["pipenv", "sync"], cwd=mkdocs_dir)
+    subprocess.run(["poetry", "install", "--no-root"], cwd=mkdocs_dir)
     subprocess.run(
-        ["pipenv", "run", "mkdocs", "build"],
+        ["poetry", "run", "mkdocs", "build"],
         cwd=mkdocs_dir,
         check=True,
     )

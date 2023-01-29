@@ -33,7 +33,7 @@ jobs:
         run: |
           cmake --build build --target docs
           pushd docs/mkdocs
-          poetry install
+          poetry install --no-root
           poetry run mkdocs build
           popd
       - name: "Publish documentation"

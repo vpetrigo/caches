@@ -62,7 +62,7 @@ Handle element insertion in a cache.
   * **key** Key that should be used by the policy 
 
 
-**Reimplemented by**: [caches::LFUCachePolicy::Insert](/caches/api/policy/lfu_cache_policy.html/#function-insert), [caches::FIFOCachePolicy::Insert](/caches/api/policy/fifo_cache_policy.html/#function-insert), [caches::LRUCachePolicy::Insert](/caches/api/policy/lru_cache_policy.html/#function-insert), [caches::NoCachePolicy::Insert](/caches/api/policy/no_cache_policy.html/#function-insert)
+**Reimplemented by**: [caches::LFUCachePolicy::Insert](/caches/api/policy/lfu_cache_policy/#function-insert), [caches::FIFOCachePolicy::Insert](/caches/api/policy/fifo_cache_policy/#function-insert), [caches::LRUCachePolicy::Insert](/caches/api/policy/lru_cache_policy/#function-insert), [caches::NoCachePolicy::Insert](/caches/api/policy/no_cache_policy/#function-insert)
 
 
 ### function Touch
@@ -80,7 +80,7 @@ Handle request to the key-element in a cache.
   * **key** 
 
 
-**Reimplemented by**: [caches::FIFOCachePolicy::Touch](/caches/api/policy/fifo_cache_policy.html/#function-touch), [caches::NoCachePolicy::Touch](/caches/api/policy/no_cache_policy.html/#function-touch), [caches::LFUCachePolicy::Touch](/caches/api/policy/lfu_cache_policy.html/#function-touch), [caches::LRUCachePolicy::Touch](/caches/api/policy/lru_cache_policy.html/#function-touch)
+**Reimplemented by**: [caches::FIFOCachePolicy::Touch](/caches/api/policy/fifo_cache_policy/#function-touch), [caches::NoCachePolicy::Touch](/caches/api/policy/no_cache_policy/#function-touch), [caches::LFUCachePolicy::Touch](/caches/api/policy/lfu_cache_policy/#function-touch), [caches::LRUCachePolicy::Touch](/caches/api/policy/lru_cache_policy/#function-touch)
 
 
 ### function Erase
@@ -98,7 +98,7 @@ Handle element deletion from a cache.
   * **key** Key that should be used by the policy 
 
 
-**Reimplemented by**: [caches::LRUCachePolicy::Erase](/caches/api/policy/lru_cache_policy.html/#function-erase), [caches::FIFOCachePolicy::Erase](/caches/api/policy/fifo_cache_policy.html/#function-erase), [caches::LFUCachePolicy::Erase](/caches/api/policy/lfu_cache_policy.html/#function-erase), [caches::NoCachePolicy::Erase](/caches/api/policy/no_cache_policy.html/#function-erase)
+**Reimplemented by**: [caches::LRUCachePolicy::Erase](/caches/api/policy/lru_cache_policy/#function-erase), [caches::FIFOCachePolicy::Erase](/caches/api/policy/fifo_cache_policy/#function-erase), [caches::LFUCachePolicy::Erase](/caches/api/policy/lfu_cache_policy/#function-erase), [caches::NoCachePolicy::Erase](/caches/api/policy/no_cache_policy/#function-erase)
 
 
 ### function ReplCandidate
@@ -111,4 +111,4 @@ Return a key of a replacement candidate.
 
 **Return**: Replacement candidate according to selected policy 
 
-**Reimplemented by**: [caches::FIFOCachePolicy::ReplCandidate](/caches/api/policy/fifo_cache_policy.html/#function-replcandidate), [caches::LFUCachePolicy::ReplCandidate](/caches/api/policy/lfu_cache_policy.html/#function-replcandidate), [caches::LRUCachePolicy::ReplCandidate](/caches/api/policy/lru_cache_policy.html/#function-replcandidate), [caches::NoCachePolicy::ReplCandidate](/caches/api/policy/no_cache_policy.html/#function-replcandidate)
+**Reimplemented by**: [caches::FIFOCachePolicy::ReplCandidate](/caches/api/policy/fifo_cache_policy/#function-replcandidate), [caches::LFUCachePolicy::ReplCandidate](/caches/api/policy/lfu_cache_policy/#function-replcandidate), [caches::LRUCachePolicy::ReplCandidate](/caches/api/policy/lru_cache_policy/#function-replcandidate), [caches::NoCachePolicy::ReplCandidate](/caches/api/policy/no_cache_policy/#function-replcandidate)

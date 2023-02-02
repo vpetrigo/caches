@@ -5,7 +5,7 @@ class CacheConan(ConanFile):
     name = "cache"
     version = "0.0.4"
     license = "BSD-3-Clause"
-    author = "Vladimir Petrigo <And your email here>"
+    author = "Vladimir Petrigo <vladimir.petrigo@gmail.com>"
     url = "https://github.com/vpetrigo/caches"
     description = "C++ LRU/FIFO/LFU Cache implementation"
     topics = ("header-only", "cache", "lru-cache", "fifo-cache", "lfu-cache")

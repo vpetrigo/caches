@@ -64,7 +64,7 @@ class NoCachePolicy : public ICachePolicy<Key>
         key_storage.emplace(key);
     }
 
-    void Touch(const Key &key) noexcept override
+    void Touch(__attribute__((unused)) const Key &key) noexcept override
     {
         // do not do anything
     }

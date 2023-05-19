@@ -46,9 +46,10 @@ class FIFOCachePolicy : public ICachePolicy<Key>
         key_lookup[key] = fifo_queue.begin();
     }
     // handle request to the key-element in a cache
-    void Touch(__attribute__((unused)) const Key &key) noexcept override
+    void Touch(const Key &key) noexcept override
     {
         // nothing to do here in the FIFO strategy
+        (void)key;
     }
     // handle element deletion from a cache
     void Erase(const Key &key) noexcept override

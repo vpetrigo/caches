@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 project(caches
-    VERSION 0.0.4)
+        VERSION 0.0.5)
 
 if (MSVC)
     add_definitions(/MP)
@@ -18,14 +18,14 @@ if (DOXYGEN_FOUND)
     configure_file(${PROJECT_SOURCE_DIR}/cmake/index.md.in ${PROJECT_SOURCE_DIR}/docs/doxygen/index.md)
 
     add_custom_target(docs doxygen Doxyfile
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs/doxygen
-        COMMENT "Generate library Doxygen documentation")
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs/doxygen
+            COMMENT "Generate library Doxygen documentation")
 endif ()
 
 add_library(caches INTERFACE)
 target_include_directories(caches INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 if (BUILD_TEST)
     enable_testing()
@@ -45,9 +45,9 @@ if (INSTALL_CACHES)
     configure_file(${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
     include(CMakePackageConfigHelpers)
     configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
-        PATH_VARS CMAKE_INSTALL_LIBDIR)
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+            INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
+            PATH_VARS CMAKE_INSTALL_LIBDIR)
 
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     install(TARGETS caches EXPORT ${PROJECT_NAME}-targets INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

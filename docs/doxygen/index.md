@@ -17,4 +17,4 @@ These pages contain the API documentation of Caches library that is a header-onl
 
 \see https://github.com/vpetrigo/caches to download the source code
 
-\version 0.0.4
+\version 0.0.5

@@ -31,19 +31,19 @@ class fixed_sized_cache
     using iterator = typename std::unordered_map<Key, Value>::iterator;
     using const_iterator = typename std::unordered_map<Key, Value>::const_iterator;
     using operation_guard = typename std::lock_guard<std::mutex>;
-    using Callback = typename std::function<void(const Key &key, const Value &value)>;
+    using on_erase_cb = typename std::function<void(const Key &key, const Value &value)>;
 
     /**
      * \brief Fixed sized cache constructor
      * \throw std::invalid_argument
      * \param[in] max_size Maximum size of the cache
      * \param[in] policy Cache policy to use
-     * \param[in] OnErase Callback function to be called when cache's element get erased
+     * \param[in] on_erase on_erase_cb function to be called when cache's element get erased
      */
     explicit fixed_sized_cache(
         size_t max_size, const Policy<Key> policy = Policy<Key>{},
-        Callback OnErase = [](const Key &, const Value &) {})
-        : cache_policy{policy}, max_cache_size{max_size}, OnEraseCallback{OnErase}
+        on_erase_cb on_erase = [](const Key &, const Value &) {})
+        : cache_policy{policy}, max_cache_size{max_size}, on_erase_callback{on_erase}
     {
         if (max_cache_size == 0)
         {
@@ -197,7 +197,7 @@ class fixed_sized_cache
     void Erase(const_iterator elem)
     {
         cache_policy.Erase(elem->first);
-        OnEraseCallback(elem->first, elem->second);
+        on_erase_callback(elem->first, elem->second);
         cache_items_map.erase(elem);
     }
 
@@ -237,7 +237,7 @@ class fixed_sized_cache
     mutable Policy<Key> cache_policy;
     mutable std::mutex safe_op;
     size_t max_cache_size;
-    Callback OnEraseCallback;
+    on_erase_cb on_erase_callback;
 };
 } // namespace caches
 

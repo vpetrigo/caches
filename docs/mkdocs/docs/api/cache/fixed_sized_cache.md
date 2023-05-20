@@ -20,13 +20,13 @@ Fixed sized cache that can be used with different policy types (e.g. LRU, FIFO, 
 | using typename std::unordered_map< Key, Value >::iterator | **[iterator](/caches/api/cache/fixed_sized_cache/#using-iterator)**  |
 | using typename std::unordered_map< Key, Value >::const_iterator | **[const_iterator](/caches/api/cache/fixed_sized_cache/#using-const-iterator)**  |
 | using typename std::lock_guard< std::mutex > | **[operation_guard](/caches/api/cache/fixed_sized_cache/#using-operation-guard)**  |
-| using typename std::function< void(const Key &key, const Value &value)> | **[Callback](/caches/api/cache/fixed_sized_cache/#using-callback)**  |
+| using typename std::function< void(const Key &key, const Value &value)> | **[on_erase_cb](/caches/api/cache/fixed_sized_cache/#using-callback)**  |
 
 ## Public Functions
 
 |                | Name           |
 | -------------- | -------------- |
-| | **[fixed_sized_cache](/caches/api/cache/fixed_sized_cache/#function-fixed-sized-cache)**(size_t max_size, const Policy< Key > policy =Policy< Key >{}, Callback OnErase =[](const Key &, const Value &) {})<br>Fixed sized cache constructor.  |
+| | **[fixed_sized_cache](/caches/api/cache/fixed_sized_cache/#function-fixed-sized-cache)**(size_t max_size, const Policy< Key > policy =Policy< Key >{}, on_erase_cb OnErase =[](const Key &, const Value &) {})<br>Fixed sized cache constructor.  |
 | | **[~fixed_sized_cache](/caches/api/cache/fixed_sized_cache/#function-~fixed-sized-cache)**() |
 | void | **[Put](/caches/api/cache/fixed_sized_cache/#function-put)**(const Key & key, const Value & value)<br>Put element into the cache.  |
 | std::pair< const_iterator, bool > | **[TryGet](/caches/api/cache/fixed_sized_cache/#function-tryget)**(const Key & key) const<br>Try to get an element by the given key from the cache.  |
@@ -89,10 +89,10 @@ using caches::fixed_sized_cache< Key, Value, Policy >::operation_guard =  typena
 ```
 
 
-### using Callback
+### using on_erase_cb
 
 ```cpp
-using caches::fixed_sized_cache< Key, Value, Policy >::Callback =  typename std::function<void(const Key &key, const Value &value)>;
+using caches::fixed_sized_cache< Key, Value, Policy >::on_erase_cb =  typename std::function<void(const Key &key, const Value &value)>;
 ```
 
 
@@ -104,7 +104,7 @@ using caches::fixed_sized_cache< Key, Value, Policy >::Callback =  typename std:
 inline explicit fixed_sized_cache(
     size_t max_size,
     const Policy< Key > policy =Policy< Key >{},
-    Callback OnErase =[](const Key &, const Value &) {}
+    on_erase_cb OnErase =[](const Key &, const Value &) {}
 )
 ```
 
@@ -114,7 +114,7 @@ Fixed sized cache constructor.
 
   * **max_size** Maximum size of the cache 
   * **policy** Cache policy to use 
-  * **OnErase** Callback function to be called when cache's element get erased 
+  * **OnErase** on_erase_cb function to be called when cache's element get erased 
 
 
 **Exceptions**: 

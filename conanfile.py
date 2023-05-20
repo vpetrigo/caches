@@ -3,7 +3,7 @@ from conans import ConanFile, CMake
 
 class CacheConan(ConanFile):
     name = "cache"
-    version = "0.0.4"
+    version = "0.0.5"
     license = "BSD-3-Clause"
     author = "Vladimir Petrigo <vladimir.petrigo@gmail.com>"
     url = "https://github.com/vpetrigo/caches"

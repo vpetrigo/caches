@@ -63,12 +63,12 @@ def git_push(
 def generate_documentation(
     docs_dir: pathlib.Path, working_dir: Union[str, pathlib.Path]
 ) -> None:
-    # doxygen_dir = docs_dir.joinpath("doxygen")
-    # subprocess.run(["doxygen"], cwd=doxygen_dir)
+    doxygen_dir = docs_dir.joinpath("doxygen")
+    subprocess.run(["doxygen"], cwd=doxygen_dir)
     mkdocs_dir = docs_dir.joinpath("mkdocs")
-    # copy_docs_output_dir(
-    #     doxygen_dir.joinpath("html"), mkdocs_dir.joinpath("docs", "doxygen")
-    # )
+    copy_docs_output_dir(
+        doxygen_dir.joinpath("html"), mkdocs_dir.joinpath("docs", "doxygen")
+    )
     subprocess.run(["poetry", "install", "--no-root"], cwd=mkdocs_dir)
     subprocess.run(
         ["poetry", "run", "mkdocs", "build"],

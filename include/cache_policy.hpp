@@ -67,6 +67,7 @@ class NoCachePolicy : public ICachePolicy<Key>
     void Touch(const Key &key) noexcept override
     {
         // do not do anything
+        (void)key;
     }
 
     void Erase(const Key &key) noexcept override

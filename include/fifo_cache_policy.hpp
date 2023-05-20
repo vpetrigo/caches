@@ -49,6 +49,7 @@ class FIFOCachePolicy : public ICachePolicy<Key>
     void Touch(const Key &key) noexcept override
     {
         // nothing to do here in the FIFO strategy
+        (void)key;
     }
     // handle element deletion from a cache
     void Erase(const Key &key) noexcept override

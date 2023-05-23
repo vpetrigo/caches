@@ -2,12 +2,18 @@
 #include "lru_cache_policy.hpp"
 
 #include <gtest/gtest.h>
+#ifdef CUSTOM_HASHMAP
+#include <parallel_hashmap/phmap.h>
+#endif /* CUSTOM_HASHMAP */
 
-#include <stdexcept>
-
+#ifndef CUSTOM_HASHMAP
 template <typename Key, typename Value>
-using lru_cache_t =
-    typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
+using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
+#else
+template <typename Key, typename Value>
+using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
+                                                       phmap::node_hash_map<Key, Value>>;
+#endif /* CUSTOM_HASHMAP */
 
 TEST(CacheTest, SimplePut)
 {
@@ -118,8 +124,7 @@ TEST(LRUCache, CachedCheck)
 
 TEST(LRUCache, ConstructCache)
 {
-    EXPECT_THROW((lru_cache_t<std::string, std::size_t>(0)),
-                 std::invalid_argument);
+    EXPECT_THROW((lru_cache_t<std::string, std::size_t>(0)), std::invalid_argument);
     EXPECT_NO_THROW((lru_cache_t<std::string, std::size_t>(1024)));
 }
 

@@ -23,13 +23,15 @@ namespace caches
  * \tparam Key Type of a key (should be hashable)
  * \tparam Value Type of a value stored in the cache
  * \tparam Policy Type of a policy to be used with the cache
+ * \tparam HashMap Type of a hashmap to use for cache operations. Should have `std::unordered_map` compatible interface
  */
-template <typename Key, typename Value, template <typename> class Policy = NoCachePolicy>
+template <typename Key, typename Value, template <typename> class Policy = NoCachePolicy,
+          typename HashMap = std::unordered_map<Key, Value>>
 class fixed_sized_cache
 {
   public:
-    using iterator = typename std::unordered_map<Key, Value>::iterator;
-    using const_iterator = typename std::unordered_map<Key, Value>::const_iterator;
+    using iterator = typename HashMap::iterator;
+    using const_iterator = typename HashMap::const_iterator;
     using operation_guard = typename std::lock_guard<std::mutex>;
     using on_erase_cb = typename std::function<void(const Key &key, const Value &value)>;
 
@@ -233,10 +235,10 @@ class fixed_sized_cache
     }
 
   private:
-    std::unordered_map<Key, Value> cache_items_map;
+    HashMap cache_items_map;
     mutable Policy<Key> cache_policy;
     mutable std::mutex safe_op;
-    size_t max_cache_size;
+    std::size_t max_cache_size;
     on_erase_cb on_erase_callback;
 };
 } // namespace caches

@@ -43,10 +43,29 @@ void foo(...) {
   cache.Put("Hello", 1);
   cache.Put("world", 2);
 
-  std::cout << cache.Get("Hello") << cache.Get("world") << std::endl;
+  std::cout << cache.Get("Hello") << cache.Get("world") << '\n';
   // "12"
 }
 ```
+
+## Custom hashmap usage
+
+You can use a custom hashmap implementation for the `caches::fixed_sized_cache` class which has the same interface
+`std::unordered_map` has.
+
+For example, you can declare LRU cache type like that:
+
+```cpp
+template <typename Key, typename Value>
+using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
+                                                       phmap::node_hash_map<Key, Value>>;
+// ...
+lru_cache_t<std::string, std::size_t> cache{16};
+cache.Put("Hello", 1);
+std::cout << cache.Get("Hello") << '\n';
+```
+
+See `test` implementation which uses [`parallel-hashmap`](https://github.com/greg7mdp/parallel-hashmap).
 
 # Requirements
 

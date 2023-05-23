@@ -1,11 +1,19 @@
 #include "cache.hpp"
 #include "fifo_cache_policy.hpp"
-#include <gtest/gtest.h>
 
+#include <gtest/gtest.h>
+#ifdef CUSTOM_HASHMAP
+#include <parallel_hashmap/phmap.h>
+#endif /* CUSTOM_HASHMAP */
+
+#ifndef CUSTOM_HASHMAP
 template <typename Key, typename Value>
-using fifo_cache_t =
-    typename caches::fixed_sized_cache<Key, Value,
-                                       caches::FIFOCachePolicy>;
+using fifo_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::FIFOCachePolicy>;
+#else
+template <typename Key, typename Value>
+using fifo_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::FIFOCachePolicy,
+                                                        phmap::node_hash_map<Key, Value>>;
+#endif /* CUSTOM_HASHMAP */
 
 TEST(FIFOCache, Simple_Test)
 {
@@ -80,25 +88,29 @@ TEST(FIFOCache, Sequence_Test)
     }
 }
 
-TEST(FIFOCache, Remove_Test) {
-  constexpr std::size_t TEST_SIZE = 10;
-  fifo_cache_t <std::string, std::size_t> fc(TEST_SIZE);
+TEST(FIFOCache, Remove_Test)
+{
+    constexpr std::size_t TEST_SIZE = 10;
+    fifo_cache_t<std::string, std::size_t> fc(TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    fc.Put(std::to_string(i), i);
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        fc.Put(std::to_string(i), i);
+    }
 
-  EXPECT_EQ(fc.Size(), TEST_SIZE);
+    EXPECT_EQ(fc.Size(), TEST_SIZE);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_TRUE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_TRUE(fc.Remove(std::to_string(i)));
+    }
 
-  EXPECT_EQ(fc.Size(), 0);
+    EXPECT_EQ(fc.Size(), 0);
 
-  for (std::size_t i = 0; i < TEST_SIZE; ++i) {
-    EXPECT_FALSE(fc.Remove(std::to_string(i)));
-  }
+    for (std::size_t i = 0; i < TEST_SIZE; ++i)
+    {
+        EXPECT_FALSE(fc.Remove(std::to_string(i)));
+    }
 }
 
 TEST(FIFOCache, TryGet)

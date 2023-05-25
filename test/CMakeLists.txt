@@ -6,7 +6,7 @@ macro(add_cache_test _TEST_NAME)
     target_include_directories(${_TEST_NAME}_tests PRIVATE ${GTEST_INCLUDE_DIRS} ${parallel-hashmap_SOURCE_DIR})
     target_compile_definitions(${_TEST_NAME}_tests PRIVATE $<$<BOOL:${USE_CUSTOM_HASHMAP}>:CUSTOM_HASHMAP>)
     target_compile_options(${_TEST_NAME}_tests PRIVATE
-            $<$<CXX_COMPILER_ID:MSVC>:$<IF:$<VERSION_GREATER_EQUAL:MSVC_TOOLSET_VERSION,142>,/W4 /WX,>>
+            $<$<CXX_COMPILER_ID:MSVC>:$<IF:$<VERSION_GREATER_EQUAL:${MSVC_TOOLSET_VERSION},142>,/W4 /WX,>>
             $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>)
     add_test(NAME cache_${_TEST_NAME}_tests COMMAND ${_TEST_NAME}_tests)
 endmacro()

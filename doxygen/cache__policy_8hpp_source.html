@@ -22,7 +22,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Caches<span id="projectnumber">&#160;0.0.4</span>
+   <div id="projectname">Caches<span id="projectnumber">&#160;0.0.5</span>
    </div>
    <div id="projectbrief">LRU/LFU/FIFO Caches library</div>
   </td>
@@ -116,25 +116,26 @@ $(function() {
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classcaches_1_1NoCachePolicy.html#a889837db8d2dc50188cc522fa0781d16">   67</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classcaches_1_1NoCachePolicy.html#a889837db8d2dc50188cc522fa0781d16">Touch</a>(<span class="keyword">const</span> Key &amp;key) <span class="keyword">noexcept</span> <span class="keyword">override</span></div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    {</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="comment">// do not do anything</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">   72</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">Erase</a>(<span class="keyword">const</span> Key &amp;key) <span class="keyword">noexcept</span> <span class="keyword">override</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    {</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        key_storage.erase(key);</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    }</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// return a key of a displacement candidate</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">   78</a></span>    <span class="keyword">const</span> Key &amp;<a class="code hl_function" href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">ReplCandidate</a>() const noexcept<span class="keyword"> override</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">return</span> *key_storage.cbegin();</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    }</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    std::unordered_set&lt;Key&gt; key_storage;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>};</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>} <span class="comment">// namespace caches</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif </span><span class="comment">// CACHE_POLICY_HPP</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        (void)key;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    }</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">   73</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">Erase</a>(<span class="keyword">const</span> Key &amp;key) <span class="keyword">noexcept</span> <span class="keyword">override</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        key_storage.erase(key);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// return a key of a displacement candidate</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">   79</a></span>    <span class="keyword">const</span> Key &amp;<a class="code hl_function" href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">ReplCandidate</a>() const noexcept<span class="keyword"> override</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">return</span> *key_storage.cbegin();</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    }</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    std::unordered_set&lt;Key&gt; key_storage;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>};</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>} <span class="comment">// namespace caches</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#endif </span><span class="comment">// CACHE_POLICY_HPP</span></div>
 <div class="ttc" id="aclasscaches_1_1ICachePolicy_html"><div class="ttname"><a href="classcaches_1_1ICachePolicy.html">caches::ICachePolicy</a></div><div class="ttdoc">Cache policy abstract base class.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:19</div></div>
 <div class="ttc" id="aclasscaches_1_1ICachePolicy_html_a295595ae141575e2e0673f63b06a6599"><div class="ttname"><a href="classcaches_1_1ICachePolicy.html#a295595ae141575e2e0673f63b06a6599">caches::ICachePolicy::Erase</a></div><div class="ttdeci">virtual void Erase(const Key &amp;key)=0</div><div class="ttdoc">Handle element deletion from a cache.</div></div>
 <div class="ttc" id="aclasscaches_1_1ICachePolicy_html_a343a438b74bcd3ff1658408b08c4089f"><div class="ttname"><a href="classcaches_1_1ICachePolicy.html#a343a438b74bcd3ff1658408b08c4089f">caches::ICachePolicy::ReplCandidate</a></div><div class="ttdeci">virtual const Key &amp; ReplCandidate() const =0</div><div class="ttdoc">Return a key of a replacement candidate.</div></div>
@@ -142,9 +143,9 @@ $(function() {
 <div class="ttc" id="aclasscaches_1_1ICachePolicy_html_ae04daf420d640079f071691d27d82bce"><div class="ttname"><a href="classcaches_1_1ICachePolicy.html#ae04daf420d640079f071691d27d82bce">caches::ICachePolicy::Touch</a></div><div class="ttdeci">virtual void Touch(const Key &amp;key)=0</div><div class="ttdoc">Handle request to the key-element in a cache.</div></div>
 <div class="ttc" id="aclasscaches_1_1NoCachePolicy_html"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html">caches::NoCachePolicy</a></div><div class="ttdoc">Basic no caching policy class.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:57</div></div>
 <div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_a889837db8d2dc50188cc522fa0781d16"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#a889837db8d2dc50188cc522fa0781d16">caches::NoCachePolicy::Touch</a></div><div class="ttdeci">void Touch(const Key &amp;key) noexcept override</div><div class="ttdoc">Handle request to the key-element in a cache.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:67</div></div>
-<div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_ab0fb0bed0696259059987e3484dc8642"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">caches::NoCachePolicy::ReplCandidate</a></div><div class="ttdeci">const Key &amp; ReplCandidate() const noexcept override</div><div class="ttdoc">Return a key of a replacement candidate.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:78</div></div>
+<div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_ab0fb0bed0696259059987e3484dc8642"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#ab0fb0bed0696259059987e3484dc8642">caches::NoCachePolicy::ReplCandidate</a></div><div class="ttdeci">const Key &amp; ReplCandidate() const noexcept override</div><div class="ttdoc">Return a key of a replacement candidate.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:79</div></div>
 <div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_ab1ef9139984d6ef8c3156bf016651ed6"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#ab1ef9139984d6ef8c3156bf016651ed6">caches::NoCachePolicy::Insert</a></div><div class="ttdeci">void Insert(const Key &amp;key) override</div><div class="ttdoc">Handle element insertion in a cache.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:62</div></div>
-<div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_afd95ef469aa591a9a8e534da0d02b329"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">caches::NoCachePolicy::Erase</a></div><div class="ttdeci">void Erase(const Key &amp;key) noexcept override</div><div class="ttdoc">Handle element deletion from a cache.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:72</div></div>
+<div class="ttc" id="aclasscaches_1_1NoCachePolicy_html_afd95ef469aa591a9a8e534da0d02b329"><div class="ttname"><a href="classcaches_1_1NoCachePolicy.html#afd95ef469aa591a9a8e534da0d02b329">caches::NoCachePolicy::Erase</a></div><div class="ttdeci">void Erase(const Key &amp;key) noexcept override</div><div class="ttdoc">Handle element deletion from a cache.</div><div class="ttdef"><b>Definition:</b> cache_policy.hpp:73</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

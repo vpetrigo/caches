@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.6"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Caches: caches::fixed_sized_cache&lt; Key, Value, Policy &gt; Class Template Reference</title>
+<title>Caches: caches::fixed_sized_cache&lt; Key, Value, Policy, HashMap &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Caches<span id="projectnumber">&#160;0.0.4</span>
+   <div id="projectname">Caches<span id="projectnumber">&#160;0.0.5</span>
    </div>
    <div id="projectbrief">LRU/LFU/FIFO Caches library</div>
   </td>
@@ -80,7 +80,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classcaches_1_1fixed__sized__cache-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">caches::fixed_sized_cache&lt; Key, Value, Policy &gt; Class Template Reference</div></div>
+  <div class="headertitle"><div class="title">caches::fixed_sized_cache&lt; Key, Value, Policy, HashMap &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
@@ -91,97 +91,98 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ae592422c2c1d5ed8016c2629bc038c2b"><td class="memItemLeft" align="right" valign="top"><a id="ae592422c2c1d5ed8016c2629bc038c2b" name="ae592422c2c1d5ed8016c2629bc038c2b"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>iterator</b> = typename std::unordered_map&lt; Key, Value &gt;::iterator</td></tr>
-<tr class="separator:ae592422c2c1d5ed8016c2629bc038c2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73dc12c9b3e30ef583e2f7785318643d"><td class="memItemLeft" align="right" valign="top"><a id="a73dc12c9b3e30ef583e2f7785318643d" name="a73dc12c9b3e30ef583e2f7785318643d"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b> = typename std::unordered_map&lt; Key, Value &gt;::const_iterator</td></tr>
-<tr class="separator:a73dc12c9b3e30ef583e2f7785318643d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85e5e67113dda750e577b2fb3c044b5e"><td class="memItemLeft" align="right" valign="top"><a id="a85e5e67113dda750e577b2fb3c044b5e" name="a85e5e67113dda750e577b2fb3c044b5e"></a>
+<tr class="memitem:a8e777a64746a255f995438a6b777d5ce"><td class="memItemLeft" align="right" valign="top"><a id="a8e777a64746a255f995438a6b777d5ce" name="a8e777a64746a255f995438a6b777d5ce"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>iterator</b> = typename HashMap::iterator</td></tr>
+<tr class="separator:a8e777a64746a255f995438a6b777d5ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18d8b37a362b2bcbea63bdebfd12ba9b"><td class="memItemLeft" align="right" valign="top"><a id="a18d8b37a362b2bcbea63bdebfd12ba9b" name="a18d8b37a362b2bcbea63bdebfd12ba9b"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b> = typename HashMap::const_iterator</td></tr>
+<tr class="separator:a18d8b37a362b2bcbea63bdebfd12ba9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adde75369a712804471b7f16d455975f1"><td class="memItemLeft" align="right" valign="top"><a id="adde75369a712804471b7f16d455975f1" name="adde75369a712804471b7f16d455975f1"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>operation_guard</b> = typename std::lock_guard&lt; std::mutex &gt;</td></tr>
-<tr class="separator:a85e5e67113dda750e577b2fb3c044b5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab098580aae3dd3d0a3b538067df350fb"><td class="memItemLeft" align="right" valign="top"><a id="ab098580aae3dd3d0a3b538067df350fb" name="ab098580aae3dd3d0a3b538067df350fb"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>Callback</b> = typename std::function&lt; void(const Key &amp;key, const Value &amp;value)&gt;</td></tr>
-<tr class="separator:ab098580aae3dd3d0a3b538067df350fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:adde75369a712804471b7f16d455975f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99b8ccfde012d8e9327560736665de9e"><td class="memItemLeft" align="right" valign="top"><a id="a99b8ccfde012d8e9327560736665de9e" name="a99b8ccfde012d8e9327560736665de9e"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>on_erase_cb</b> = typename std::function&lt; void(const Key &amp;key, const Value &amp;value)&gt;</td></tr>
+<tr class="separator:a99b8ccfde012d8e9327560736665de9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aeb60a304d16703bc9a4bfe13533dd53a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#aeb60a304d16703bc9a4bfe13533dd53a">fixed_sized_cache</a> (size_t max_size, const Policy&lt; Key &gt; policy=Policy&lt; Key &gt;{}, Callback OnErase=[](const Key &amp;, const Value &amp;) {})</td></tr>
-<tr class="memdesc:aeb60a304d16703bc9a4bfe13533dd53a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fixed sized cache constructor.  <br /></td></tr>
-<tr class="separator:aeb60a304d16703bc9a4bfe13533dd53a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58d60c35df4a45a600401a0c7e1ca04e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a58d60c35df4a45a600401a0c7e1ca04e">Put</a> (const Key &amp;key, const Value &amp;value) noexcept</td></tr>
-<tr class="memdesc:a58d60c35df4a45a600401a0c7e1ca04e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put element into the cache.  <br /></td></tr>
-<tr class="separator:a58d60c35df4a45a600401a0c7e1ca04e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8fdf2cab3a764a32aa999d521eecc10"><td class="memItemLeft" align="right" valign="top">std::pair&lt; const_iterator, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#ac8fdf2cab3a764a32aa999d521eecc10">TryGet</a> (const Key &amp;key) const noexcept</td></tr>
-<tr class="memdesc:ac8fdf2cab3a764a32aa999d521eecc10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to get an element by the given key from the cache.  <br /></td></tr>
-<tr class="separator:ac8fdf2cab3a764a32aa999d521eecc10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab466580e1210246cabd4b1c4ca196ea0"><td class="memItemLeft" align="right" valign="top">const Value &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#ab466580e1210246cabd4b1c4ca196ea0">Get</a> (const Key &amp;key) const</td></tr>
-<tr class="memdesc:ab466580e1210246cabd4b1c4ca196ea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get element from the cache if present.  <br /></td></tr>
-<tr class="separator:ab466580e1210246cabd4b1c4ca196ea0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28e71b4859093d041590c0a78212b5fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a28e71b4859093d041590c0a78212b5fb">Cached</a> (const Key &amp;key) const noexcept</td></tr>
-<tr class="memdesc:a28e71b4859093d041590c0a78212b5fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the given key is presented in the cache.  <br /></td></tr>
-<tr class="separator:a28e71b4859093d041590c0a78212b5fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25c094655f13dd9f748fe60b0be989c5"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a25c094655f13dd9f748fe60b0be989c5">Size</a> () const</td></tr>
-<tr class="memdesc:a25c094655f13dd9f748fe60b0be989c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of elements in cache.  <br /></td></tr>
-<tr class="separator:a25c094655f13dd9f748fe60b0be989c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a427b7814b5e7c25d24f59d26682e3e20"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a427b7814b5e7c25d24f59d26682e3e20">Remove</a> (const Key &amp;key)</td></tr>
-<tr class="separator:a427b7814b5e7c25d24f59d26682e3e20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac70feef15ad4819eda395aca23b77fd2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#ac70feef15ad4819eda395aca23b77fd2">fixed_sized_cache</a> (size_t max_size, const Policy&lt; Key &gt; policy=Policy&lt; Key &gt;{}, on_erase_cb on_erase=[](const Key &amp;, const Value &amp;) {})</td></tr>
+<tr class="memdesc:ac70feef15ad4819eda395aca23b77fd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fixed sized cache constructor.  <br /></td></tr>
+<tr class="separator:ac70feef15ad4819eda395aca23b77fd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a336db7be956d8303b01b568433c32d40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a336db7be956d8303b01b568433c32d40">Put</a> (const Key &amp;key, const Value &amp;value) noexcept</td></tr>
+<tr class="memdesc:a336db7be956d8303b01b568433c32d40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put element into the cache.  <br /></td></tr>
+<tr class="separator:a336db7be956d8303b01b568433c32d40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9aaf87c5bc526406755ebf090ca0b438"><td class="memItemLeft" align="right" valign="top">std::pair&lt; const_iterator, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#a9aaf87c5bc526406755ebf090ca0b438">TryGet</a> (const Key &amp;key) const noexcept</td></tr>
+<tr class="memdesc:a9aaf87c5bc526406755ebf090ca0b438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to get an element by the given key from the cache.  <br /></td></tr>
+<tr class="separator:a9aaf87c5bc526406755ebf090ca0b438"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3c5876db9ae03fe9a8da504012ee98c"><td class="memItemLeft" align="right" valign="top">const Value &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#ab3c5876db9ae03fe9a8da504012ee98c">Get</a> (const Key &amp;key) const</td></tr>
+<tr class="memdesc:ab3c5876db9ae03fe9a8da504012ee98c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get element from the cache if present.  <br /></td></tr>
+<tr class="separator:ab3c5876db9ae03fe9a8da504012ee98c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3e67e880ef07650b49185a4d27adf6e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#ac3e67e880ef07650b49185a4d27adf6e">Cached</a> (const Key &amp;key) const noexcept</td></tr>
+<tr class="memdesc:ac3e67e880ef07650b49185a4d27adf6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the given key is presented in the cache.  <br /></td></tr>
+<tr class="separator:ac3e67e880ef07650b49185a4d27adf6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af046ba8361491c0ecebe5f6654b81838"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#af046ba8361491c0ecebe5f6654b81838">Size</a> () const</td></tr>
+<tr class="memdesc:af046ba8361491c0ecebe5f6654b81838"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of elements in cache.  <br /></td></tr>
+<tr class="separator:af046ba8361491c0ecebe5f6654b81838"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf12c01cdd7390c169676814f04d6acc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcaches_1_1fixed__sized__cache.html#aaf12c01cdd7390c169676814f04d6acc">Remove</a> (const Key &amp;key)</td></tr>
+<tr class="separator:aaf12c01cdd7390c169676814f04d6acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a5a2e35e54c8e9fea74e9b44e8e7f6abb"><td class="memItemLeft" align="right" valign="top"><a id="a5a2e35e54c8e9fea74e9b44e8e7f6abb" name="a5a2e35e54c8e9fea74e9b44e8e7f6abb"></a>
+<tr class="memitem:af7b12f5f0e3dc83a20a1a1d618cdb790"><td class="memItemLeft" align="right" valign="top"><a id="af7b12f5f0e3dc83a20a1a1d618cdb790" name="af7b12f5f0e3dc83a20a1a1d618cdb790"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Clear</b> ()</td></tr>
-<tr class="separator:a5a2e35e54c8e9fea74e9b44e8e7f6abb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab259fbb6adc18c29cd99d1509daf2d08"><td class="memItemLeft" align="right" valign="top"><a id="ab259fbb6adc18c29cd99d1509daf2d08" name="ab259fbb6adc18c29cd99d1509daf2d08"></a>
+<tr class="separator:af7b12f5f0e3dc83a20a1a1d618cdb790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d7cae157d2d9b80d744d656eec4a0e4"><td class="memItemLeft" align="right" valign="top"><a id="a6d7cae157d2d9b80d744d656eec4a0e4" name="a6d7cae157d2d9b80d744d656eec4a0e4"></a>
 const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>begin</b> () const noexcept</td></tr>
-<tr class="separator:ab259fbb6adc18c29cd99d1509daf2d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae566fc5394d95025228ef70d98c79207"><td class="memItemLeft" align="right" valign="top"><a id="ae566fc5394d95025228ef70d98c79207" name="ae566fc5394d95025228ef70d98c79207"></a>
+<tr class="separator:a6d7cae157d2d9b80d744d656eec4a0e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd59598bddd739fa8a4509e8313adb7c"><td class="memItemLeft" align="right" valign="top"><a id="afd59598bddd739fa8a4509e8313adb7c" name="afd59598bddd739fa8a4509e8313adb7c"></a>
 const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>end</b> () const noexcept</td></tr>
-<tr class="separator:ae566fc5394d95025228ef70d98c79207"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca4edea7c75063457681bc34c19b021d"><td class="memItemLeft" align="right" valign="top"><a id="aca4edea7c75063457681bc34c19b021d" name="aca4edea7c75063457681bc34c19b021d"></a>
+<tr class="separator:afd59598bddd739fa8a4509e8313adb7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5826b078723bfc030ee03da344639cd"><td class="memItemLeft" align="right" valign="top"><a id="ad5826b078723bfc030ee03da344639cd" name="ad5826b078723bfc030ee03da344639cd"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Insert</b> (const Key &amp;key, const Value &amp;value)</td></tr>
-<tr class="separator:aca4edea7c75063457681bc34c19b021d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace97680252105d0182e1225c20ba73c7"><td class="memItemLeft" align="right" valign="top"><a id="ace97680252105d0182e1225c20ba73c7" name="ace97680252105d0182e1225c20ba73c7"></a>
+<tr class="separator:ad5826b078723bfc030ee03da344639cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af54b2feaa63342c607ad69806e2ac65f"><td class="memItemLeft" align="right" valign="top"><a id="af54b2feaa63342c607ad69806e2ac65f" name="af54b2feaa63342c607ad69806e2ac65f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Erase</b> (const_iterator elem)</td></tr>
-<tr class="separator:ace97680252105d0182e1225c20ba73c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d3c4f0c42c7cdd1908efbeaf662a099"><td class="memItemLeft" align="right" valign="top"><a id="a6d3c4f0c42c7cdd1908efbeaf662a099" name="a6d3c4f0c42c7cdd1908efbeaf662a099"></a>
+<tr class="separator:af54b2feaa63342c607ad69806e2ac65f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a543fd4cfbfec9d4935541e87c90f42cf"><td class="memItemLeft" align="right" valign="top"><a id="a543fd4cfbfec9d4935541e87c90f42cf" name="a543fd4cfbfec9d4935541e87c90f42cf"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Erase</b> (const Key &amp;key)</td></tr>
-<tr class="separator:a6d3c4f0c42c7cdd1908efbeaf662a099"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38d979682c5f3431345a5a17e2b4eb64"><td class="memItemLeft" align="right" valign="top"><a id="a38d979682c5f3431345a5a17e2b4eb64" name="a38d979682c5f3431345a5a17e2b4eb64"></a>
+<tr class="separator:a543fd4cfbfec9d4935541e87c90f42cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3162c3aa357e9196e0446df7223b51fc"><td class="memItemLeft" align="right" valign="top"><a id="a3162c3aa357e9196e0446df7223b51fc" name="a3162c3aa357e9196e0446df7223b51fc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Update</b> (const Key &amp;key, const Value &amp;value)</td></tr>
-<tr class="separator:a38d979682c5f3431345a5a17e2b4eb64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad27b914e8cd03c89699fa44574caa535"><td class="memItemLeft" align="right" valign="top"><a id="ad27b914e8cd03c89699fa44574caa535" name="ad27b914e8cd03c89699fa44574caa535"></a>
+<tr class="separator:a3162c3aa357e9196e0446df7223b51fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d842bbcf79399fa1caeec0ffc349deb"><td class="memItemLeft" align="right" valign="top"><a id="a9d842bbcf79399fa1caeec0ffc349deb" name="a9d842bbcf79399fa1caeec0ffc349deb"></a>
 const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>FindElem</b> (const Key &amp;key) const</td></tr>
-<tr class="separator:ad27b914e8cd03c89699fa44574caa535"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afcc7f4581ef88f7fa9ea425cf95767ab"><td class="memItemLeft" align="right" valign="top"><a id="afcc7f4581ef88f7fa9ea425cf95767ab" name="afcc7f4581ef88f7fa9ea425cf95767ab"></a>
+<tr class="separator:a9d842bbcf79399fa1caeec0ffc349deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb31093ec27a51fb7be1817f1395027d"><td class="memItemLeft" align="right" valign="top"><a id="acb31093ec27a51fb7be1817f1395027d" name="acb31093ec27a51fb7be1817f1395027d"></a>
 std::pair&lt; const_iterator, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetInternal</b> (const Key &amp;key) const noexcept</td></tr>
-<tr class="separator:afcc7f4581ef88f7fa9ea425cf95767ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:acb31093ec27a51fb7be1817f1395027d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;typename Key, typename Value, template&lt; typename &gt; class Policy = NoCachePolicy&gt;<br />
-class caches::fixed_sized_cache&lt; Key, Value, Policy &gt;</div><p>Fixed sized cache that can be used with different policy types (e.g. LRU, FIFO, LFU) </p>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename Key, typename Value, template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap = std::unordered_map&lt;Key, Value&gt;&gt;<br />
+class caches::fixed_sized_cache&lt; Key, Value, Policy, HashMap &gt;</div><p>Fixed sized cache that can be used with different policy types (e.g. LRU, FIFO, LFU) </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Key</td><td>Type of a key (should be hashable) </td></tr>
     <tr><td class="paramname">Value</td><td>Type of a value stored in the cache </td></tr>
     <tr><td class="paramname">Policy</td><td>Type of a policy to be used with the cache </td></tr>
+    <tr><td class="paramname">HashMap</td><td>Type of a hashmap to use for cache operations. Should have <code>std::unordered_map</code> compatible interface </td></tr>
   </table>
   </dd>
 </dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aeb60a304d16703bc9a4bfe13533dd53a" name="aeb60a304d16703bc9a4bfe13533dd53a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb60a304d16703bc9a4bfe13533dd53a">&#9670;&#160;</a></span>fixed_sized_cache()</h2>
+<a id="ac70feef15ad4819eda395aca23b77fd2" name="ac70feef15ad4819eda395aca23b77fd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac70feef15ad4819eda395aca23b77fd2">&#9670;&#160;</a></span>fixed_sized_cache()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::fixed_sized_cache </td>
+          <td class="memname"><a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::fixed_sized_cache </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>max_size</em>, </td>
@@ -195,8 +196,8 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Callback&#160;</td>
-          <td class="paramname"><em>OnErase</em> = <code>[](const&#160;Key&#160;&amp;,&#160;const&#160;Value&#160;&amp;)&#160;{}</code>&#160;</td>
+          <td class="paramtype">on_erase_cb&#160;</td>
+          <td class="paramname"><em>on_erase</em> = <code>[](const&#160;Key&#160;&amp;,&#160;const&#160;Value&#160;&amp;)&#160;{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -222,7 +223,7 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">max_size</td><td>Maximum size of the cache </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Cache policy to use </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">OnErase</td><td>Callback function to be called when cache's element get erased </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">on_erase</td><td>on_erase_cb function to be called when cache's element get erased </td></tr>
   </table>
   </dd>
 </dl>
@@ -230,19 +231,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a28e71b4859093d041590c0a78212b5fb" name="a28e71b4859093d041590c0a78212b5fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28e71b4859093d041590c0a78212b5fb">&#9670;&#160;</a></span>Cached()</h2>
+<a id="ac3e67e880ef07650b49185a4d27adf6e" name="ac3e67e880ef07650b49185a4d27adf6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3e67e880ef07650b49185a4d27adf6e">&#9670;&#160;</a></span>Cached()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::Cached </td>
+          <td class="memname">bool <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::Cached </td>
           <td>(</td>
           <td class="paramtype">const Key &amp;&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
@@ -273,19 +274,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 </div>
 </div>
-<a id="ab466580e1210246cabd4b1c4ca196ea0" name="ab466580e1210246cabd4b1c4ca196ea0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab466580e1210246cabd4b1c4ca196ea0">&#9670;&#160;</a></span>Get()</h2>
+<a id="ab3c5876db9ae03fe9a8da504012ee98c" name="ab3c5876db9ae03fe9a8da504012ee98c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3c5876db9ae03fe9a8da504012ee98c">&#9670;&#160;</a></span>Get()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const Value &amp; <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::Get </td>
+          <td class="memname">const Value &amp; <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::Get </td>
           <td>(</td>
           <td class="paramtype">const Key &amp;&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
@@ -317,19 +318,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 </div>
 </div>
-<a id="a58d60c35df4a45a600401a0c7e1ca04e" name="a58d60c35df4a45a600401a0c7e1ca04e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58d60c35df4a45a600401a0c7e1ca04e">&#9670;&#160;</a></span>Put()</h2>
+<a id="a336db7be956d8303b01b568433c32d40" name="a336db7be956d8303b01b568433c32d40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a336db7be956d8303b01b568433c32d40">&#9670;&#160;</a></span>Put()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::Put </td>
+          <td class="memname">void <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::Put </td>
           <td>(</td>
           <td class="paramtype">const Key &amp;&#160;</td>
           <td class="paramname"><em>key</em>, </td>
@@ -364,19 +365,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 </div>
 </div>
-<a id="a427b7814b5e7c25d24f59d26682e3e20" name="a427b7814b5e7c25d24f59d26682e3e20"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a427b7814b5e7c25d24f59d26682e3e20">&#9670;&#160;</a></span>Remove()</h2>
+<a id="aaf12c01cdd7390c169676814f04d6acc" name="aaf12c01cdd7390c169676814f04d6acc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf12c01cdd7390c169676814f04d6acc">&#9670;&#160;</a></span>Remove()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::Remove </td>
+          <td class="memname">bool <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::Remove </td>
           <td>(</td>
           <td class="paramtype">const Key &amp;&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
@@ -405,19 +406,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 </div>
 </div>
-<a id="a25c094655f13dd9f748fe60b0be989c5" name="a25c094655f13dd9f748fe60b0be989c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25c094655f13dd9f748fe60b0be989c5">&#9670;&#160;</a></span>Size()</h2>
+<a id="af046ba8361491c0ecebe5f6654b81838" name="af046ba8361491c0ecebe5f6654b81838"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af046ba8361491c0ecebe5f6654b81838">&#9670;&#160;</a></span>Size()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::size_t <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::Size </td>
+          <td class="memname">std::size_t <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::Size </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -435,19 +436,19 @@ template&lt;typename Key , typename Value , template&lt; typename &gt; class Pol
 
 </div>
 </div>
-<a id="ac8fdf2cab3a764a32aa999d521eecc10" name="ac8fdf2cab3a764a32aa999d521eecc10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8fdf2cab3a764a32aa999d521eecc10">&#9670;&#160;</a></span>TryGet()</h2>
+<a id="a9aaf87c5bc526406755ebf090ca0b438" name="a9aaf87c5bc526406755ebf090ca0b438"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aaf87c5bc526406755ebf090ca0b438">&#9670;&#160;</a></span>TryGet()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy&gt; </div>
+template&lt;typename Key , typename Value , template&lt; typename &gt; class Policy = NoCachePolicy, typename HashMap  = std::unordered_map&lt;Key, Value&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::pair&lt; const_iterator, bool &gt; <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy &gt;::TryGet </td>
+          <td class="memname">std::pair&lt; const_iterator, bool &gt; <a class="el" href="classcaches_1_1fixed__sized__cache.html">caches::fixed_sized_cache</a>&lt; Key, Value, Policy, HashMap &gt;::TryGet </td>
           <td>(</td>
           <td class="paramtype">const Key &amp;&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>

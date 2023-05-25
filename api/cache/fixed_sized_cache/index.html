@@ -395,8 +395,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-callback" class="md-nav__link">
-    using Callback
+  <a href="#using-on_erase_cb" class="md-nav__link">
+    using on_erase_cb
   </a>
   
 </li>
@@ -769,8 +769,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-callback" class="md-nav__link">
-    using Callback
+  <a href="#using-on_erase_cb" class="md-nav__link">
+    using on_erase_cb
   </a>
   
 </li>
@@ -970,7 +970,7 @@
 </tr>
 <tr>
 <td>using typename std::function&lt; void(const Key &amp;key, const Value &amp;value)&gt;</td>
-<td><strong><a href="/caches/api/cache/fixed_sized_cache/#using-callback">Callback</a></strong></td>
+<td><strong><a href="/caches/api/cache/fixed_sized_cache/#using-callback">on_erase_cb</a></strong></td>
 </tr>
 </tbody>
 </table>
@@ -985,7 +985,7 @@
 <tbody>
 <tr>
 <td></td>
-<td><strong><a href="/caches/api/cache/fixed_sized_cache/#function-fixed-sized-cache">fixed_sized_cache</a></strong>(size_t max_size, const Policy&lt; Key &gt; policy =Policy&lt; Key &gt;{}, Callback OnErase =<a href="const Key &amp;, const Value &amp;"></a> {})<br>Fixed sized cache constructor.</td>
+<td><strong><a href="/caches/api/cache/fixed_sized_cache/#function-fixed-sized-cache">fixed_sized_cache</a></strong>(size_t max_size, const Policy&lt; Key &gt; policy =Policy&lt; Key &gt;{}, on_erase_cb OnErase =<a href="const Key &amp;, const Value &amp;"></a> {})<br>Fixed sized cache constructor.</td>
 </tr>
 <tr>
 <td></td>
@@ -1087,15 +1087,15 @@
 <h3 id="using-operation_guard">using operation_guard</h3>
 <div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="n">caches</span><span class="o">::</span><span class="n">fixed_sized_cache</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Key</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">,</span><span class="w"> </span><span class="n">Policy</span><span class="w"> </span><span class="o">&gt;::</span><span class="n">operation_guard</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="k">typename</span><span class="w"> </span><span class="nc">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="p">;</span>
 </code></pre></div>
-<h3 id="using-callback">using Callback</h3>
-<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="n">caches</span><span class="o">::</span><span class="n">fixed_sized_cache</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Key</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">,</span><span class="w"> </span><span class="n">Policy</span><span class="w"> </span><span class="o">&gt;::</span><span class="n">Callback</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="k">typename</span><span class="w"> </span><span class="nc">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Value</span><span class="w"> </span><span class="o">&amp;</span><span class="n">value</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+<h3 id="using-on_erase_cb">using on_erase_cb</h3>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="n">caches</span><span class="o">::</span><span class="n">fixed_sized_cache</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Key</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">,</span><span class="w"> </span><span class="n">Policy</span><span class="w"> </span><span class="o">&gt;::</span><span class="n">on_erase_cb</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="k">typename</span><span class="w"> </span><span class="nc">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Value</span><span class="w"> </span><span class="o">&amp;</span><span class="n">value</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 </code></pre></div>
 <h2 id="public-functions-documentation">Public Functions Documentation</h2>
 <h3 id="function-fixed_sized_cache">function fixed_sized_cache</h3>
 <div class="highlight"><pre><span></span><code><span class="kr">inline</span><span class="w"> </span><span class="k">explicit</span><span class="w"> </span><span class="n">fixed_sized_cache</span><span class="p">(</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">max_size</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Policy</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="o">=</span><span class="n">Policy</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&gt;</span><span class="p">{},</span>
-<span class="w">    </span><span class="n">Callback</span><span class="w"> </span><span class="n">OnErase</span><span class="w"> </span><span class="o">=</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Value</span><span class="w"> </span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="n">on_erase_cb</span><span class="w"> </span><span class="n">OnErase</span><span class="w"> </span><span class="o">=</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Key</span><span class="w"> </span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Value</span><span class="w"> </span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Fixed sized cache constructor. </p>
@@ -1103,7 +1103,7 @@
 <ul>
 <li><strong>max_size</strong> Maximum size of the cache </li>
 <li><strong>policy</strong> Cache policy to use </li>
-<li><strong>OnErase</strong> Callback function to be called when cache's element get erased </li>
+<li><strong>OnErase</strong> on_erase_cb function to be called when cache's element get erased </li>
 </ul>
 <p><strong>Exceptions</strong>: </p>
 <ul>

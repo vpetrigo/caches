@@ -43,7 +43,7 @@ if (BUILD_TEST)
             COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" -x coverage.info
     )
     add_custom_target(coverage-html
-            COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" --html-details ${CMAKE_CURRENT_LIST_DIR}/report/report.html
+            COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" --html-details ${CMAKE_BINARY_DIR}/report/report.html
     )
 endif ()
 

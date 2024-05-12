@@ -1,5 +1,5 @@
 <map id="cache.hpp" name="cache.hpp">
-<area shape="rect" id="node1" title="Generic cache implementation." alt="" coords="414,5,502,31"/>
+<area shape="rect" id="node1" title="Generic cache implementation." alt="" coords="463,5,551,31"/>
 <area shape="rect" id="node2" href="$cache__policy_8hpp.html" title="Cache policy interface declaration." alt="" coords="5,79,137,104"/>
 <area shape="rect" id="node4" title=" " alt="" coords="162,79,247,104"/>
 <area shape="rect" id="node5" title=" " alt="" coords="272,79,343,104"/>
@@ -7,6 +7,7 @@
 <area shape="rect" id="node7" title=" " alt="" coords="478,79,537,104"/>
 <area shape="rect" id="node8" title=" " alt="" coords="561,79,638,104"/>
 <area shape="rect" id="node9" title=" " alt="" coords="662,79,726,104"/>
-<area shape="rect" id="node10" title=" " alt="" coords="751,79,875,104"/>
+<area shape="rect" id="node10" title=" " alt="" coords="751,79,837,104"/>
+<area shape="rect" id="node11" title=" " alt="" coords="861,79,985,104"/>
 <area shape="rect" id="node3" title=" " alt="" coords="14,152,129,177"/>
 </map>

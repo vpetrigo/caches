@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(caches
-        VERSION 0.0.5)
+        VERSION 0.1.0)
+
+macro(add_coverage_flags target)
+    if (BUILD_TEST)
+        target_compile_options(${target} PRIVATE --coverage)
+
+        if (NOT MSVC)
+            target_link_options(${target} PRIVATE --coverage)
+        endif ()
+    endif ()
+endmacro()
 
 if (MSVC)
     add_definitions(/MP)
@@ -29,6 +39,12 @@ target_include_directories(caches INTERFACE
 
 if (BUILD_TEST)
     enable_testing()
+    add_custom_target(coverage
+            COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" -x coverage.info
+    )
+    add_custom_target(coverage-html
+            COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" --html-details ${CMAKE_CURRENT_LIST_DIR}/report/report.html
+    )
 endif ()
 
 if (INSTALL_CACHES)

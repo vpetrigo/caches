@@ -12,7 +12,7 @@ using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCa
 #else
 template <typename Key, typename Value>
 using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
-                                                       phmap::node_hash_map<Key, Value>>;
+                                                       phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
 #endif /* CUSTOM_HASHMAP */
 
 TEST(CacheTest, SimplePut)
@@ -21,7 +21,7 @@ TEST(CacheTest, SimplePut)
 
     cache.Put("test", 666);
 
-    EXPECT_EQ(cache.Get("test"), 666);
+    EXPECT_EQ(*cache.Get("test"), 666);
 }
 
 TEST(CacheTest, PutWithUpdate)
@@ -34,7 +34,7 @@ TEST(CacheTest, PutWithUpdate)
         cache.Put(std::to_string(i), i);
 
         const auto value = cache.Get(std::to_string(i));
-        ASSERT_EQ(i, value);
+        ASSERT_EQ(i, *value);
     }
 
     for (size_t i = 0; i < TEST_CASE; ++i)
@@ -43,7 +43,7 @@ TEST(CacheTest, PutWithUpdate)
         cache.Put(std::to_string(i), i * 10);
 
         const auto value = cache.Get(std::to_string(i));
-        ASSERT_EQ(i * 10, value);
+        ASSERT_EQ(i * 10, *value);
     }
 }
 
@@ -72,7 +72,7 @@ TEST(CacheTest, KeepsAllValuesWithinCapacity)
 
     for (int i = TEST_RECORDS - CACHE_CAP; i < TEST_RECORDS; ++i)
     {
-        EXPECT_EQ(i, cache.Get(i));
+        EXPECT_EQ(i, *cache.Get(i));
     }
 }
 
@@ -142,7 +142,7 @@ TEST(LRUCache, TryGet)
     {
         auto element = cache.TryGet(std::to_string(i));
         EXPECT_TRUE(element.second);
-        EXPECT_EQ(element.first->second, i);
+        EXPECT_EQ(*element.first, i);
     }
 
     for (std::size_t i = TEST_CASE; i < TEST_CASE * 2; ++i)
@@ -150,4 +150,43 @@ TEST(LRUCache, TryGet)
         auto element = cache.TryGet(std::to_string(i));
         EXPECT_FALSE(element.second);
     }
+}
+
+TEST(LRUCache, GetWithReplacement)
+{
+    lru_cache_t<std::string, std::size_t> cache{2};
+
+    cache.Put("1", 1);
+    cache.Put("2", 2);
+
+    auto element1 = cache.Get("1");
+    auto element2 = cache.Get("2");
+    EXPECT_EQ(*element1, 1);
+    EXPECT_EQ(*element2, 2);
+    cache.Put("3", 3);
+    auto element3 = cache.Get("3");
+    EXPECT_EQ(*element3, 3);
+
+    std::string replaced_key;
+
+    for (size_t i = 1; i <= 2; ++i) {
+        const auto key = std::to_string(i);
+
+        if (!cache.Cached(key)) {
+            replaced_key = key;
+        }
+    }
+
+    EXPECT_FALSE(cache.Cached(replaced_key));
+    EXPECT_FALSE(cache.TryGet(replaced_key).second);
+    EXPECT_THROW(cache.Get(replaced_key), std::range_error);
+    EXPECT_EQ(*element1, 1);
+    EXPECT_EQ(*element2, 2);
+    EXPECT_EQ(*element3, 3);
+}
+
+TEST(LRUCache, InvalidSize)
+{
+    using test_type = lru_cache_t<std::string, int>;
+    EXPECT_THROW(test_type cache{0}, std::invalid_argument);
 }

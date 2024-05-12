@@ -1,6 +1,7 @@
 macro(add_cache_test _TEST_NAME)
     add_executable(${_TEST_NAME}_tests
             ${_TEST_NAME}_tests.cpp)
+    add_coverage_flags(${_TEST_NAME}_tests)
     target_link_libraries(${_TEST_NAME}_tests
             ${GTEST_MAIN_LIBRARIES} caches)
     target_include_directories(${_TEST_NAME}_tests PRIVATE ${GTEST_INCLUDE_DIRS} ${parallel-hashmap_SOURCE_DIR})

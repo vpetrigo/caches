@@ -13,28 +13,37 @@
 #include <limits>
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace caches
 {
+/**
+ * \brief Wrapper over the given value type to allow safe returning of a value from the cache
+ */
+template <typename V>
+using WrappedValue = std::shared_ptr<V>;
 
 /**
  * \brief Fixed sized cache that can be used with different policy types (e.g. LRU, FIFO, LFU)
  * \tparam Key Type of a key (should be hashable)
  * \tparam Value Type of a value stored in the cache
  * \tparam Policy Type of a policy to be used with the cache
- * \tparam HashMap Type of a hashmap to use for cache operations. Should have `std::unordered_map` compatible interface
+ * \tparam HashMap Type of a hashmap to use for cache operations. Should have `std::unordered_map`
+ * compatible interface
  */
 template <typename Key, typename Value, template <typename> class Policy = NoCachePolicy,
-          typename HashMap = std::unordered_map<Key, Value>>
+          typename HashMap = std::unordered_map<Key, WrappedValue<Value>>>
 class fixed_sized_cache
 {
   public:
-    using iterator = typename HashMap::iterator;
-    using const_iterator = typename HashMap::const_iterator;
+    using map_type = HashMap;
+    using value_type = typename map_type::mapped_type;
+    using iterator = typename map_type::iterator;
+    using const_iterator = typename map_type::const_iterator;
     using operation_guard = typename std::lock_guard<std::mutex>;
-    using on_erase_cb = typename std::function<void(const Key &key, const Value &value)>;
+    using on_erase_cb =
+        typename std::function<void(const Key &key, const value_type &value)>;
 
     /**
      * \brief Fixed sized cache constructor
@@ -45,7 +54,7 @@ class fixed_sized_cache
      */
     explicit fixed_sized_cache(
         size_t max_size, const Policy<Key> policy = Policy<Key>{},
-        on_erase_cb on_erase = [](const Key &, const Value &) {})
+        on_erase_cb on_erase = [](const Key &, const value_type &) {})
         : cache_policy{policy}, max_cache_size{max_size}, on_erase_callback{on_erase}
     {
         if (max_cache_size == 0)
@@ -96,10 +105,13 @@ class fixed_sized_cache
      * the element is not presented in the cache. If pair's boolean value is true,
      * returned iterator can be used to get access to the element
      */
-    std::pair<const_iterator, bool> TryGet(const Key &key) const noexcept
+    std::pair<value_type, bool> TryGet(const Key &key) const noexcept
     {
         operation_guard lock{safe_op};
-        return GetInternal(key);
+        const auto result = GetInternal(key);
+
+        return std::make_pair(result.second ? result.first->second : nullptr,
+                              result.second);
     }
 
     /**
@@ -110,7 +122,7 @@ class fixed_sized_cache
      * \param[in] key Get element by key
      * \return Reference to the value stored by the specified key in the cache
      */
-    const Value &Get(const Key &key) const
+    value_type Get(const Key &key) const
     {
         operation_guard lock{safe_op};
         auto elem = GetInternal(key);
@@ -176,7 +188,8 @@ class fixed_sized_cache
         operation_guard lock{safe_op};
 
         std::for_each(begin(), end(),
-                      [&](const std::pair<const Key, Value> &el) { cache_policy.Erase(el.first); });
+                      [&](const std::pair<const Key, value_type> &el)
+                      { cache_policy.Erase(el.first); });
         cache_items_map.clear();
     }
 
@@ -194,7 +207,7 @@ class fixed_sized_cache
     void Insert(const Key &key, const Value &value)
     {
         cache_policy.Insert(key);
-        cache_items_map.emplace(std::make_pair(key, value));
+        cache_items_map.emplace(std::make_pair(key, std::make_shared<Value>(value)));
     }
 
     void Erase(const_iterator elem)
@@ -214,7 +227,7 @@ class fixed_sized_cache
     void Update(const Key &key, const Value &value)
     {
         cache_policy.Touch(key);
-        cache_items_map[key] = value;
+        cache_items_map[key] = std::make_shared<Value>(value);
     }
 
     const_iterator FindElem(const Key &key) const
@@ -236,7 +249,7 @@ class fixed_sized_cache
     }
 
   private:
-    HashMap cache_items_map;
+    map_type cache_items_map;
     mutable Policy<Key> cache_policy;
     mutable std::mutex safe_op;
     std::size_t max_cache_size;

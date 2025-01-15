@@ -19,7 +19,8 @@ TEST(CacheTest, SimplePut)
 {
     lru_cache_t<std::string, int> cache(1);
 
-    cache.Put("test", 666);
+    auto val = cache.Put("test", 666);
+    EXPECT_EQ(*val, 666);
 
     EXPECT_EQ(*cache.Get("test"), 666);
 }

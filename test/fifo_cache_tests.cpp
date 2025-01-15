@@ -20,8 +20,11 @@ TEST(FIFOCache, Simple_Test)
 {
     fifo_cache_t<int, int> fc(2);
 
-    fc.Put(1, 10);
-    fc.Put(2, 20);
+    auto val1 = fc.Put(1, 10);
+    auto val2 = fc.Put(2, 20);
+
+    EXPECT_EQ(*val1, 10);
+    EXPECT_EQ(*val2, 20);
 
     EXPECT_EQ(fc.Size(), 2);
     EXPECT_EQ(*fc.Get(1), 10);

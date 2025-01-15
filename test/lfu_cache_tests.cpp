@@ -23,9 +23,12 @@ TEST(LFUCache, Simple_Test)
     constexpr size_t THIRD_FREQ = 8;
     lfu_cache_t<std::string, int> cache(3);
 
-    cache.Put("A", 1);
-    cache.Put("B", 2);
+    auto val1 = cache.Put("A", 1);
+    auto val2 = cache.Put("B", 2);
     cache.Put("C", 3);
+
+    EXPECT_EQ(*val1, 1);
+    EXPECT_EQ(*val2, 2);
 
     for (size_t i = 0; i < FIRST_FREQ; ++i)
     {

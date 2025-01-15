@@ -15,6 +15,20 @@ TEST(NoPolicyCache, Add_one_element)
     ASSERT_EQ(*cache.Get("Hello"), 1);
 }
 
+TEST(NoPolicyCache, Put_returns_shared_ptr)
+{
+    constexpr std::size_t cache_size = 1;
+    caches::fixed_sized_cache<std::string, int> cache(cache_size);
+
+    auto val = cache.Put("Hello", 1);
+    ASSERT_EQ(*val, 1);
+    ASSERT_EQ(*cache.Get("Hello"), 1);
+
+    // update existing element
+    auto val_updated = cache.Put("Hello", 2);
+    ASSERT_EQ(*val_updated, 2);
+}
+
 TEST(NoPolicyCache, Add_delete_add_one_element)
 {
     constexpr std::size_t cache_size = 1;

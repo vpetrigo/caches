@@ -15,6 +15,7 @@
 #include <mutex>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 
 namespace caches
 {
@@ -73,7 +74,8 @@ class fixed_sized_cache
      * \param[in] key Key value to use
      * \param[in] value Value to assign to the given key
      */
-    void Put(const Key &key, const Value &value) noexcept
+    template<typename T=Value>
+    WrappedValue<Value> Put(const Key &key, T &&value) noexcept
     {
         operation_guard lock{safe_op};
         auto elem_it = FindElem(key);
@@ -88,12 +90,12 @@ class fixed_sized_cache
                 Erase(disp_candidate_key);
             }
 
-            Insert(key, value);
+            return Insert(key, std::forward<T>(value));
         }
         else
         {
             // update previous value
-            Update(key, value);
+            return Update(key, std::forward<T>(value));
         }
     }
 
@@ -204,10 +206,13 @@ class fixed_sized_cache
     }
 
   protected:
-    void Insert(const Key &key, const Value &value)
+    template<typename T=Value>
+    WrappedValue<Value> Insert(const Key &key, T &&value)
     {
         cache_policy.Insert(key);
-        cache_items_map.emplace(std::make_pair(key, std::make_shared<Value>(value)));
+        auto ptr = std::make_shared<Value>(std::forward<T>(value));
+        cache_items_map.emplace(std::make_pair(key, ptr));
+        return ptr;
     }
 
     void Erase(const_iterator elem)
@@ -224,10 +229,13 @@ class fixed_sized_cache
         Erase(elem_it);
     }
 
-    void Update(const Key &key, const Value &value)
+    template<class T=Value>
+    WrappedValue<Value> Update(const Key &key, T &&value)
     {
         cache_policy.Touch(key);
-        cache_items_map[key] = std::make_shared<Value>(value);
+        auto ptr = std::make_shared<Value>(std::forward<T>(value));;
+        cache_items_map[key] = ptr;
+        return ptr;
     }
 
     const_iterator FindElem(const Key &key) const

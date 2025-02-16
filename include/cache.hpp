@@ -75,25 +75,26 @@ class fixed_sized_cache
      */
     void Put(const Key &key, const Value &value) noexcept
     {
-        operation_guard lock{safe_op};
         auto elem_it = FindElem(key);
-
-        if (elem_it == cache_items_map.end())
+        
         {
-            // add new element to the cache
-            if (cache_items_map.size() + 1 > max_cache_size)
+            operation_guard lock{safe_op}; 
+            if (elem_it == cache_items_map.end())
             {
-                auto disp_candidate_key = cache_policy.ReplCandidate();
+                // add new element to the cache
+                if (cache_items_map.size() + 1 > max_cache_size)
+                {
+                    auto disp_candidate_key = cache_policy.ReplCandidate();
+                    Erase(disp_candidate_key);
+                }
 
-                Erase(disp_candidate_key);
+                Insert(key, std::move(value));
             }
-
-            Insert(key, value);
-        }
-        else
-        {
-            // update previous value
-            Update(key, value);
+            else
+            {
+                // update previous value
+                Update(key, std::move(value));
+            }
         }
     }
 
@@ -168,18 +169,15 @@ class fixed_sized_cache
      */
     bool Remove(const Key &key)
     {
-        operation_guard lock{safe_op};
-
-        auto elem = FindElem(key);
-
-        if (elem == cache_items_map.end())
+        auto elem_it = FindElem(key);
+        
+        if (elem_it != cache_items_map.end())
         {
-            return false;
+            operation_guard lock{safe_op}; 
+            Erase(elem_it);
+            return true;
         }
-
-        Erase(elem);
-
-        return true;
+        return false;
     }
 
   protected:

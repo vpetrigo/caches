@@ -11,7 +11,7 @@ summary: Fixed sized cache that can be used with different policy types (e.g. LR
 Fixed sized cache that can be used with different policy types (e.g. LRU, FIFO, LFU)  [More...](#detailed-description)
 
 
-`#include <cache.hpp>`
+`#include <caches/cache.hpp>`
 
 ## Public Types
 

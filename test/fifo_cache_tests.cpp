@@ -1,5 +1,5 @@
-#include "cache.hpp"
-#include "fifo_cache_policy.hpp"
+#include "caches/cache.hpp"
+#include "caches/fifo_cache_policy.hpp"
 
 #include <gtest/gtest.h>
 #ifdef CUSTOM_HASHMAP

@@ -15,7 +15,7 @@ More about cache algorithms and policy you could read on [Wikipedia](https://en.
 
 # Usage
 
-Using this library is simple. It is necessary to include header with the cache implementation (`cache.hpp` file)
+Using this library is simple. It is necessary to include header with the cache implementation (`caches/cache.hpp` file)
 and appropriate header with the cache policy if it is needed. If not then the non-special algorithm will be used (it
 removes the last element which key is the last in the internal container).
 
@@ -29,8 +29,8 @@ Example for the LRU policy:
 
 ```cpp
 #include <string>
-#include "cache.hpp"
-#include "lru_cache_policy.hpp"
+#include "caches/cache.hpp"
+#include "caches/lru_cache_policy.hpp"
 
 // alias for an easy class typing
 template <typename Key, typename Value>
@@ -59,6 +59,8 @@ You can use a custom hashmap implementation for the `caches::fixed_sized_cache` 
 For example, you can declare LRU cache type like that:
 
 ```cpp
+#include "caches/cache.hpp"
+
 template <typename Key, typename Value>
 using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
                                                        phmap::node_hash_map<Key, Value>>;

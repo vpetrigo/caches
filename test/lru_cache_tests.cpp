@@ -1,5 +1,5 @@
-#include "cache.hpp"
-#include "lru_cache_policy.hpp"
+#include "caches/cache.hpp"
+#include "caches/lru_cache_policy.hpp"
 
 #include <gtest/gtest.h>
 #ifdef CUSTOM_HASHMAP

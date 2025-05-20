@@ -20,10 +20,7 @@ jobs:
         id: set-compiler
         shell: bash
         run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            echo "CC=cl" >> $GITHUB_ENV
-            echo "CXX=cl" >> $GITHUB_ENV
-          else
+          if [[ "${{ runner.os }}" != "Windows" ]]; then
             echo "CC=clang" >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
           fi

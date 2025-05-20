@@ -37,14 +37,8 @@ jobs:
             ${{ env.CXX }} --version
           fi
           cd build
-          cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cmake --build . --parallel
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            cmake --build . --parallel $(sysctl -n hw.ncpu)
-          else
-            cmake --build . --parallel $(nproc)
-          fi
+          cmake -G Ninja .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake --build . --parallel
           ctest
 
   build-coverage:

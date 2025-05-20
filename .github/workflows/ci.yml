@@ -39,11 +39,11 @@ jobs:
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cmake --build --parallel %NUMBER_OF_PROCESSORS% . 
+            cmake --build . --parallel %NUMBER_OF_PROCESSORS% 
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            cmake --build --parallel $(sysctl -n hw.ncpu) .
+            cmake --build . --parallel $(sysctl -n hw.ncpu)
           else
-            cmake --build --parallel $(nproc) .
+            cmake --build . --parallel $(nproc)
           fi
           ctest
 
@@ -53,8 +53,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - name: Install lcov
-        run: sudo apt install lcov -y
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov gcc g++ libstdc++-dev llvm
       - name: Run tests with coverage options
         run: |
           mkdir build
@@ -64,8 +66,8 @@ jobs:
           ctest
           mkdir coverage
           cd coverage
-          lcov --directory ../ -c -o coverage.info
-          lcov --remove coverage.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info
+          lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch --rc geninfo_unexecuted_blocks=1
+          lcov --remove coverage-raw.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info --ignore-errors mismatch
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

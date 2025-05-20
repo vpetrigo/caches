@@ -39,11 +39,11 @@ jobs:
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cmake --build . -- /MP %NUMBER_OF_PROCESSORS%
+            cmake --build --parallel %NUMBER_OF_PROCESSORS% . 
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            cmake --build . -- -j$(sysctl -n hw.ncpu)
+            cmake --build --parallel $(sysctl -n hw.ncpu) .
           else
-            cmake --build . -- -j$(nproc)
+            cmake --build --parallel $(nproc) .
           fi
           ctest
 

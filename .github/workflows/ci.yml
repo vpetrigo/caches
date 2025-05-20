@@ -56,13 +56,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lcov gcc g++ libstdc++-dev llvm
+          sudo apt-get install -y lcov gcc g++ llvm
       - name: Run tests with coverage options
         run: |
           mkdir build
           cd build
           cmake .. -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
-          cmake --build . -- -j$(nproc)
+          cmake --build . --parallel $(nproc)
           ctest
           mkdir coverage
           cd coverage

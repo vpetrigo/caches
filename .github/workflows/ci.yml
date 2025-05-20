@@ -10,33 +10,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         custom-hash-map: [OFF, ON]
     env:
-      CC: clang
-      CXX: clang++
+      CC: ${{ runner.os == 'Windows' && 'cl' || 'clang' }}
+      CXX: ${{ runner.os == 'Windows' && 'cl' || 'clang++' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - name: "Run tests"
         run: |
           mkdir build
           cmake --version
-          $CC --version
-          $CXX --version
+          if [ "${{ runner.os }}" != "Windows" ]; then
+            $CC --version
+            $CXX --version
+          fi
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
-          cmake --build . -- -j$(nproc)
+          cmake --build . -- -j${{ runner.os == 'Windows' && '%NUMBER_OF_PROCESSORS%' || runner.os == 'macOS' && '$(sysctl -n hw.ncpu)' || '$(nproc)' }}
           ctest
         shell: bash
+        
   build-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - name: Run tests with coverage options
+      - name: Install lcov
         run: sudo apt install lcov -y
       - name: Run tests with coverage options
         env:
@@ -51,29 +54,31 @@ jobs:
           cd coverage
           lcov --directory ../ -c -o coverage.info
           lcov --remove coverage.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov -t ${CODECOV_TOKEN} -R .
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./build/coverage
+          fail_ci_if_error: false
+          
   build-clang:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        tag: [13, 15, 16, 17]
+        tag: [14, 15, 16, 17, 18]
         custom-hash-map: [OFF, ON]
     env:
       CC: clang-${{ matrix.tag }}
       CXX: clang++-${{ matrix.tag }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - name: Install Clang ${{ matrix.tag }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x ./llvm.sh
-          sudo ./llvm.sh ${{ matrix.tag }}
-        shell: bash
+      - name: Install Clang
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: ${{ matrix.tag }}
       - name: "Run tests"
         run: |
           mkdir build
@@ -85,23 +90,26 @@ jobs:
           cmake --build . -- -j$(nproc)
           ctest
         shell: bash
+        
   build-gcc:
     runs-on: ubuntu-latest
-    container: gcc:${{ matrix.tag }}
     strategy:
       fail-fast: false
       matrix:
-        tag: [7, 8, 9, 10, 11, 12, 13]
+        tag: [9, 10, 11, 12, 13, 14]
         custom-hash-map: [OFF, ON]
-    env:
-      CC: gcc
-      CXX: g++
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - uses: lukka/get-cmake@latest
+      - name: Setup GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: ${{ matrix.tag }}
       - name: "Run tests"
+        env:
+          CC: gcc-${{ matrix.tag }}
+          CXX: g++-${{ matrix.tag }}
         run: |
           mkdir build
           cmake --version

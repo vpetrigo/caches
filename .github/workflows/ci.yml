@@ -1,38 +1,52 @@
 name: CI
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        custom-hash-map: [OFF, ON]
-    env:
-      CC: ${{ runner.os == 'Windows' && 'cl' || 'clang' }}
-      CXX: ${{ runner.os == 'Windows' && 'cl' || 'clang++' }}
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: 'true'
+      - name: Set compiler variables
+        id: set-compiler
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            echo "CC=cl" >> $GITHUB_ENV
+            echo "CXX=cl" >> $GITHUB_ENV
+          else
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          fi
       - name: "Run tests"
+        shell: bash
         run: |
           mkdir build
           cmake --version
-          if [ "${{ runner.os }}" != "Windows" ]; then
-            $CC --version
-            $CXX --version
+          if [[ "${{ runner.os }}" != "Windows" ]]; then
+            ${{ env.CC }} --version
+            ${{ env.CXX }} --version
           fi
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
-          cmake --build . -- -j${{ runner.os == 'Windows' && '%NUMBER_OF_PROCESSORS%' || runner.os == 'macOS' && '$(sysctl -n hw.ncpu)' || '$(nproc)' }}
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cmake --build . -- -j%NUMBER_OF_PROCESSORS%
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            cmake --build . -- -j$(sysctl -n hw.ncpu)
+          else
+            cmake --build . -- -j$(nproc)
+          fi
           ctest
-        shell: bash
-        
+
   build-coverage:
     runs-on: ubuntu-latest
     steps:
@@ -42,8 +56,6 @@ jobs:
       - name: Install lcov
         run: sudo apt install lcov -y
       - name: Run tests with coverage options
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           mkdir build
           cd build
@@ -60,17 +72,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./build/coverage
           fail_ci_if_error: false
-          
+
   build-clang:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        tag: [14, 15, 16, 17, 18]
-        custom-hash-map: [OFF, ON]
-    env:
-      CC: clang-${{ matrix.tag }}
-      CXX: clang++-${{ matrix.tag }}
+        tag: [ 14, 15, 16, 17, 18 ]
+        custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,25 +88,29 @@ jobs:
         uses: egor-tensin/setup-clang@v1
         with:
           version: ${{ matrix.tag }}
+      - name: Set environment variables
+        run: |
+          echo "CC=clang-${{ matrix.tag }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.tag }}" >> $GITHUB_ENV
       - name: "Run tests"
         run: |
           mkdir build
           cmake --version
-          $CC --version
-          $CXX --version
+          ${{ env.CC }} --version
+          ${{ env.CXX }} --version
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           cmake --build . -- -j$(nproc)
           ctest
         shell: bash
-        
+
   build-gcc:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        tag: [9, 10, 11, 12, 13, 14]
-        custom-hash-map: [OFF, ON]
+        tag: [ 9, 10, 11, 12, 13, 14 ]
+        custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,15 +119,16 @@ jobs:
         uses: egor-tensin/setup-gcc@v1
         with:
           version: ${{ matrix.tag }}
+      - name: Set environment variables
+        run: |
+          echo "CC=gcc-${{ matrix.tag }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.tag }}" >> $GITHUB_ENV
       - name: "Run tests"
-        env:
-          CC: gcc-${{ matrix.tag }}
-          CXX: g++-${{ matrix.tag }}
         run: |
           mkdir build
           cmake --version
-          $CC --version
-          $CXX --version
+          ${{ env.CC }} --version
+          ${{ env.CXX }} --version
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           cmake --build . -- -j$(nproc)

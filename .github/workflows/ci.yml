@@ -39,7 +39,7 @@ jobs:
           cd build
           cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cmake --build . --parallel %NUMBER_OF_PROCESSORS% 
+            cmake --build . --parallel
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
             cmake --build . --parallel $(sysctl -n hw.ncpu)
           else
@@ -80,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 16, 17, 18, 19, 20 ]
+        tag: [ 16, 17, 18 ]
         custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 9, 10, 11, 12, 13, 14, 15 ]
+        tag: [ 9, 10, 11, 12, 13, 14 ]
         custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4

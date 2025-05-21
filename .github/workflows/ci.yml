@@ -34,7 +34,7 @@ jobs:
             ${{ env.CXX }} --version
           fi
           cd build
-          cmake -G Ninja .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake -G Ninja .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           cmake --build . --parallel
           ctest
 
@@ -52,7 +52,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
+          cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
           cmake --build . --parallel $(nproc)
           ctest
           mkdir coverage
@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 16, 17, 18 ]
+        tag: [ 13, 14, 15, 16, 17, 18, 19, 20 ]
         custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4
@@ -92,8 +92,8 @@ jobs:
           ${{ env.CC }} --version
           ${{ env.CXX }} --version
           cd build
-          cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
-          cmake --build . -- -j$(nproc)
+          cmake .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake --build . --parallel
           ctest
         shell: bash
 
@@ -123,7 +123,7 @@ jobs:
           ${{ env.CC }} --version
           ${{ env.CXX }} --version
           cd build
-          cmake .. -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
           cmake --build . -- -j$(nproc)
           ctest
         shell: bash

@@ -4,7 +4,7 @@ project(caches
         VERSION 0.1.0)
 
 macro(add_coverage_flags target)
-    if (BUILD_TEST)
+    if (CACHES_BUILD_TEST AND CACHES_ENABLE_COVERAGE)
         target_compile_options(${target} PRIVATE --coverage)
 
         if (NOT MSVC)
@@ -19,8 +19,9 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(INSTALL_CACHES "Install caches library" OFF)
-option(BUILD_TEST "Build tests for the project" ON)
+option(CACHES_INSTALL_LIBRARY "Install caches library" OFF)
+option(CACHES_BUILD_TEST "Build tests for the project" ON)
+option(CACHES_ENABLE_COVERAGE "Build test executables with coverage support" OFF)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
@@ -37,7 +38,7 @@ target_include_directories(caches INTERFACE
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
-if (BUILD_TEST)
+if (CACHES_BUILD_TEST)
     enable_testing()
     add_custom_target(coverage
             COMMAND gcovr -r ${CMAKE_CURRENT_LIST_DIR} --filter "${CMAKE_CURRENT_LIST_DIR}/include" -x coverage.info
@@ -47,16 +48,16 @@ if (BUILD_TEST)
     )
 endif ()
 
-if (INSTALL_CACHES)
+if (CACHES_INSTALL_LIBRARY)
     set(INSTALL_GTEST OFF CACHE STRING "")
 endif ()
 
-if (BUILD_TEST)
+if (CACHES_BUILD_TEST)
     add_subdirectory(deps/)
     add_subdirectory(test)
 endif ()
 
-if (INSTALL_CACHES)
+if (CACHES_INSTALL_LIBRARY)
     include(GNUInstallDirs)
     configure_file(${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
     include(CMakePackageConfigHelpers)

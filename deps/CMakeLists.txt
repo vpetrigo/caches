@@ -1,4 +1,4 @@
-if(${BUILD_TEST})
+if(CACHES_BUILD_TEST)
   if (MINGW)
     set(gtest_disable_pthreads ON CACHE BOOL "Force gtest to disable pthreads")
   endif()

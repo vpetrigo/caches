@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 13, 14, 15, 16, 17, 18, 19, 20 ]
+        tag: [ 14, 15, 16, 17, 18, 19, 20 ]
         custom-hash-map: [ OFF, ON ]
     steps:
       - uses: actions/checkout@v4

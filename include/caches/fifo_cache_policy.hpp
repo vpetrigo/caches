@@ -38,7 +38,7 @@ class FIFOCachePolicy : public ICachePolicy<Key>
     using fifo_iterator = typename std::list<Key>::const_iterator;
 
     FIFOCachePolicy() = default;
-    ~FIFOCachePolicy() = default;
+    ~FIFOCachePolicy() override = default;
 
     void Insert(const Key &key) override
     {

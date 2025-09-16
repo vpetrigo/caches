@@ -5,15 +5,13 @@ branches:
 init:
   - git config --global core.autocrlf input
 
+image:
+  - Visual Studio 2017
+  - Visual Studio 2019
+  - Visual Studio 2022
+
 matrix:
   fast_finish: true
-  include:
-    - image: Visual Studio 2017
-      CMAKE_GENERATOR: "Visual Studio 15 2017"
-    - image: Visual Studio 2019
-      CMAKE_GENERATOR: "Visual Studio 16 2019"
-    - image: Visual Studio 2022
-      CMAKE_GENERATOR: "Visual Studio 17 2022"
 
 platform:
   - Win32
@@ -22,6 +20,24 @@ platform:
 configuration:
   - Debug
   - Release
+
+for:
+  - matrix:
+      only:
+        - image: Visual Studio 2017
+    environment:
+      CMAKE_GENERATOR: "Visual Studio 15 2017"
+  - matrix:
+      only:
+        - image: Visual Studio 2019
+    environment:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+  - matrix:
+      only:
+        - image: Visual Studio 2022
+    environment:
+      CMAKE_GENERATOR: "Visual Studio 17 2022"
+
 
 before_build:
   - git submodule update --init --recursive

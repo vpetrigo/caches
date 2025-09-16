@@ -1,4 +1,0 @@
-<map id="caches::FIFOCachePolicy&lt; Key &gt;" name="caches::FIFOCachePolicy&lt; Key &gt;">
-<area shape="rect" id="node1" title="FIFO (First in, first out) cache policy." alt="" coords="5,93,189,133"/>
-<area shape="rect" id="node2" href="$classcaches_1_1ICachePolicy.html" title="Cache policy abstract base class." alt="" coords="18,5,177,45"/>
-</map>

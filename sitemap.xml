@@ -2,42 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://rs-stuff.dev/caches/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/LICENSE/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/cache/fixed_sized_cache/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/policy/cache_policy_interface/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/policy/fifo_cache_policy/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/policy/lfu_cache_policy/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/policy/lru_cache_policy/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://rs-stuff.dev/caches/api/policy/no_cache_policy/</loc>
-         <lastmod>2024-05-12</lastmod>
+         <lastmod>2025-09-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

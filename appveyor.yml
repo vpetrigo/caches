@@ -42,6 +42,7 @@ for:
 before_build:
   - git submodule update --init --recursive
   - mkdir build
+  - cd build
   - cmake .. -G "%CMAKE_GENERATOR%" -A %PLATFORM%
 
 build_script:

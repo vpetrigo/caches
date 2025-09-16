@@ -16,6 +16,8 @@ using lru_cache_t =
                                        phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
 #endif /* CUSTOM_HASHMAP */
 
+#include <array>
+
 TEST(CacheTest, SimplePut)
 {
     lru_cache_t<std::string, int> cache(1);

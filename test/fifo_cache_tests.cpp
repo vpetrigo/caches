@@ -6,6 +6,8 @@
 #include <parallel_hashmap/phmap.h>
 #endif /* CUSTOM_HASHMAP */
 
+#include <array>
+
 #ifndef CUSTOM_HASHMAP
 template <typename Key, typename Value>
 using fifo_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::FIFOCachePolicy>;

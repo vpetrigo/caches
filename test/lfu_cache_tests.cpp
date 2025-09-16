@@ -16,6 +16,8 @@ using lfu_cache_t =
                                        phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
 #endif /* CUSTOM_HASHMAP */
 
+#include <array>
+
 TEST(LFUCache, Simple_Test)
 {
     constexpr size_t FIRST_FREQ = 10;

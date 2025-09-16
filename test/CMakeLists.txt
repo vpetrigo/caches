@@ -28,3 +28,6 @@ add_cache_test(lru_cache)
 add_cache_test(fifo_cache)
 add_cache_test(lfu_cache)
 add_cache_test(nopolicy_cache)
+
+add_executable(issue issue.cpp)
+target_link_libraries(issue PRIVATE caches)

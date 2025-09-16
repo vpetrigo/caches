@@ -114,6 +114,52 @@ TEST(FIFOCache, Remove_Test)
     }
 }
 
+TEST(FIFOCache, Partial_Remove_Test)
+{
+    fifo_cache_t<std::string, int> cache{5};
+
+    for (int i = 0; i < 5; ++i)
+    {
+        cache.Put("key" + std::to_string(i), i);
+    }
+
+    constexpr std::array access_order = {
+        "key1", "key3", "key0", "key4", "key2",
+    };
+
+    for (const auto &key : access_order)
+    {
+        EXPECT_NE(cache.Get(key), nullptr);
+    }
+
+    cache.Remove("key3");
+
+    for (int i = 0; i < 5; ++i)
+    {
+        if (const auto key = "key" + std::to_string(i); key != "key3")
+        {
+            EXPECT_TRUE(cache.Cached(key));
+        }
+        else
+        {
+            EXPECT_FALSE(cache.Cached(key));
+        }
+    }
+
+    cache.Put("key5", 5);
+    cache.Put("key6", 6);
+
+    constexpr std::array access_order3 = {
+        "key5", "key6", "key1", "key2", "key4",
+    };
+
+    for (const auto &key : access_order3)
+    {
+        EXPECT_TRUE(cache.Cached(key));
+        EXPECT_NO_THROW(cache.Get(key));
+    }
+}
+
 TEST(FIFOCache, TryGet)
 {
     constexpr std::size_t TEST_CASE{10};

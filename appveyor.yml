@@ -6,9 +6,9 @@ init:
   - git config --global core.autocrlf input
 
 os:
- - Visual Studio 2015
- - Visual Studio 2017
- - Visual Studio 2019
+  - Visual Studio 2017
+  - Visual Studio 2019
+  - Visual Studio 2022
 
 platform:
   - Win32
@@ -21,15 +21,15 @@ configuration:
 before_build:
   - git submodule update --init --recursive
   - mkdir build
-  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" ( SET GEN="Visual Studio 14 2015" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" ( SET GEN="Visual Studio 15 2017" )
   - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" ( SET GEN="Visual Studio 16 2019" )
-  - IF %PLATFORM% == "x64" IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" ( SET GEN=%GEN% Win64 )
+  - IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2022" ( SET GEN="Visual Studio 17 2022" )
+  - IF %PLATFORM% == "x64" IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2022" ( SET GEN=%GEN% Win64 )
   - cd build
-  - IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" (
-      cmake .. -G%GEN%
+  - IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" IF NOT "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2022" (
+    cmake .. -G%GEN%
     ) ELSE (
-      cmake .. -G %GEN% -A %PLATFORM%
+    cmake .. -G %GEN% -A %PLATFORM%
     )
 
 build_script:

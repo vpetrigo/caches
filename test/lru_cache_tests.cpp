@@ -11,9 +11,12 @@ template <typename Key, typename Value>
 using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 #else
 template <typename Key, typename Value>
-using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
-                                                       phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
+using lru_cache_t =
+    typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
+                                       phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
 #endif /* CUSTOM_HASHMAP */
+
+#include <array>
 
 TEST(CacheTest, SimplePut)
 {
@@ -101,6 +104,52 @@ TEST(LRUCache, Remove_Test)
     }
 }
 
+TEST(LRUCache, Partial_Remove_Test)
+{
+    lru_cache_t<std::string, int> cache{5};
+
+    for (int i = 0; i < 5; ++i)
+    {
+        cache.Put("key" + std::to_string(i), i);
+    }
+
+    constexpr std::array access_order = {
+        "key1", "key3", "key0", "key4", "key2",
+    };
+
+    for (const auto &key : access_order)
+    {
+        EXPECT_NE(cache.Get(key), nullptr);
+    }
+
+    cache.Remove("key3");
+
+    for (int i = 0; i < 5; ++i)
+    {
+        if (const auto key = "key" + std::to_string(i); key != "key3")
+        {
+            EXPECT_TRUE(cache.Cached(key));
+        }
+        else
+        {
+            EXPECT_FALSE(cache.Cached(key));
+        }
+    }
+
+    cache.Put("key5", 5);
+    cache.Put("key6", 6);
+
+    constexpr std::array access_order3 = {
+        "key5", "key6", "key0", "key2", "key4",
+    };
+
+    for (const auto &key : access_order3)
+    {
+        EXPECT_TRUE(cache.Cached(key));
+        EXPECT_NO_THROW(cache.Get(key));
+    }
+}
+
 TEST(LRUCache, CachedCheck)
 {
     constexpr std::size_t TEST_SUITE = 4;
@@ -169,10 +218,12 @@ TEST(LRUCache, GetWithReplacement)
 
     std::string replaced_key;
 
-    for (size_t i = 1; i <= 2; ++i) {
+    for (size_t i = 1; i <= 2; ++i)
+    {
         const auto key = std::to_string(i);
 
-        if (!cache.Cached(key)) {
+        if (!cache.Cached(key))
+        {
             replaced_key = key;
         }
     }

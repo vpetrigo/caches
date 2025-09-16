@@ -40,7 +40,7 @@ class LRUCachePolicy : public ICachePolicy<Key>
     using lru_iterator = typename std::list<Key>::iterator;
 
     LRUCachePolicy() = default;
-    ~LRUCachePolicy() = default;
+    ~LRUCachePolicy() override = default;
 
     void Insert(const Key &key) override
     {
@@ -54,11 +54,11 @@ class LRUCachePolicy : public ICachePolicy<Key>
         lru_queue.splice(lru_queue.begin(), lru_queue, key_finder[key]);
     }
 
-    void Erase(const Key &) noexcept override
+    void Erase(const Key &key) noexcept override
     {
         // remove the least recently used element
-        key_finder.erase(lru_queue.back());
-        lru_queue.pop_back();
+        lru_queue.erase(key_finder[key]);
+        key_finder.erase(key);
     }
 
     // return a key of a displacement candidate

@@ -22,7 +22,7 @@ namespace caches
  * represents how many times that particular key has been accessed by someone. When a
  * replacement has to occur the LFU policy just takes a look onto keys' frequencies
  * and remove the least used one. E.g. cache of two elements where `A` has been accessed
- * 10 times and `B` – only 2. When you want to add a key `C` the LFU policy returns `B`
+ * 10 times and `B` - only 2. When you want to add a key `C` the LFU policy returns `B`
  * as a replacement candidate.
  * \tparam Key Type of a key a policy works with
  */

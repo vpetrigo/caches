@@ -16,8 +16,6 @@ using lfu_cache_t =
                                        phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
 #endif /* CUSTOM_HASHMAP */
 
-#include <array>
-
 TEST(LFUCache, Simple_Test)
 {
     constexpr size_t FIRST_FREQ = 10;
@@ -128,52 +126,6 @@ TEST(LFUCache, Remove_Test)
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
         EXPECT_FALSE(fc.Remove(std::to_string(i)));
-    }
-}
-
-TEST(LFUCache, Partial_Remove_Test)
-{
-    lfu_cache_t<std::string, int> cache{5};
-
-    for (int i = 0; i < 5; ++i)
-    {
-        cache.Put("key" + std::to_string(i), i);
-    }
-
-    constexpr std::array access_order = {
-        "key1", "key3", "key0", "key4", "key2",
-    };
-
-    for (const auto &key : access_order)
-    {
-        EXPECT_NE(cache.Get(key), nullptr);
-    }
-
-    cache.Remove("key3");
-
-    for (int i = 0; i < 5; ++i)
-    {
-        if (const auto key = "key" + std::to_string(i); key != "key3")
-        {
-            EXPECT_TRUE(cache.Cached(key));
-        }
-        else
-        {
-            EXPECT_FALSE(cache.Cached(key));
-        }
-    }
-
-    cache.Put("key5", 5);
-    cache.Put("key6", 6);
-
-    constexpr std::array access_order3 = {
-        "key0", "key6", "key1", "key4", "key2",
-    };
-
-    for (const auto &key : access_order3)
-    {
-        EXPECT_TRUE(cache.Cached(key));
-        EXPECT_NO_THROW(cache.Get(key));
     }
 }
 

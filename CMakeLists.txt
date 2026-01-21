@@ -37,9 +37,18 @@ if (DOXYGEN_FOUND)
 endif ()
 
 add_library(caches INTERFACE)
-target_include_directories(caches INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+target_sources(caches INTERFACE
+    FILE_SET caches_headers
+    TYPE HEADERS
+    BASE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include"
+    FILES
+    include/caches/core/cache.hpp
+    include/caches/policies/fifo.hpp
+    include/caches/policies/lfu.hpp
+    include/caches/policies/lru.hpp
+    include/caches/policies/no_eviction.hpp
+    include/caches/policies/policy_interface.hpp
+)
 
 if (CACHES_BUILD_TEST)
     enable_testing()
@@ -76,15 +85,20 @@ if (CACHES_INSTALL_LIBRARY)
             INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
             PATH_VARS CMAKE_INSTALL_LIBDIR)
 
-    install(DIRECTORY
-        ${PROJECT_SOURCE_DIR}/include/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    set(pc_file "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+    set(cmake_config_file "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake")
+
+    install(
+        TARGETS caches
+        EXPORT caches_lib_targets
+        FILE_SET caches_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
     install(TARGETS caches EXPORT ${PROJECT_NAME}-targets
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     install(EXPORT ${PROJECT_NAME}-targets
         NAMESPACE ${PROJECT_NAME}:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+    install(FILES ${pc_file}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+    install(FILES ${cmake_config_file}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
 endif ()

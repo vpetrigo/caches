@@ -10,6 +10,12 @@ macro(add_cache_test _TEST_NAME)
             $<$<CXX_COMPILER_ID:MSVC>:$<IF:$<VERSION_GREATER_EQUAL:${MSVC_TOOLSET_VERSION},142>,/W4 /WX,>>
             $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>)
     add_test(NAME cache_${_TEST_NAME}_tests COMMAND ${_TEST_NAME}_tests)
+    target_sources(${_TEST_NAME}_tests
+        PRIVATE
+        FILE_SET test_helpers
+        TYPE HEADERS
+        FILES
+        test_helper.hpp)
 endmacro()
 
 option(USE_CUSTOM_HASHMAP "Use custom hashmap implementation for tests" OFF)

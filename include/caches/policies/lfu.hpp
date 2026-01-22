@@ -5,7 +5,7 @@
 #ifndef CACHES_POLICIES_LFU_HPP
 #define CACHES_POLICIES_LFU_HPP
 
-#include "../key_traits.hpp"
+#include "caches/key_traits.hpp"
 #include "policy_interface.hpp"
 
 #include <cstddef>

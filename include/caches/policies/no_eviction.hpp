@@ -5,7 +5,7 @@
 #ifndef CACHES_POLICIES_NO_EVICTION_HPP
 #define CACHES_POLICIES_NO_EVICTION_HPP
 
-#include "../key_traits.hpp"
+#include "caches/key_traits.hpp"
 #include "policy_interface.hpp"
 
 #include <memory>

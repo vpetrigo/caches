@@ -5,9 +5,8 @@
 #ifndef CACHES_CORE_CACHE_HPP
 #define CACHES_CORE_CACHE_HPP
 
-#include "../key_traits.hpp"
-#include "../policies/lru.hpp"
-#include "../policies/policy_interface.hpp"
+#include "caches/key_traits.hpp"
+#include "caches/policies/lru.hpp"
 
 #include <algorithm>
 #include <cstddef>

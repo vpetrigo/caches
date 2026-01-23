@@ -29,6 +29,7 @@
 
 // Key traits for automatic hash/equality detection
 #include "key_traits.hpp"
+#include "wrapper_policy.hpp"
 
 // Cache policies
 #include "policies/fifo.hpp"

@@ -8,8 +8,8 @@ template <typename Key, typename Value>
 using no_eviction_cache_t = caches::cache<Key, Value, caches::NoEviction>;
 #else
 template <typename Key, typename Value>
-using no_eviction_cache_t =
-    caches::cache<Key, Value, caches::NoEviction, caches::key_traits<Key>, phmap_node_hash_map>;
+using no_eviction_cache_t = caches::cache<Key, Value, caches::NoEviction, caches::key_traits<Key>,
+                                          caches::wrapper_policy<Value>, phmap_node_hash_map>;
 #endif
 
 TEST(NoPolicyCache, Add_one_element)

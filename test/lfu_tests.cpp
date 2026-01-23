@@ -1,6 +1,7 @@
 #include "caches/caches.hpp"
 #include "test_helper.hpp"
 
+#include <array>
 #include <gtest/gtest.h>
 
 #ifndef CUSTOM_HASHMAP
@@ -8,8 +9,8 @@ template <typename Key, typename Value>
 using lfu_cache_t = caches::cache<Key, Value, caches::LFU>;
 #else
 template <typename Key, typename Value>
-using lfu_cache_t =
-    caches::cache<Key, Value, caches::LFU, caches::key_traits<Key>, phmap_node_hash_map>;
+using lfu_cache_t = caches::cache<Key, Value, caches::LFU, caches::key_traits<Key>,
+                                  caches::wrapper_policy<Value>, phmap_node_hash_map>;
 #endif
 
 TEST(LFUCache, Simple_Test)
@@ -134,7 +135,7 @@ TEST(LFUCache, Partial_Remove_Test)
         cache.Put("key" + std::to_string(i), i);
     }
 
-    constexpr std::array access_order = {
+    const std::array<const char *, 5> access_order = {
         "key1", "key3", "key0", "key4", "key2",
     };
 
@@ -160,7 +161,7 @@ TEST(LFUCache, Partial_Remove_Test)
     cache.Put("key5", 5);
     cache.Put("key6", 6);
 
-    constexpr std::array access_order3 = {
+    const std::array<const char *, 5> access_order3 = {
         "key0", "key6", "key1", "key4", "key2",
     };
 

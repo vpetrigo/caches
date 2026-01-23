@@ -1,8 +1,11 @@
 /**
  * \file
- * \brief Tests for wrapper_value_traits customization
+ * \brief Tests for wrapper_policy customization
  */
 #include "caches/caches.hpp"
+#include "caches/wrapper_policy.hpp"
+
+#include "test_helper.hpp"
 
 #include <gtest/gtest.h>
 
@@ -11,7 +14,6 @@
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <vector>
 
 //=============================================================================
 // Test Utilities
@@ -121,21 +123,21 @@ struct TestValue
 
 TEST(WrapperValueTraitsTest, DefaultTraitsUsesSharedPtr)
 {
-    using traits = caches::wrapper_value_traits<int>;
-    static_assert(std::is_same<traits::type, std::shared_ptr<int>>::value,
+    using policy = caches::wrapper_policy<int>;
+    static_assert(std::is_same<policy::type, std::shared_ptr<int>>::value,
                   "Default wrapper should be std::shared_ptr");
 }
 
 TEST(WrapperValueTraitsTest, DefaultTraitsCreateWorks)
 {
-    auto ptr = caches::wrapper_value_traits<int>::create(42);
+    auto ptr = caches::wrapper_policy<int>::create(42);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(*ptr, 42);
 }
 
 TEST(WrapperValueTraitsTest, DefaultTraitsWithComplexType)
 {
-    auto ptr = caches::wrapper_value_traits<test_utils::TestValue>::create(100, "test");
+    auto ptr = caches::wrapper_policy<test_utils::TestValue>::create(100, "test");
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->data, 100);
     EXPECT_EQ(ptr->name, "test");
@@ -315,9 +317,9 @@ std::atomic<int> custom_shared_ptr_wrapper::create_count{0};
 
 } // namespace specialization_test
 
-// Specialize wrapper_value_traits for SpecialValue
+// Specialize wrapper_policy for SpecialValue
 template <>
-struct caches::wrapper_value_traits<specialization_test::SpecialValue>
+struct caches::wrapper_policy<specialization_test::SpecialValue>
     : specialization_test::custom_shared_ptr_wrapper
 {
 };
@@ -370,9 +372,9 @@ TEST(MakeWrapperTraitsTest, WorksWithCustomPolicy)
 {
     make_wrapper_test::custom_policy<int>::reset();
 
-    using my_wrapper = caches::make_wrapper_traits<make_wrapper_test::custom_policy>;
+    using my_wrapper = caches::make_wrapper_policy<make_wrapper_test::custom_policy>;
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
-                  my_wrapper::traits<int>>
+                  my_wrapper::policy<int>>
         cache{10};
 
     cache.Put("key", 42);
@@ -465,4 +467,53 @@ TEST(WrapperTryGetTest, ReturnsEmptyWrapperForMissingKey)
     auto result = cache.TryGet("nonexistent");
     EXPECT_FALSE(result.second);
     EXPECT_EQ(result.first, nullptr);
+}
+
+namespace custom_shared_ptr
+{
+template <typename Value>
+struct wrapper_policy
+{
+    using type = gtl_shared_ptr<Value>;
+
+    template <typename... Args>
+    static type create(Args &&...args)
+    {
+        Value *ptr = new Value{std::forward<Args>(args)...};
+        return gtl_shared_ptr<Value>{ptr};
+    }
+};
+
+struct CustomInt : gtl::intrusive_ref_counter<CustomInt, gtl::thread_safe_counter>
+{
+    int v;
+
+    explicit CustomInt(int value) noexcept : v{value}
+    {
+    }
+};
+} // namespace custom_shared_ptr
+
+TEST(CustomPtrWrapper, Simple)
+{
+    using wrapper = caches::make_wrapper_policy<custom_shared_ptr::wrapper_policy>;
+    caches::cache<std::string, custom_shared_ptr::CustomInt, caches::LRU,
+                  caches::key_traits<std::string>, wrapper::policy<custom_shared_ptr::CustomInt>>
+        cache{2};
+
+    auto result = cache.TryGet("nonexistent");
+    EXPECT_FALSE(result.second);
+    EXPECT_EQ(result.first, nullptr);
+
+    cache.Put("1", custom_shared_ptr::CustomInt{1});
+    cache.Put("2", custom_shared_ptr::CustomInt{2});
+
+    {
+        auto result = cache.Get("1");
+        EXPECT_NE(result, nullptr);
+        EXPECT_EQ(result->v, 1);
+        result = cache.Get("2");
+        EXPECT_NE(result, nullptr);
+        EXPECT_EQ(result->v, 2);
+    }
 }

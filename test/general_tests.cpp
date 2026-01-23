@@ -502,7 +502,7 @@ TEST(CustomHashMapTest, WorksWithPhmapNodeHashMap)
 {
     // Use phmap::node_hash_map as the underlying hash map
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
-                  phmap_node_hash_map>
+                  caches::default_wrapper<int>, phmap_node_hash_map>
         cache{10};
 
     cache.Put("key1", 100);
@@ -516,7 +516,7 @@ TEST(CustomHashMapTest, WorksWithPhmapNodeHashMap)
 TEST(CustomHashMapTest, LRUEvictionWithPhmap)
 {
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
-                  phmap_node_hash_map>
+                  caches::default_wrapper<int>, phmap_node_hash_map>
         cache{2};
 
     cache.Put("A", 1);
@@ -536,7 +536,7 @@ TEST(CustomHashMapTest, LRUEvictionWithPhmap)
 TEST(CustomHashMapTest, FIFOEvictionWithPhmap)
 {
     caches::cache<std::string, int, caches::FIFO, caches::key_traits<std::string>,
-                  phmap_node_hash_map>
+                  caches::default_wrapper<int>, phmap_node_hash_map>
         cache{2};
 
     cache.Put("A", 1);
@@ -556,7 +556,7 @@ TEST(CustomHashMapTest, FIFOEvictionWithPhmap)
 TEST(CustomHashMapTest, LFUEvictionWithPhmap)
 {
     caches::cache<std::string, int, caches::LFU, caches::key_traits<std::string>,
-                  phmap_node_hash_map>
+                  caches::default_wrapper<int>, phmap_node_hash_map>
         cache{2};
 
     cache.Put("A", 1);
@@ -582,7 +582,7 @@ TEST(CustomHashMapTest, CustomKeyWithPhmap)
                                           explicit_traits_test::ExternalKeyEqual>;
 
     caches::cache<explicit_traits_test::ExternalKey, int, caches::LRU, my_traits,
-                  phmap_node_hash_map>
+                  caches::default_wrapper<int>, phmap_node_hash_map>
         cache{10};
 
     cache.Put(explicit_traits_test::ExternalKey{1.5}, 100);
@@ -594,7 +594,8 @@ TEST(CustomHashMapTest, CustomKeyWithPhmap)
 
 TEST(CustomHashMapTest, AllOperationsWithPhmap)
 {
-    caches::cache<int, std::string, caches::LRU, caches::key_traits<int>, phmap_node_hash_map>
+    caches::cache<int, std::string, caches::LRU, caches::key_traits<int>,
+                  caches::default_wrapper<std::string>, phmap_node_hash_map>
         cache{5};
 
     // Test Put and Get
@@ -640,7 +641,7 @@ TEST(CustomHashMapTest, WorksWithPhmapFlatHashMap)
 {
     // Use phmap::flat_hash_map as the underlying hash map
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
-                  phmap_flat_hash_map>
+                  caches::default_wrapper<int>, phmap_flat_hash_map>
         cache{10};
 
     cache.Put("key1", 100);
@@ -654,8 +655,9 @@ TEST(CustomHashMapTest, WorksWithPhmapFlatHashMap)
 TEST(CustomHashMapTest, CapacityWithPhmap)
 {
     constexpr std::size_t CAPACITY = 50;
-    caches::cache<int, int, caches::LRU, caches::key_traits<int>, phmap_node_hash_map> cache{
-        CAPACITY};
+    caches::cache<int, int, caches::LRU, caches::key_traits<int>, caches::default_wrapper<int>,
+                  phmap_node_hash_map>
+        cache{CAPACITY};
 
     for (int i = 0; i < 500; ++i)
     {

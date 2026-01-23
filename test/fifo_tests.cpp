@@ -1,6 +1,7 @@
 #include "caches/caches.hpp"
 #include "test_helper.hpp"
 
+#include <array>
 #include <gtest/gtest.h>
 
 #ifndef CUSTOM_HASHMAP
@@ -8,8 +9,8 @@ template <typename Key, typename Value>
 using fifo_cache_t = caches::cache<Key, Value, caches::FIFO>;
 #else
 template <typename Key, typename Value>
-using fifo_cache_t =
-    caches::cache<Key, Value, caches::FIFO, caches::key_traits<Key>, phmap_node_hash_map>;
+using fifo_cache_t = caches::cache<Key, Value, caches::FIFO, caches::key_traits<Key>,
+                                   caches::wrapper_policy<Value>, phmap_node_hash_map>;
 #endif
 
 TEST(FIFOCache, Simple_Test)

@@ -4,9 +4,11 @@
  */
 #pragma once
 
-#ifdef CUSTOM_HASHMAP
-#include <parallel_hashmap/phmap.h>
+#include <gtl/intrusive.hpp>
+#include <gtl/phmap.hpp>
 
 template <typename Key, typename Value, typename Hash, typename Equal, typename Allocator>
-using phmap_node_hash_map = phmap::node_hash_map<Key, Value, Hash, Equal, Allocator>;
-#endif
+using phmap_node_hash_map = gtl::node_hash_map<Key, Value, Hash, Equal, Allocator>;
+
+template <typename Value>
+using gtl_shared_ptr = gtl::intrusive_ptr<Value>;

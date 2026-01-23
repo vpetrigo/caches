@@ -7,6 +7,7 @@
 
 #include "caches/key_traits.hpp"
 #include "caches/policies/lru.hpp"
+#include "caches/wrapper_policy.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -19,15 +20,6 @@
 
 namespace caches
 {
-
-/**
- * \brief Wrapper for cached values using shared_ptr for safe access
- *
- * Values are wrapped in shared_ptr to allow safe access even after
- * the value has been evicted from the cache.
- */
-template <typename V>
-using wrapped_value = std::shared_ptr<V>;
 
 namespace detail
 {
@@ -48,7 +40,7 @@ using default_hash_map = std::unordered_map<Key, Value, Hash, Equal, Allocator>;
  * // Simple LRU cache (default)
  * caches::cache<std::string, int> c{100};
  * c.Put("key", 42);
- * auto value = c.Get("key");  // returns shared_ptr<int>
+ * auto value = c.Get("key");  // returns wrapper type (default: shared_ptr<int>)
  * \endcode
  *
  * \par Custom Key Types
@@ -100,10 +92,12 @@ using default_hash_map = std::unordered_map<Key, Value, Hash, Equal, Allocator>;
  * \tparam Value Type of cached values
  * \tparam Policy Eviction policy template (default: LRU)
  * \tparam KeyTraits Traits providing hash_type, equal_type, allocator_type
+ * \tparam WrapperPolicy Policy providing wrapper `type` and `create()` (default:
+ * wrapper_policy<Value>)
  * \tparam HashMap Template for the underlying hash map (default: std::unordered_map)
  */
 template <typename Key, typename Value, template <typename, typename> class Policy = LRU,
-          typename KeyTraits = key_traits<Key>,
+          typename KeyTraits = key_traits<Key>, typename WrapperPolicy = wrapper_policy<Value>,
           template <typename, typename, typename, typename, typename> class HashMap =
               detail::default_hash_map>
 class cache
@@ -111,7 +105,8 @@ class cache
   public:
     using key_type = Key;
     using mapped_type = Value;
-    using value_type = wrapped_value<Value>;
+    using wrapper_policy_type = WrapperPolicy;
+    using value_type = typename WrapperPolicy::type;
     using traits_type = KeyTraits;
     using hash_type = typename KeyTraits::hash_type;
     using equal_type = typename KeyTraits::equal_type;
@@ -216,13 +211,13 @@ class cache
             }
             // Insert new entry
             policy_.Insert(key);
-            cache_map_.emplace(key, std::make_shared<Value>(value));
+            cache_map_.emplace(key, WrapperPolicy::create(value));
         }
         else
         {
             // Update existing entry
             policy_.Touch(key);
-            it->second = std::make_shared<Value>(value);
+            it->second = WrapperPolicy::create(value);
         }
     }
 
@@ -230,7 +225,7 @@ class cache
      * \brief Get an entry from the cache
      *
      * \param key Key to look up
-     * \return Shared pointer to the cached value
+     * \return Wrapped value (throws if not found)
      * \throw std::range_error if key is not in the cache
      */
     value_type Get(const Key &key) const
@@ -250,7 +245,7 @@ class cache
      * \brief Try to get an entry from the cache without throwing
      *
      * \param key Key to look up
-     * \return Pair of (value, found). If found is false, value is nullptr.
+     * \return Pair of (value, found). If found is false, value is default-constructed.
      */
     std::pair<value_type, bool> TryGet(const Key &key) const noexcept
     {
@@ -262,7 +257,7 @@ class cache
             policy_.Touch(key);
             return {it->second, true};
         }
-        return {nullptr, false};
+        return {value_type{}, false};
     }
 
     /**

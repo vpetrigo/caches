@@ -4,10 +4,9 @@
  */
 #include "caches/caches.hpp"
 
+#include "test_helper.hpp"
+
 #include <gtest/gtest.h>
-#ifdef CUSTOM_HASHMAP
-#include <parallel_hashmap/phmap.h>
-#endif /* CUSTOM_HASHMAP */
 
 #include <cstddef>
 #include <functional>
@@ -416,9 +415,7 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnClear)
     EXPECT_EQ(callback_count, 3);
 }
 
-//==============================================================================
 // Value Lifetime Tests
-//==============================================================================
 
 TEST(ValueLifetimeTest, ValueRemainsValidAfterEviction)
 {
@@ -493,14 +490,8 @@ TEST(CapacityTest, LargeCacheStaysWithinCapacity)
     EXPECT_EQ(cache.Size(), CAPACITY);
 }
 
-#ifdef CUSTOM_HASHMAP
-// Define a template alias for phmap::node_hash_map that matches the expected signature
-template <typename Key, typename Value, typename Hash, typename Equal, typename Allocator>
-using phmap_node_hash_map = phmap::node_hash_map<Key, Value, Hash, Equal, Allocator>;
-
 TEST(CustomHashMapTest, WorksWithPhmapNodeHashMap)
 {
-    // Use phmap::node_hash_map as the underlying hash map
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_node_hash_map>
         cache{10};
@@ -633,13 +624,8 @@ TEST(CustomHashMapTest, AllOperationsWithPhmap)
     EXPECT_EQ(cache.Size(), 0);
 }
 
-// Define a template alias for phmap::flat_hash_map
-template <typename Key, typename Value, typename Hash, typename Equal, typename Allocator>
-using phmap_flat_hash_map = phmap::flat_hash_map<Key, Value, Hash, Equal, Allocator>;
-
 TEST(CustomHashMapTest, WorksWithPhmapFlatHashMap)
 {
-    // Use phmap::flat_hash_map as the underlying hash map
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_flat_hash_map>
         cache{10};
@@ -667,5 +653,3 @@ TEST(CustomHashMapTest, CapacityWithPhmap)
 
     EXPECT_EQ(cache.Size(), CAPACITY);
 }
-
-#endif // CUSTOM_HASHMAP

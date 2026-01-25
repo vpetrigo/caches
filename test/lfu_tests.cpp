@@ -4,8 +4,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "typed_backends.hpp"
-
 template <typename Backend>
 class LFUCache : public ::testing::Test
 {

@@ -139,11 +139,7 @@ TEST(LRUCacheTest, EvictsLeastRecentlyUsed)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A to make B the LRU
     cache.Get("A");
-
-    // Insert C, should evict B
     cache.Put("C", 3);
 
     EXPECT_TRUE(cache.Cached("A"));
@@ -157,11 +153,7 @@ TEST(LRUCacheTest, UpdateRefreshesAccessTime)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Update A (should refresh its access time)
     cache.Put("A", 10);
-
-    // Insert C, should evict B (not A)
     cache.Put("C", 3);
 
     EXPECT_TRUE(cache.Cached("A"));
@@ -176,11 +168,7 @@ TEST(FIFOCacheTest, EvictsFirstInserted)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A (should not affect FIFO order)
     cache.Get("A");
-
-    // Insert C, should evict A (first inserted)
     cache.Put("C", 3);
 
     EXPECT_FALSE(cache.Cached("A"));
@@ -194,14 +182,9 @@ TEST(LFUCacheTest, EvictsLeastFrequentlyUsed)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A multiple times
     cache.Get("A");
     cache.Get("A");
     cache.Get("A");
-
-    // B only accessed once (during Put)
-    // Insert C, should evict B (least frequently used)
     cache.Put("C", 3);
 
     EXPECT_TRUE(cache.Cached("A"));
@@ -217,10 +200,8 @@ TEST(NoEvictionCacheTest, EvictsSomeEntry)
     cache.Put("B", 2);
     cache.Put("C", 3);
 
-    // One of A or B should be evicted
     EXPECT_EQ(cache.Size(), 2);
     EXPECT_TRUE(cache.Cached("C"));
-    // Either A or B is evicted (implementation-defined)
     EXPECT_TRUE(cache.Cached("A") || cache.Cached("B"));
 }
 
@@ -237,13 +218,11 @@ struct MyKey
     }
 };
 
-// ADL-discoverable hash function
 std::size_t hash_value(const MyKey &key)
 {
     return std::hash<int>{}(key.id) ^ (std::hash<std::string>{}(key.name) << 1);
 }
 
-// ADL-discoverable equality operator
 bool operator==(const MyKey &lhs, const MyKey &rhs)
 {
     return lhs.id == rhs.id && lhs.name == rhs.name;
@@ -253,8 +232,6 @@ bool operator==(const MyKey &lhs, const MyKey &rhs)
 
 TEST(CustomKeyADLTest, WorksWithADLHashAndEqual)
 {
-    // This should compile and work because hash_value() and operator== are
-    // discoverable via ADL in the custom_types namespace
     caches::cache<custom_types::MyKey, std::string> cache{10};
 
     cache.Put(custom_types::MyKey{1, "one"}, "value1");
@@ -341,7 +318,6 @@ struct SpecialKeyEqual
 
 } // namespace specialized_traits_test
 
-// Specialize key_traits for SpecialKey
 template <>
 struct caches::key_traits<specialized_traits_test::SpecialKey>
 {
@@ -352,7 +328,6 @@ struct caches::key_traits<specialized_traits_test::SpecialKey>
 
 TEST(CustomKeySpecializedTraitsTest, WorksWithSpecializedKeyTraits)
 {
-    // No need to specify traits - they're automatically picked up from specialization
     caches::cache<specialized_traits_test::SpecialKey, std::string> cache{10};
 
     cache.Put(specialized_traits_test::SpecialKey{100ULL}, "hundred");
@@ -378,8 +353,6 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnEviction)
     cache.Put("A", 1);
     cache.Put("B", 2);
     EXPECT_EQ(callback_count, 0);
-
-    // This should trigger eviction
     cache.Put("C", 3);
     EXPECT_EQ(callback_count, 1);
 }
@@ -415,8 +388,6 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnClear)
     EXPECT_EQ(callback_count, 3);
 }
 
-// Value Lifetime Tests
-
 TEST(ValueLifetimeTest, ValueRemainsValidAfterEviction)
 {
     caches::cache<std::string, int> cache{1};
@@ -424,17 +395,10 @@ TEST(ValueLifetimeTest, ValueRemainsValidAfterEviction)
     cache.Put("A", 42);
     auto value_a = cache.Get("A");
 
-    // Evict A by inserting B
     cache.Put("B", 100);
-
-    // A is evicted but the shared_ptr should still be valid
     EXPECT_EQ(*value_a, 42);
     EXPECT_FALSE(cache.Cached("A"));
 }
-
-//==============================================================================
-// Different Policy Type Combinations
-//==============================================================================
 
 TEST(PolicyCombinationsTest, AllPoliciesWithIntKey)
 {
@@ -459,10 +423,6 @@ TEST(PolicyCombinationsTest, AllPoliciesWithIntKey)
         EXPECT_EQ(*no_eviction.Get(1), 100);
     }
 }
-
-//==============================================================================
-// Capacity Boundary Tests
-//==============================================================================
 
 TEST(CapacityTest, SingleElementCache)
 {
@@ -512,11 +472,7 @@ TEST(CustomHashMapTest, LRUEvictionWithPhmap)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A to make B the LRU
     cache.Get("A");
-
-    // Insert C, should evict B
     cache.Put("C", 3);
 
     EXPECT_TRUE(cache.Cached("A"));
@@ -532,11 +488,7 @@ TEST(CustomHashMapTest, FIFOEvictionWithPhmap)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A (should not affect FIFO order)
     cache.Get("A");
-
-    // Insert C, should evict A (first inserted)
     cache.Put("C", 3);
 
     EXPECT_FALSE(cache.Cached("A"));
@@ -552,14 +504,9 @@ TEST(CustomHashMapTest, LFUEvictionWithPhmap)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-
-    // Access A multiple times
     cache.Get("A");
     cache.Get("A");
     cache.Get("A");
-
-    // B only accessed once (during Put)
-    // Insert C, should evict B (least frequently used)
     cache.Put("C", 3);
 
     EXPECT_TRUE(cache.Cached("A"));
@@ -589,7 +536,7 @@ TEST(CustomHashMapTest, AllOperationsWithPhmap)
                   caches::default_wrapper<std::string>, phmap_node_hash_map>
         cache{5};
 
-    // Test Put and Get
+
     cache.Put(1, "one");
     cache.Put(2, "two");
     cache.Put(3, "three");
@@ -598,27 +545,18 @@ TEST(CustomHashMapTest, AllOperationsWithPhmap)
     EXPECT_EQ(*cache.Get(2), "two");
     EXPECT_EQ(*cache.Get(3), "three");
 
-    // Test TryGet
     auto result = cache.TryGet(1);
     EXPECT_TRUE(result.second);
     EXPECT_EQ(*result.first, "one");
 
     auto missing = cache.TryGet(99);
     EXPECT_FALSE(missing.second);
-
-    // Test Cached
     EXPECT_TRUE(cache.Cached(1));
     EXPECT_FALSE(cache.Cached(99));
-
-    // Test Size
     EXPECT_EQ(cache.Size(), 3);
-
-    // Test Remove
     EXPECT_TRUE(cache.Remove(2));
     EXPECT_FALSE(cache.Cached(2));
     EXPECT_EQ(cache.Size(), 2);
-
-    // Test Clear
     cache.Clear();
     EXPECT_TRUE(cache.Empty());
     EXPECT_EQ(cache.Size(), 0);

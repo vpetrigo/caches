@@ -3,8 +3,6 @@
 
 #include <gtest/gtest.h>
 
-#include "typed_backends.hpp"
-
 template <typename Backend>
 class NoEvictionCache : public ::testing::Test
 {

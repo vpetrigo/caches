@@ -15,10 +15,6 @@
 #include <string>
 #include <type_traits>
 
-//=============================================================================
-// Test Utilities
-//=============================================================================
-
 namespace test_utils
 {
 
@@ -117,10 +113,6 @@ struct TestValue
 
 } // namespace test_utils
 
-//=============================================================================
-// Default Wrapper Traits Tests
-//=============================================================================
-
 TEST(WrapperValueTraitsTest, DefaultTraitsUsesSharedPtr)
 {
     using policy = caches::wrapper_policy<int>;
@@ -154,10 +146,6 @@ TEST(WrapperValueTraitsTest, CacheWithDefaultTraits)
     EXPECT_EQ(*value, 42);
 }
 
-//=============================================================================
-// Custom Allocator Wrapper Tests
-//=============================================================================
-
 TEST(AllocateSharedWrapperTest, UsesCustomAllocator)
 {
     test_utils::tracking_allocator<int>::reset_counts();
@@ -171,7 +159,6 @@ TEST(AllocateSharedWrapperTest, UsesCustomAllocator)
         EXPECT_GT(test_utils::tracking_allocator_state::allocation_count.load(), 0);
     }
 
-    // After ptr goes out of scope, deallocation should have occurred
     EXPECT_GT(test_utils::tracking_allocator_state::deallocation_count.load(), 0);
 }
 
@@ -191,10 +178,6 @@ TEST(AllocateSharedWrapperTest, CacheWithCustomAllocator)
     EXPECT_GT(test_utils::tracking_allocator_state::allocation_count.load(), 0);
 }
 
-//=============================================================================
-// Custom Deleter Wrapper Tests
-//=============================================================================
-
 TEST(CustomDeleterWrapperTest, UsesCustomDeleter)
 {
     test_utils::tracking_deleter<int>::reset_count();
@@ -208,7 +191,6 @@ TEST(CustomDeleterWrapperTest, UsesCustomDeleter)
         EXPECT_EQ(test_utils::tracking_deleter<int>::delete_count.load(), 0);
     }
 
-    // After ptr goes out of scope, deleter should have been called
     EXPECT_EQ(test_utils::tracking_deleter<int>::delete_count.load(), 1);
 }
 
@@ -221,18 +203,11 @@ TEST(CustomDeleterWrapperTest, CacheWithCustomDeleter)
 
     cache.Put("key1", 100);
     cache.Put("key2", 200);
-
-    // Evict key1 by adding key3
     cache.Put("key3", 300);
 
-    // key1 should have been evicted and deleted
     EXPECT_FALSE(cache.Cached("key1"));
     EXPECT_GE(test_utils::tracking_deleter<int>::delete_count.load(), 1);
 }
-
-//=============================================================================
-// Full Control Wrapper Tests
-//=============================================================================
 
 namespace full_control_test
 {
@@ -278,10 +253,6 @@ TEST(FullControlWrapperTest, CombinesAllocatorAndDeleter)
     EXPECT_EQ(full_control_test::test_deleter<int>::count.load(), 1);
 }
 
-//=============================================================================
-// User Specialization Tests
-//=============================================================================
-
 namespace specialization_test
 {
 
@@ -296,7 +267,6 @@ struct SpecialValue
 // Custom wrapper for SpecialValue
 struct custom_shared_ptr_wrapper
 {
-    // Simulating a custom shared_ptr (using std::shared_ptr for simplicity)
     using type = std::shared_ptr<SpecialValue>;
     static std::atomic<int> create_count;
 
@@ -336,10 +306,6 @@ TEST(WrapperValueTraitsSpecializationTest, UsesSpecializedTraits)
     auto value = cache.Get("key");
     EXPECT_EQ(value->x, 42);
 }
-
-//=============================================================================
-// make_wrapper_traits Helper Tests
-//=============================================================================
 
 namespace make_wrapper_test
 {
@@ -382,10 +348,6 @@ TEST(MakeWrapperTraitsTest, WorksWithCustomPolicy)
 
     EXPECT_EQ(*cache.Get("key"), 42);
 }
-
-//=============================================================================
-// Integration Tests with Different Policies
-//=============================================================================
 
 TEST(WrapperIntegrationTest, WorksWithLRU)
 {
@@ -434,10 +396,6 @@ TEST(WrapperIntegrationTest, WorksWithLFU)
     EXPECT_TRUE(cache.Cached(3));
 }
 
-//=============================================================================
-// Value Lifetime Tests with Custom Wrapper
-//=============================================================================
-
 TEST(WrapperLifetimeTest, ValueRemainsValidAfterEviction)
 {
     using wrapper = caches::allocate_shared_wrapper<int, test_utils::tracking_allocator<int>>;
@@ -446,17 +404,11 @@ TEST(WrapperLifetimeTest, ValueRemainsValidAfterEviction)
     cache.Put("A", 42);
     auto value_a = cache.Get("A");
 
-    // Evict A by inserting B
     cache.Put("B", 100);
 
-    // A is evicted but the shared_ptr should still be valid
     EXPECT_EQ(*value_a, 42);
     EXPECT_FALSE(cache.Cached("A"));
 }
-
-//=============================================================================
-// TryGet Tests with Custom Wrapper
-//=============================================================================
 
 TEST(WrapperTryGetTest, ReturnsEmptyWrapperForMissingKey)
 {

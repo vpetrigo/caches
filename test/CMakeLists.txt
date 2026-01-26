@@ -9,6 +9,7 @@ macro(add_cache_test _TEST_NAME)
     target_compile_options(${_TEST_NAME}_tests PRIVATE
             $<$<CXX_COMPILER_ID:MSVC>:$<IF:$<VERSION_GREATER_EQUAL:${MSVC_TOOLSET_VERSION},142>,/W4 /WX,>>
             $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Wno-error=pedantic>
+            $<$<AND:$<CXX_COMPILER_ID:Clang>,$<PLATFORM_ID:Windows>>:-Wno-c++98-compat -Wno-c++98-compat-pedantic>
             $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11.0>>:-Wno-interference-size>
     )
     add_test(NAME cache_${_TEST_NAME}_tests COMMAND ${_TEST_NAME}_tests)

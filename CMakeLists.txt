@@ -31,9 +31,14 @@ if (DOXYGEN_FOUND)
     configure_file(${PROJECT_SOURCE_DIR}/cmake/index.md.in
         ${PROJECT_SOURCE_DIR}/docs/doxygen/index.md)
 
-    add_custom_target(docs doxygen Doxyfile
+    add_custom_target(docs DEPENDS doxy DEPENDS docs_web)
+
+    add_custom_target(doxy doxygen Doxyfile
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs/doxygen
             COMMENT "Generate library Doxygen documentation")
+    add_custom_target(docs_web uv run mkdocs build --strict
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/docs/mkdocs
+            COMMENT "Generate documentation web version with MkDocs")
 endif ()
 
 add_library(caches INTERFACE)
@@ -42,12 +47,15 @@ target_sources(caches INTERFACE
     TYPE HEADERS
     BASE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include"
     FILES
+    include/caches/caches.hpp
     include/caches/core/cache.hpp
+    include/caches/key_traits.hpp
     include/caches/policies/fifo.hpp
     include/caches/policies/lfu.hpp
     include/caches/policies/lru.hpp
     include/caches/policies/no_eviction.hpp
     include/caches/policies/policy_interface.hpp
+    include/caches/wrapper_policy.hpp
 )
 
 if (CACHES_BUILD_TEST)

@@ -10,33 +10,71 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.name }})
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: macos-latest
+            name: macos-clang
+            clang_cl_asan: false
+          - os: ubuntu-latest
+            name: ubuntu-clang
+            clang_cl_asan: false
+          - os: windows-latest
+            name: windows-mingw
+            clang_cl_asan: false
+          - os: windows-latest
+            name: windows-clang-cl-asan
+            clang_cl_asan: true
     steps:
       - uses: actions/checkout@v6
         with:
           submodules: "true"
-      - name: Set compiler variables
-        id: set-compiler
-        shell: bash
+      - name: Setup MSVC environment (clang-cl)
+        if: runner.os == 'Windows' && matrix.clang_cl_asan
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Add LLVM to PATH (clang-cl)
+        if: runner.os == 'Windows' && matrix.clang_cl_asan
+        shell: pwsh
         run: |
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            echo "CC=clang" >> $GITHUB_ENV
-            echo "CXX=clang++" >> $GITHUB_ENV
-          fi
+          $llvmBin = "C:\\Program Files\\LLVM\\bin"
+          if (Test-Path (Join-Path $llvmBin "clang-cl.exe")) {
+            $llvmBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            Write-Host "clang-cl.exe not found at: $llvmBin"
+            exit 1
+          }
       - name: "Run tests"
         shell: bash
         run: |
-          mkdir build
+          cmake -E make_directory build
           cmake --version
           if [[ "${{ runner.os }}" != "Windows" ]]; then
-            ${{ env.CC }} --version
-            ${{ env.CXX }} --version
+            clang --version
+            clang++ --version
+            export CC=clang
+            export CXX=clang++
+          elif [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+            clang-cl --version
           fi
           cd build
-          cmake -G Ninja .. -DCACHES_BUILD_TEST=ON
+          if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+            cmake -G Ninja .. \
+              -DCACHES_BUILD_TEST=ON \
+              -DCMAKE_C_COMPILER=clang-cl \
+              -DCMAKE_CXX_COMPILER=clang-cl \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_C_FLAGS="/fsanitize=address /Zi" \
+              -DCMAKE_CXX_FLAGS="/fsanitize=address /Zi /EHsc" \
+              -DCMAKE_EXE_LINKER_FLAGS="/fsanitize=address"
+            export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
+          else
+            cmake -G Ninja .. -DCACHES_BUILD_TEST=ON
+          fi
           cmake --build . --parallel
           ctest -V --output-on-failure
 

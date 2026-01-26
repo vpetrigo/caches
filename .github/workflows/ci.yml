@@ -68,9 +68,9 @@ jobs:
               -DCMAKE_C_COMPILER=clang-cl \
               -DCMAKE_CXX_COMPILER=clang-cl \
               -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-              -DCMAKE_C_FLAGS="/fsanitize=address /Zi" \
-              -DCMAKE_CXX_FLAGS="/fsanitize=address /Zi /EHsc" \
-              -DCMAKE_EXE_LINKER_FLAGS="/fsanitize=address"
+              -DCMAKE_C_FLAGS="-fsanitize=address" \
+              -DCMAKE_CXX_FLAGS="-fsanitize=address /EHsc" \
+              -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address"
             export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
           else
             cmake -G Ninja .. -DCACHES_BUILD_TEST=ON

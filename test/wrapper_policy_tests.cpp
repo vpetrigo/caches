@@ -461,11 +461,11 @@ TEST(CustomPtrWrapper, Simple)
     cache.Put("2", custom_shared_ptr::CustomInt{2});
 
     {
-        auto result = cache.Get("1");
-        EXPECT_NE(result, nullptr);
-        EXPECT_EQ(result->v, 1);
-        result = cache.Get("2");
-        EXPECT_NE(result, nullptr);
-        EXPECT_EQ(result->v, 2);
+        auto get_result = cache.Get("1");
+        EXPECT_NE(get_result, nullptr);
+        EXPECT_EQ(get_result->v, 1);
+        get_result = cache.Get("2");
+        EXPECT_NE(get_result, nullptr);
+        EXPECT_EQ(get_result->v, 2);
     }
 }

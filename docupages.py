@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import argparse
 import pathlib
-import tempfile
 import shutil
 import subprocess
-import argparse
+import tempfile
 from typing import Union
 
 
@@ -60,20 +60,13 @@ def git_push(
     )
 
 
-def generate_documentation(
+def copy_documentation(
     docs_dir: pathlib.Path, working_dir: Union[str, pathlib.Path]
 ) -> None:
     doxygen_dir = docs_dir.joinpath("doxygen")
-    subprocess.run(["doxygen"], cwd=doxygen_dir)
     mkdocs_dir = docs_dir.joinpath("mkdocs")
     copy_docs_output_dir(
         doxygen_dir.joinpath("html"), mkdocs_dir.joinpath("docs", "doxygen")
-    )
-    subprocess.run(["poetry", "install", "--no-root"], cwd=mkdocs_dir)
-    subprocess.run(
-        ["poetry", "run", "mkdocs", "build"],
-        cwd=mkdocs_dir,
-        check=True,
     )
     shutil.copytree(mkdocs_dir.joinpath("site"), working_dir, dirs_exist_ok=True)
 
@@ -115,7 +108,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as docudir:
         git_init(options.repo, options.branch, docudir)
         github_pages_nojekyll(docudir)
-        generate_documentation(pathlib.Path("docs").resolve(), docudir)
+        copy_documentation(pathlib.Path("docs").resolve(), docudir)
         git_add_documentation_files(docudir)
 
         if not options.n:

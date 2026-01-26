@@ -14,7 +14,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        custom-hash-map: [OFF, ON]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -37,7 +36,7 @@ jobs:
             ${{ env.CXX }} --version
           fi
           cd build
-          cmake -G Ninja .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake -G Ninja .. -DCACHES_BUILD_TEST=ON
           cmake --build . --parallel
           ctest
 

@@ -37,17 +37,30 @@ jobs:
         with:
           arch: x64
 
-      - name: Add LLVM to PATH (clang-cl)
+      - name: Add LLVM and ASan runtime to PATH (clang-cl)
         if: runner.os == 'Windows' && matrix.clang_cl_asan
         shell: pwsh
         run: |
-          $llvmBin = "C:\\Program Files\\LLVM\\bin"
+          $llvmRoot = "C:\\Program Files\\LLVM"
+          $llvmBin = Join-Path $llvmRoot "bin"
           if (Test-Path (Join-Path $llvmBin "clang-cl.exe")) {
             $llvmBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           } else {
             Write-Host "clang-cl.exe not found at: $llvmBin"
             exit 1
           }
+
+          $asanDll = Get-ChildItem -Path $llvmRoot -Recurse -File -Filter "clang_rt.asan_dynamic-x86_64.dll" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if ($null -eq $asanDll) {
+            Write-Host "clang_rt.asan_dynamic-x86_64.dll not found under: $llvmRoot"
+            exit 1
+          }
+
+          $asanDir = $asanDll.DirectoryName
+          $asanDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "ASAN_RUNTIME_DIR=$asanDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "LIB=$asanDir;$env:LIB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: "Run tests"
         shell: bash
         run: |
@@ -63,6 +76,8 @@ jobs:
           fi
           cd build
           if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+            # Prevent Git-Bash (MSYS2) from rewriting MSVC-style flags like /fsanitize=address.
+            export MSYS2_ARG_CONV_EXCL="*"
             cmake -G Ninja .. \
               -DCACHES_BUILD_TEST=ON \
               -DCMAKE_C_COMPILER=clang-cl \
@@ -70,10 +85,12 @@ jobs:
               -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
               -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL \
               -DCMAKE_TRY_COMPILE_CONFIGURATION=Release \
-              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-              -DCMAKE_C_FLAGS="-fsanitize=address" \
-              -DCMAKE_CXX_FLAGS="-fsanitize=address /EHsc" \
-              -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address"
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_C_FLAGS="/fsanitize=address -Wno-unused-command-line-argument" \
+              -DCMAKE_CXX_FLAGS="/fsanitize=address /EHsc -Wno-unused-command-line-argument" \
+              -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" \
+              -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib"
+
             export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
           else
             cmake -G Ninja .. -DCACHES_BUILD_TEST=ON

@@ -3,6 +3,8 @@ branches:
     - master
 
 init:
+  - choco upgrade cmake -y
+  - refreshenv
   - git config --global core.autocrlf input
 
 image:
@@ -44,11 +46,6 @@ before_build:
   - mkdir build
   - cd build
   - cmake .. -G "%CMAKE_GENERATOR%" -A %PLATFORM%
-
-before_install:
-  # Ensure CMake is new enough for the project's CMakeLists (requires >= 3.28)
-  - choco upgrade cmake -y
-  - refreshenv
 
 build_script:
   - cmake --build . --config %CONFIGURATION%

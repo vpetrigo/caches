@@ -13,8 +13,8 @@ jobs:
           submodules: "true"
       - name: "Install doxygen"
         run: |
-          wget -qO- https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.linux.bin.tar.gz | tar zxf -
-          echo "$(readlink -f doxygen-1.9.6/bin)" >> $GITHUB_PATH
+          wget -qO- https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-1.16.1.linux.bin.tar.gz | tar zxf -
+          echo "$(readlink -f doxygen-1.16.1/bin)" >> $GITHUB_PATH
           sudo apt install graphviz
       - name: "Configure project"
         run: |

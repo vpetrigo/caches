@@ -93,7 +93,7 @@ jobs:
 
             export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
           else
-            cmake -G Ninja .. -DCACHES_BUILD_TEST=ON
+            cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
           fi
           cmake --build . --parallel
           ctest -V --output-on-failure

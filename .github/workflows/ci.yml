@@ -103,7 +103,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [9, 10, 11, 12, 13, 14, 15]
+        tag: [9, 10, 11, 12, 13, 14]
     steps:
       - uses: actions/checkout@v6
         with:

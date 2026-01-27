@@ -1,51 +1,109 @@
 name: CI
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
   schedule:
-    - cron: '0 10 * * 1'
+    - cron: "0 10 * * 1"
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.name }})
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
-        custom-hash-map: [ OFF, ON ]
+        include:
+          - os: macos-latest
+            name: macos-clang
+            clang_cl_asan: false
+          - os: ubuntu-latest
+            name: ubuntu-clang
+            clang_cl_asan: false
+          - os: windows-latest
+            name: windows-mingw
+            clang_cl_asan: false
+          - os: windows-latest
+            name: windows-clang-cl-asan
+            clang_cl_asan: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          submodules: 'true'
-      - name: Set compiler variables
-        id: set-compiler
-        shell: bash
+          submodules: "true"
+      - name: Setup MSVC environment (clang-cl)
+        if: runner.os == 'Windows' && matrix.clang_cl_asan
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Add LLVM and ASan runtime to PATH (clang-cl)
+        if: runner.os == 'Windows' && matrix.clang_cl_asan
+        shell: pwsh
         run: |
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            echo "CC=clang" >> $GITHUB_ENV
-            echo "CXX=clang++" >> $GITHUB_ENV
-          fi
+          $llvmRoot = "C:\\Program Files\\LLVM"
+          $llvmBin = Join-Path $llvmRoot "bin"
+          if (Test-Path (Join-Path $llvmBin "clang-cl.exe")) {
+            $llvmBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            Write-Host "clang-cl.exe not found at: $llvmBin"
+            exit 1
+          }
+
+          $asanDll = Get-ChildItem -Path $llvmRoot -Recurse -File -Filter "clang_rt.asan_dynamic-x86_64.dll" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if ($null -eq $asanDll) {
+            Write-Host "clang_rt.asan_dynamic-x86_64.dll not found under: $llvmRoot"
+            exit 1
+          }
+
+          $asanDir = $asanDll.DirectoryName
+          $asanDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "ASAN_RUNTIME_DIR=$asanDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "LIB=$asanDir;$env:LIB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: "Run tests"
         shell: bash
         run: |
-          mkdir build
+          cmake -E make_directory build
           cmake --version
           if [[ "${{ runner.os }}" != "Windows" ]]; then
-            ${{ env.CC }} --version
-            ${{ env.CXX }} --version
+            clang --version
+            clang++ --version
+            export CC=clang
+            export CXX=clang++
+          elif [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+            clang-cl --version
           fi
           cd build
-          cmake -G Ninja .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+            # Prevent Git-Bash (MSYS2) from rewriting MSVC-style flags like /fsanitize=address.
+            export MSYS2_ARG_CONV_EXCL="*"
+            cmake -G Ninja .. \
+              -DCACHES_BUILD_TEST=ON \
+              -DCMAKE_C_COMPILER=clang-cl \
+              -DCMAKE_CXX_COMPILER=clang-cl \
+              -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
+              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL \
+              -DCMAKE_TRY_COMPILE_CONFIGURATION=Release \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_C_FLAGS="/fsanitize=address -Wno-unused-command-line-argument" \
+              -DCMAKE_CXX_FLAGS="/fsanitize=address /EHsc -Wno-unused-command-line-argument" \
+              -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" \
+              -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib"
+
+            export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
+          else
+            cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
+          fi
           cmake --build . --parallel
-          ctest
+          ctest -V --output-on-failure
 
   build-coverage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -56,7 +114,7 @@ jobs:
           cd build
           cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
           cmake --build . --parallel $(nproc)
-          ctest
+          ctest -V --output-on-failure
           mkdir coverage
           cd coverage
           lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch --rc geninfo_unexecuted_blocks=1
@@ -73,14 +131,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 14, 15, 16, 17, 18, 19, 20 ]
-        custom-hash-map: [ OFF, ON ]
+        tag: [14, 15, 16, 17, 18, 19, 20, 21]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Install Clang
-        uses: egor-tensin/setup-clang@v1
+        uses: egor-tensin/setup-clang@v2
         with:
           version: ${{ matrix.tag }}
       - name: Set environment variables
@@ -94,9 +151,9 @@ jobs:
           ${{ env.CC }} --version
           ${{ env.CXX }} --version
           cd build
-          cmake .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake .. -DCACHES_BUILD_TEST=ON
           cmake --build . --parallel
-          ctest
+          ctest -V --output-on-failure
         shell: bash
 
   build-gcc:
@@ -104,14 +161,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 9, 10, 11, 12, 13, 14 ]
-        custom-hash-map: [ OFF, ON ]
+        tag: [9, 10, 11, 12, 13, 14]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Setup GCC
-        uses: egor-tensin/setup-gcc@v1
+        uses: egor-tensin/setup-gcc@v2
         with:
           version: ${{ matrix.tag }}
       - name: Set environment variables
@@ -125,7 +181,7 @@ jobs:
           ${{ env.CC }} --version
           ${{ env.CXX }} --version
           cd build
-          cmake .. -DCACHES_BUILD_TEST=ON -DUSE_CUSTOM_HASHMAP=${{ matrix.custom-hash-map }}
+          cmake .. -DCACHES_BUILD_TEST=ON
           cmake --build . -- -j$(nproc)
-          ctest
+          ctest -V --output-on-failure
         shell: bash

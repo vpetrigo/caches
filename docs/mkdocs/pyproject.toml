@@ -1,20 +1,18 @@
-[tool.poetry]
+[project]
 name = "caches-mkdocs"
-version = "0.0.4"
+version = "0.0.5"
 description = "Caches library documentation"
-authors = ["Vladimir Petrigo <vladimir.petrigo@gmail.com>"]
-license = "BSD-3-Clause"
 readme = "README.md"
-packages = [{include = "caches_mkdocs"}]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-mkdocs = "^1.4.2"
-mkdocs-material = "^9.0.7"
-mkdocs-simple-hooks = "^0.1.5"
-mkdocs-exclude = "^1.0.2"
-
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Vladimir Petrigo", email = "vladimir.petrigo@gmail.com" }]
+dependencies = [
+  "mkdocs>=1.4.2",
+  "mkdocs-material>=9.0.7",
+  "mkdocs-simple-hooks>=0.1.5",
+  "mkdocs-exclude>=1.0.2",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"

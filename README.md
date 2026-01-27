@@ -7,70 +7,91 @@
 
 This project implements a simple thread-safe cache with several page replacement policies:
 
-* Least Recently Used
-* First-In/First-Out
-* Least Frequently Used
+- Least Recently Used
+- First-In/First-Out
+- Least Frequently Used
 
 More about cache algorithms and policy you could read on [Wikipedia](https://en.wikipedia.org/wiki/Cache_algorithms)
 
 # Usage
 
-Using this library is simple. It is necessary to include header with the cache implementation (`caches/cache.hpp` file)
-and appropriate header with the cache policy if it is needed. If not then the non-special algorithm will be used (it
-removes the last element which key is the last in the internal container).
-
-Currently, there is only three of them:
-
-* `fifo_cache_policy.hpp`
-* `lfu_cache_policy.hpp`
-* `lru_cache_policy.hpp`
-
-Example for the LRU policy:
+Include the convenience header:
 
 ```cpp
+#include <caches/caches.hpp>
+```
+
+By default, `caches::cache` uses an LRU eviction policy and wraps values in `std::shared_ptr`.
+
+```cpp
+#include <caches/caches.hpp>
+
+#include <iostream>
 #include <string>
-#include "caches/cache.hpp"
-#include "caches/lru_cache_policy.hpp"
 
-// alias for an easy class typing
-template <typename Key, typename Value>
-using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
+int main() {
+  caches::cache<std::string, int> c{256};
+  c.Put("Hello", 1);
+  c.Put("world", 2);
 
-void foo() {
-  constexpr std::size_t CACHE_SIZE = 256;
-  lru_cache_t<std::string, int> cache(CACHE_SIZE);
-
-  cache.Put("Hello", 1);
-  cache.Put("world", 2);
-  
-  const auto hello_value = cache.Get("Hello");
-  const auto world_value = cache.Get("world");
-
-  std::cout << *hello_value << *world_value << '\n';
-  // "12"
+  auto hello = c.Get("Hello");
+  auto world = c.Get("world");
+  std::cout << *hello << *world << "\n";
 }
 ```
 
-## Custom hashmap usage
+## Policies
 
-You can use a custom hashmap implementation for the `caches::fixed_sized_cache` class which has the same interface
-`std::unordered_map` has.
-
-For example, you can declare LRU cache type like that:
+Select a policy by passing it as the third template parameter:
 
 ```cpp
-#include "caches/cache.hpp"
-
-template <typename Key, typename Value>
-using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy,
-                                                       phmap::node_hash_map<Key, Value>>;
-// ...
-lru_cache_t<std::string, std::size_t> cache{16};
-cache.Put("Hello", 1);
-std::cout << *cache.Get("Hello") << '\n';
+caches::cache<int, std::string, caches::FIFO> fifo{50};
+caches::cache<int, std::string, caches::LFU> lfu{50};
+caches::cache<int, std::string, caches::LRU> lru{50};
+caches::cache<int, std::string, caches::NoEviction> no_evict{50};
 ```
 
-See `test` implementation which uses [`parallel-hashmap`](https://github.com/greg7mdp/parallel-hashmap).
+## Custom key hashing/equality
+
+For custom key types you can either provide `std::hash<Key>` or define an ADL-discoverable `hash_value(const Key&)`.
+
+```cpp
+struct MyKey { int id; };
+
+std::size_t hash_value(const MyKey& k) { return std::hash<int>{}(k.id); }
+bool operator==(const MyKey& a, const MyKey& b) { return a.id == b.id; }
+
+caches::cache<MyKey, int> c{100};
+```
+
+If you want to explicitly provide functors, use `caches::make_traits`:
+
+```cpp
+struct MyHash { std::size_t operator()(const MyKey&) const; };
+struct MyEqual { bool operator()(const MyKey&, const MyKey&) const; };
+
+using my_traits = caches::make_traits<MyHash, MyEqual>;
+caches::cache<MyKey, int, caches::LRU, my_traits> c{100};
+```
+
+## Custom hashmap
+
+You can override the underlying hashmap template as long as it is compatible with `std::unordered_map`'s template
+parameters.
+
+```cpp
+template <typename K, typename V, typename H, typename E, typename A>
+using my_hash_map = std::unordered_map<K, V, H, E, A>;
+
+caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
+              caches::wrapper_policy<int>, my_hash_map>
+    c{100};
+```
+
+## Value wrapper policy
+
+Values are wrapped to allow safe access even if an entry is evicted. By default this is `std::shared_ptr<Value>`.
+You can customize it via the `WrapperPolicy` template parameter.
 
 # Requirements
 
@@ -78,10 +99,10 @@ The only requirement is a compatible C++11 compiler.
 
 This project was tested in the environments listed below:
 
-* MinGW64 ([MSYS2 project](https://msys2.github.io/))
-    * Clang 13.0+
-    * GCC 7+
-* MSVC (VS 2015)
+- MinGW64 ([MSYS2 project](https://msys2.github.io/))
+  - Clang 13.0+
+  - GCC 7+
+- MSVC (VS 2015)
 
 If you have any issues with the library building, please let me know.
 

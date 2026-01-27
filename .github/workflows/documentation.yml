@@ -8,13 +8,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: "Install doxygen"
         run: |
-          wget -qO- https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.linux.bin.tar.gz | tar zxf -
-          echo "$(readlink -f doxygen-1.9.6/bin)" >> $GITHUB_PATH
+          wget -qO- https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-1.16.1.linux.bin.tar.gz | tar zxf -
+          echo "$(readlink -f doxygen-1.16.1/bin)" >> $GITHUB_PATH
           sudo apt install graphviz
       - name: "Configure project"
         run: |
@@ -27,17 +27,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.10"
-      - name: 'Setup poetry'
-        run: python -m pip install --upgrade poetry wheel
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
       - name: "Build documentation"
-        run: |
-          cmake --build build --target docs
-          pushd docs/mkdocs
-          poetry install --no-root
-          poetry run mkdocs build
-          popd
+        run: cmake --build build --target docs
       - name: "Publish documentation"
         env:
           GITHUB_TOKEN: ${{ secrets.DOCS_TOKEN }}
-        run:
-          ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --commit ${GITHUB_SHA} -b gh-pages
+        run: ./docupages.py -t ${GITHUB_TOKEN} -r "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --commit ${GITHUB_SHA} -b gh-pages

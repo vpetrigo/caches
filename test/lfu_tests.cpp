@@ -1,29 +1,27 @@
-#include "caches/cache.hpp"
-#include "caches/lfu_cache_policy.hpp"
-
-#include <gtest/gtest.h>
-#ifdef CUSTOM_HASHMAP
-#include <parallel_hashmap/phmap.h>
-#endif /* CUSTOM_HASHMAP */
-
-#ifndef CUSTOM_HASHMAP
-template <typename Key, typename Value>
-using lfu_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LFUCachePolicy>;
-#else
-template <typename Key, typename Value>
-using lfu_cache_t =
-    typename caches::fixed_sized_cache<Key, Value, caches::LFUCachePolicy,
-                                       phmap::node_hash_map<Key, caches::WrappedValue<Value>>>;
-#endif /* CUSTOM_HASHMAP */
+#include "caches/caches.hpp"
+#include "test_helper.hpp"
 
 #include <array>
+#include <gtest/gtest.h>
 
-TEST(LFUCache, Simple_Test)
+template <typename Backend>
+class LFUCache : public ::testing::Test
+{
+  public:
+    template <typename K, typename V>
+    using cache_t = typename Backend::template cache_t<caches::LFU, K, V>;
+};
+
+using Backends = ::testing::Types<StdBackend, PhmapBackend>;
+TYPED_TEST_SUITE(LFUCache, Backends);
+
+TYPED_TEST(LFUCache, Simple_Test)
 {
     constexpr size_t FIRST_FREQ = 10;
     constexpr size_t SECOND_FREQ = 9;
     constexpr size_t THIRD_FREQ = 8;
-    lfu_cache_t<std::string, int> cache(3);
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t cache(3);
 
     cache.Put("A", 1);
     cache.Put("B", 2);
@@ -52,10 +50,11 @@ TEST(LFUCache, Simple_Test)
     EXPECT_THROW(cache.Get("A"), std::range_error);
 }
 
-TEST(LFUCache, Single_Slot)
+TYPED_TEST(LFUCache, Single_Slot)
 {
     constexpr size_t TEST_SIZE = 5;
-    lfu_cache_t<int, int> cache(1);
+    using cache_t = typename TestFixture::template cache_t<int, int>;
+    cache_t cache(1);
 
     cache.Put(1, 10);
 
@@ -72,10 +71,11 @@ TEST(LFUCache, Single_Slot)
     EXPECT_EQ(*cache.Get(2), 20);
 }
 
-TEST(LFUCache, FrequencyIssue)
+TYPED_TEST(LFUCache, FrequencyIssue)
 {
     constexpr size_t TEST_SIZE = 50;
-    lfu_cache_t<int, int> cache(3);
+    using cache_t = typename TestFixture::template cache_t<int, int>;
+    cache_t cache(3);
 
     cache.Put(1, 10);
     cache.Put(2, 1);
@@ -106,10 +106,11 @@ TEST(LFUCache, FrequencyIssue)
     EXPECT_THROW(cache.Get(6), std::range_error);
 }
 
-TEST(LFUCache, Remove_Test)
+TYPED_TEST(LFUCache, Remove_Test)
 {
     constexpr std::size_t TEST_SIZE = 10;
-    lfu_cache_t<std::string, std::size_t> fc(TEST_SIZE);
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t fc(TEST_SIZE);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
@@ -131,16 +132,17 @@ TEST(LFUCache, Remove_Test)
     }
 }
 
-TEST(LFUCache, Partial_Remove_Test)
+TYPED_TEST(LFUCache, Partial_Remove_Test)
 {
-    lfu_cache_t<std::string, int> cache{5};
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t cache{5};
 
     for (int i = 0; i < 5; ++i)
     {
         cache.Put("key" + std::to_string(i), i);
     }
 
-    constexpr std::array access_order = {
+    const std::array<const char *, 5> access_order = {
         "key1", "key3", "key0", "key4", "key2",
     };
 
@@ -166,7 +168,7 @@ TEST(LFUCache, Partial_Remove_Test)
     cache.Put("key5", 5);
     cache.Put("key6", 6);
 
-    constexpr std::array access_order3 = {
+    const std::array<const char *, 5> access_order3 = {
         "key0", "key6", "key1", "key4", "key2",
     };
 
@@ -177,10 +179,11 @@ TEST(LFUCache, Partial_Remove_Test)
     }
 }
 
-TEST(LFUCache, TryGet)
+TYPED_TEST(LFUCache, TryGet)
 {
     constexpr std::size_t TEST_CASE{10};
-    lfu_cache_t<std::string, std::size_t> cache{TEST_CASE};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{TEST_CASE};
 
     for (std::size_t i = 0; i < TEST_CASE; ++i)
     {
@@ -201,9 +204,10 @@ TEST(LFUCache, TryGet)
     }
 }
 
-TEST(LFUCache, GetWithReplacement)
+TYPED_TEST(LFUCache, GetWithReplacement)
 {
-    lfu_cache_t<std::string, std::size_t> cache{2};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{2};
 
     cache.Put("1", 1);
     cache.Put("2", 2);
@@ -236,8 +240,8 @@ TEST(LFUCache, GetWithReplacement)
     EXPECT_EQ(*element3, 3);
 }
 
-TEST(LFUCache, InvalidSize)
+TYPED_TEST(LFUCache, InvalidSize)
 {
-    using test_type = lfu_cache_t<std::string, int>;
+    using test_type = typename TestFixture::template cache_t<std::string, int>;
     EXPECT_THROW(test_type cache{0}, std::invalid_argument);
 }

@@ -1,24 +1,34 @@
-#include "caches/cache.hpp"
+#include "caches/caches.hpp"
+#include "test_helper.hpp"
 
 #include <gtest/gtest.h>
-#include <stdexcept>
 
-template <typename K, typename V>
-using no_policy_cache_t = typename caches::fixed_sized_cache<K, V, caches::NoCachePolicy>;
+template <typename Backend>
+class NoEvictionCache : public ::testing::Test
+{
+  public:
+    template <typename K, typename V>
+    using cache_t = typename Backend::template cache_t<caches::NoEviction, K, V>;
+};
 
-TEST(NoPolicyCache, Add_one_element)
+using Backends = ::testing::Types<StdBackend, PhmapBackend>;
+TYPED_TEST_SUITE(NoEvictionCache, Backends);
+
+TYPED_TEST(NoEvictionCache, Add_one_element)
 {
     constexpr std::size_t cache_size = 1;
-    caches::fixed_sized_cache<std::string, int> cache(cache_size);
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t cache(cache_size);
 
     cache.Put("Hello", 1);
     ASSERT_EQ(*cache.Get("Hello"), 1);
 }
 
-TEST(NoPolicyCache, Add_delete_add_one_element)
+TYPED_TEST(NoEvictionCache, Add_delete_add_one_element)
 {
     constexpr std::size_t cache_size = 1;
-    caches::fixed_sized_cache<std::string, int> cache(cache_size);
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t cache(cache_size);
 
     cache.Put("Hello", 1);
     cache.Put("World", 2);
@@ -26,10 +36,11 @@ TEST(NoPolicyCache, Add_delete_add_one_element)
     ASSERT_EQ(*cache.Get("World"), 2);
 }
 
-TEST(NoPolicyCache, Add_many_elements)
+TYPED_TEST(NoEvictionCache, Add_many_elements)
 {
     constexpr std::size_t cache_size = 1024;
-    caches::fixed_sized_cache<std::string, std::size_t> cache(cache_size);
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache(cache_size);
 
     for (std::size_t i = 0; i < cache_size; ++i)
     {
@@ -44,10 +55,11 @@ TEST(NoPolicyCache, Add_many_elements)
     }
 }
 
-TEST(NoPolicyCache, Small_cache_many_elements)
+TYPED_TEST(NoEvictionCache, Small_cache_many_elements)
 {
     constexpr std::size_t cache_size = 1;
-    caches::fixed_sized_cache<std::string, std::size_t> cache(cache_size);
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache(cache_size);
 
     for (std::size_t i = 0; i < cache_size; ++i)
     {
@@ -59,10 +71,11 @@ TEST(NoPolicyCache, Small_cache_many_elements)
     ASSERT_EQ(cache.Size(), cache_size);
 }
 
-TEST(NoPolicyCache, Remove_Test)
+TYPED_TEST(NoEvictionCache, Remove_Test)
 {
     constexpr std::size_t TEST_SIZE = 10;
-    caches::fixed_sized_cache<std::string, std::size_t> fc(TEST_SIZE);
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t fc(TEST_SIZE);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
@@ -84,10 +97,11 @@ TEST(NoPolicyCache, Remove_Test)
     }
 }
 
-TEST(NoPolicyCache, TryGet)
+TYPED_TEST(NoEvictionCache, TryGet)
 {
     constexpr std::size_t TEST_CASE{10};
-    no_policy_cache_t<std::string, std::size_t> cache{TEST_CASE};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{TEST_CASE};
 
     for (std::size_t i = 0; i < TEST_CASE; ++i)
     {
@@ -108,9 +122,10 @@ TEST(NoPolicyCache, TryGet)
     }
 }
 
-TEST(NoPolicyCache, GetWithReplacement)
+TYPED_TEST(NoEvictionCache, GetWithReplacement)
 {
-    no_policy_cache_t<std::string, std::size_t> cache{2};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{2};
 
     cache.Put("1", 1);
     cache.Put("2", 2);
@@ -125,10 +140,12 @@ TEST(NoPolicyCache, GetWithReplacement)
 
     std::string replaced_key;
 
-    for (size_t i = 1; i <= 2; ++i) {
+    for (size_t i = 1; i <= 2; ++i)
+    {
         const auto key = std::to_string(i);
 
-        if (!cache.Cached(key)) {
+        if (!cache.Cached(key))
+        {
             replaced_key = key;
         }
     }
@@ -141,8 +158,8 @@ TEST(NoPolicyCache, GetWithReplacement)
     EXPECT_EQ(*element3, 3);
 }
 
-TEST(NoPolicyCache, InvalidSize)
+TYPED_TEST(NoEvictionCache, InvalidSize)
 {
-    using test_type = no_policy_cache_t<std::string, int>;
+    using test_type = typename TestFixture::template cache_t<std::string, int>;
     EXPECT_THROW(test_type cache{0}, std::invalid_argument);
 }

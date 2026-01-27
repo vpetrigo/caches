@@ -4,7 +4,7 @@ site_url: https://rs-stuff.dev/caches
 repo_name: vpetrigo/caches
 repo_url: https://github.com/vpetrigo/caches
 
-copyright: Copyright &copy; 2015-2023 Vladimir Petrigo
+copyright: Copyright &copy; 2015-2026 Vladimir Petrigo
 
 extra:
   social:
@@ -19,10 +19,23 @@ theme:
   name: material
   language: en
   palette:
-    primary: brown
-    accent: amber
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: brown
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: brown
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
   font:
-    text: Inconsolata
+    text: Roboto
     code: Inconsolata
   features:
     - tabs
@@ -30,17 +43,19 @@ theme:
 
 nav:
   - Home:
-      - Cache library: 'index.md'
-      - License: 'LICENSE.md'
+      - Cache library: "index.md"
+      - License: "LICENSE.md"
   - API:
-      - Cache: 'api/cache/fixed_sized_cache.md'
+      - Cache: "api/cache/cache.md"
       - Policies:
-          - Interface: 'api/policy/cache_policy_interface.md'
-          - Least recently used (LRU): 'api/policy/lru_cache_policy.md'
-          - Least frequently used (LFU): 'api/policy/lfu_cache_policy.md'
-          - First in, first out (FIFO): 'api/policy/fifo_cache_policy.md'
-          - No Policy: 'api/policy/no_cache_policy.md'
-  - Doxygen: 'doxygen/index.html'
+          - Interface: "api/policy/policy_interface.md"
+          - Least recently used (LRU): "api/policy/lru.md"
+          - Least frequently used (LFU): "api/policy/lfu.md"
+          - First in, first out (FIFO): "api/policy/fifo.md"
+          - No eviction: "api/policy/no_eviction.md"
+      - Key traits: "api/key_traits.md"
+      - Wrapper policy: "api/wrapper_policy.md"
+  - Doxygen: "doxygen/index.html"
 
 plugins:
   - search

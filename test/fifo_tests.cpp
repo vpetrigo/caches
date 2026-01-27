@@ -1,26 +1,24 @@
-#include "caches/cache.hpp"
-#include "caches/fifo_cache_policy.hpp"
-
-#include <gtest/gtest.h>
-#ifdef CUSTOM_HASHMAP
-#include <parallel_hashmap/phmap.h>
-#endif /* CUSTOM_HASHMAP */
+#include "caches/caches.hpp"
+#include "test_helper.hpp"
 
 #include <array>
+#include <gtest/gtest.h>
 
-#ifndef CUSTOM_HASHMAP
-template <typename Key, typename Value>
-using fifo_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::FIFOCachePolicy>;
-#else
-template <typename Key, typename Value>
-using fifo_cache_t =
-    typename caches::fixed_sized_cache<Key, Value, caches::FIFOCachePolicy,
-                                       phmap::node_hash_map<Key, std::shared_ptr<Value>>>;
-#endif /* CUSTOM_HASHMAP */
-
-TEST(FIFOCache, Simple_Test)
+template <typename Backend>
+class FIFOCache : public ::testing::Test
 {
-    fifo_cache_t<int, int> fc(2);
+  public:
+    template <typename K, typename V>
+    using cache_t = typename Backend::template cache_t<caches::FIFO, K, V>;
+};
+
+using Backends = ::testing::Types<StdBackend, PhmapBackend>;
+TYPED_TEST_SUITE(FIFOCache, Backends);
+
+TYPED_TEST(FIFOCache, Simple_Test)
+{
+    using cache_t = typename TestFixture::template cache_t<int, int>;
+    cache_t fc(2);
 
     fc.Put(1, 10);
     fc.Put(2, 20);
@@ -39,9 +37,10 @@ TEST(FIFOCache, Simple_Test)
     EXPECT_EQ(*fc.Get(3), 30);
 }
 
-TEST(FIFOCache, Missing_Value)
+TYPED_TEST(FIFOCache, Missing_Value)
 {
-    fifo_cache_t<int, int> fc(2);
+    using cache_t = typename TestFixture::template cache_t<int, int>;
+    cache_t fc(2);
 
     fc.Put(1, 10);
 
@@ -50,10 +49,11 @@ TEST(FIFOCache, Missing_Value)
     EXPECT_THROW(fc.Get(2), std::range_error);
 }
 
-TEST(FIFOCache, Sequence_Test)
+TYPED_TEST(FIFOCache, Sequence_Test)
 {
     constexpr int TEST_SIZE = 10;
-    fifo_cache_t<std::string, int> fc(TEST_SIZE);
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t fc(TEST_SIZE);
 
     for (size_t i = 0; i < TEST_SIZE; ++i)
     {
@@ -91,10 +91,11 @@ TEST(FIFOCache, Sequence_Test)
     }
 }
 
-TEST(FIFOCache, Remove_Test)
+TYPED_TEST(FIFOCache, Remove_Test)
 {
     constexpr std::size_t TEST_SIZE = 10;
-    fifo_cache_t<std::string, std::size_t> fc(TEST_SIZE);
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t fc(TEST_SIZE);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
@@ -116,9 +117,10 @@ TEST(FIFOCache, Remove_Test)
     }
 }
 
-TEST(FIFOCache, Partial_Remove_Test)
+TYPED_TEST(FIFOCache, Partial_Remove_Test)
 {
-    fifo_cache_t<std::string, int> cache{5};
+    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    cache_t cache{5};
 
     for (int i = 0; i < 5; ++i)
     {
@@ -162,10 +164,11 @@ TEST(FIFOCache, Partial_Remove_Test)
     }
 }
 
-TEST(FIFOCache, TryGet)
+TYPED_TEST(FIFOCache, TryGet)
 {
     constexpr std::size_t TEST_CASE{10};
-    fifo_cache_t<std::string, std::size_t> cache{TEST_CASE};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{TEST_CASE};
 
     for (std::size_t i = 0; i < TEST_CASE; ++i)
     {
@@ -186,9 +189,10 @@ TEST(FIFOCache, TryGet)
     }
 }
 
-TEST(FIFOCache, GetWithReplacement)
+TYPED_TEST(FIFOCache, GetWithReplacement)
 {
-    fifo_cache_t<std::string, std::size_t> cache{2};
+    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    cache_t cache{2};
 
     cache.Put("1", 1);
     cache.Put("2", 2);
@@ -221,8 +225,8 @@ TEST(FIFOCache, GetWithReplacement)
     EXPECT_EQ(*element3, 3);
 }
 
-TEST(FIFOCache, InvalidSize)
+TYPED_TEST(FIFOCache, InvalidSize)
 {
-    using test_type = fifo_cache_t<std::string, int>;
+    using test_type = typename TestFixture::template cache_t<std::string, int>;
     EXPECT_THROW(test_type cache{0}, std::invalid_argument);
 }

@@ -1,17 +1,28 @@
-LRU/LFU/FIFO Caches library
----------------------------
+Cache Library
+-------------
 
-These pages contain the API documentation of Caches library that is a header-only C++ library
+These pages contain the API documentation of Caches, a header-only C++ cache library.
+
+Prefer including the convenience header:
+
+\code
+#include <caches/caches.hpp>
+\endcode
 
 # Contents
 
-- Classes
-  - \link caches::fixed_sized_cache \endlink -- generic basic cache class
-  - \link caches::ICachePolicy \endlink -- cache policy interface class
-  - \link caches::NoCachePolicy \endlink -- basic no policy class
-  - \link caches::LRUCachePolicy \endlink -- LRU cache policy class
-  - \link caches::LFUCachePolicy \endlink -- LFU cache policy class
-  - \link caches::FIFOCachePolicy \endlink -- FIFO cache policy class
+- Core
+  - \link caches::cache \endlink -- fixed-size, thread-safe cache
+- Policies
+  - \link caches::PolicyInterface \endlink -- policy interface
+  - \link caches::LRU \endlink -- least recently used
+  - \link caches::LFU \endlink -- least frequently used
+  - \link caches::FIFO \endlink -- first in, first out
+  - \link caches::NoEviction \endlink -- never evict (inserts fail when full)
+- Customization
+  - \link caches::key_traits \endlink -- hash/equality traits (std::hash or ADL hash_value)
+  - \link caches::make_traits \endlink -- helper to define custom traits inline
+  - \link caches::wrapper_policy \endlink -- customize cached value wrapper type
 
 \author [Vladimir Petrigo](https://rs-stuff.dev/about/)
 

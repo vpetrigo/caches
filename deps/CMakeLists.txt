@@ -1,7 +1,6 @@
 if(CACHES_BUILD_TEST)
     if (MINGW)
         set(gtest_disable_pthreads ON CACHE BOOL "Force gtest to disable pthreads")
-        add_compile_definitions(GTEST_HAS_CXXABI_H_=0)
     endif ()
 
     if(MSVC)

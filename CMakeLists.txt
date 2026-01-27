@@ -17,6 +17,10 @@ if (MSVC)
     add_definitions(/MP)
 endif ()
 
+if (MINGW)
+    add_compile_definitions(GTEST_HAS_CXXABI_H_=0)
+endif ()
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

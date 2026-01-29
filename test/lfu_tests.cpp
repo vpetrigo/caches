@@ -2,25 +2,15 @@
 #include "test_helper.hpp"
 
 #include <array>
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
-template <typename Backend>
-class LFUCache : public ::testing::Test
-{
-  public:
-    template <typename K, typename V>
-    using cache_t = typename Backend::template cache_t<caches::LFU, K, V>;
-};
-
-using Backends = ::testing::Types<StdBackend, PhmapBackend>;
-TYPED_TEST_SUITE(LFUCache, Backends);
-
-TYPED_TEST(LFUCache, Simple_Test)
+TEMPLATE_TEST_CASE("LFUCache Simple_Test", "[lfu]", StdBackend, PhmapBackend)
 {
     constexpr size_t FIRST_FREQ = 10;
     constexpr size_t SECOND_FREQ = 9;
     constexpr size_t THIRD_FREQ = 8;
-    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, std::string, int>;
     cache_t cache(3);
 
     cache.Put("A", 1);
@@ -29,31 +19,31 @@ TYPED_TEST(LFUCache, Simple_Test)
 
     for (size_t i = 0; i < FIRST_FREQ; ++i)
     {
-        EXPECT_EQ(*cache.Get("B"), 2);
+        CHECK(*cache.Get("B") == 2);
     }
 
     for (size_t i = 0; i < SECOND_FREQ; ++i)
     {
-        EXPECT_EQ(*cache.Get("C"), 3);
+        CHECK(*cache.Get("C") == 3);
     }
 
     for (size_t i = 0; i < THIRD_FREQ; ++i)
     {
-        EXPECT_EQ(*cache.Get("A"), 1);
+        CHECK(*cache.Get("A") == 1);
     }
 
     cache.Put("D", 4);
 
-    EXPECT_EQ(*cache.Get("B"), 2);
-    EXPECT_EQ(*cache.Get("C"), 3);
-    EXPECT_EQ(*cache.Get("D"), 4);
-    EXPECT_THROW(cache.Get("A"), std::range_error);
+    CHECK(*cache.Get("B") == 2);
+    CHECK(*cache.Get("C") == 3);
+    CHECK(*cache.Get("D") == 4);
+    CHECK_THROWS_AS(cache.Get("A"), std::range_error);
 }
 
-TYPED_TEST(LFUCache, Single_Slot)
+TEMPLATE_TEST_CASE("LFUCache Single_Slot", "[lfu]", StdBackend, PhmapBackend)
 {
     constexpr size_t TEST_SIZE = 5;
-    using cache_t = typename TestFixture::template cache_t<int, int>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, int, int>;
     cache_t cache(1);
 
     cache.Put(1, 10);
@@ -63,18 +53,18 @@ TYPED_TEST(LFUCache, Single_Slot)
         cache.Put(1, static_cast<int>(i));
     }
 
-    EXPECT_EQ(*cache.Get(1), 4);
+    CHECK(*cache.Get(1) == 4);
 
     cache.Put(2, 20);
 
-    EXPECT_THROW(cache.Get(1), std::range_error);
-    EXPECT_EQ(*cache.Get(2), 20);
+    CHECK_THROWS_AS(cache.Get(1), std::range_error);
+    CHECK(*cache.Get(2) == 20);
 }
 
-TYPED_TEST(LFUCache, FrequencyIssue)
+TEMPLATE_TEST_CASE("LFUCache FrequencyIssue", "[lfu]", StdBackend, PhmapBackend)
 {
     constexpr size_t TEST_SIZE = 50;
-    using cache_t = typename TestFixture::template cache_t<int, int>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, int, int>;
     cache_t cache(3);
 
     cache.Put(1, 10);
@@ -84,32 +74,32 @@ TYPED_TEST(LFUCache, FrequencyIssue)
     // cache value with key '1' will have the counter 50
     for (size_t i = 0; i < TEST_SIZE; ++i)
     {
-        EXPECT_NO_THROW(cache.Get(1));
+        CHECK_NOTHROW(cache.Get(1));
     }
 
     cache.Put(4, 3);
     cache.Put(5, 4);
 
-    EXPECT_EQ(*cache.Get(1), 10);
-    EXPECT_EQ(*cache.Get(2), 1);
-    EXPECT_EQ(*cache.Get(5), 4);
-    EXPECT_THROW(cache.Get(3), std::range_error);
-    EXPECT_THROW(cache.Get(4), std::range_error);
+    CHECK(*cache.Get(1) == 10);
+    CHECK(*cache.Get(2) == 1);
+    CHECK(*cache.Get(5) == 4);
+    CHECK_THROWS_AS(cache.Get(3), std::range_error);
+    CHECK_THROWS_AS(cache.Get(4), std::range_error);
 
     cache.Put(6, 5);
     cache.Put(7, 6);
 
-    EXPECT_EQ(*cache.Get(1), 10);
-    EXPECT_EQ(*cache.Get(5), 4);
-    EXPECT_EQ(*cache.Get(7), 6);
-    EXPECT_THROW(cache.Get(3), std::range_error);
-    EXPECT_THROW(cache.Get(6), std::range_error);
+    CHECK(*cache.Get(1) == 10);
+    CHECK(*cache.Get(5) == 4);
+    CHECK(*cache.Get(7) == 6);
+    CHECK_THROWS_AS(cache.Get(3), std::range_error);
+    CHECK_THROWS_AS(cache.Get(6), std::range_error);
 }
 
-TYPED_TEST(LFUCache, Remove_Test)
+TEMPLATE_TEST_CASE("LFUCache Remove_Test", "[lfu]", StdBackend, PhmapBackend)
 {
     constexpr std::size_t TEST_SIZE = 10;
-    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, std::string, std::size_t>;
     cache_t fc(TEST_SIZE);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
@@ -117,24 +107,24 @@ TYPED_TEST(LFUCache, Remove_Test)
         fc.Put(std::to_string(i), i);
     }
 
-    EXPECT_EQ(fc.Size(), TEST_SIZE);
+    CHECK(fc.Size() == TEST_SIZE);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
-        EXPECT_TRUE(fc.Remove(std::to_string(i)));
+        CHECK(fc.Remove(std::to_string(i)));
     }
 
-    EXPECT_EQ(fc.Size(), 0);
+    CHECK(fc.Size() == 0);
 
     for (std::size_t i = 0; i < TEST_SIZE; ++i)
     {
-        EXPECT_FALSE(fc.Remove(std::to_string(i)));
+        CHECK_FALSE(fc.Remove(std::to_string(i)));
     }
 }
 
-TYPED_TEST(LFUCache, Partial_Remove_Test)
+TEMPLATE_TEST_CASE("LFUCache Partial_Remove_Test", "[lfu]", StdBackend, PhmapBackend)
 {
-    using cache_t = typename TestFixture::template cache_t<std::string, int>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, std::string, int>;
     cache_t cache{5};
 
     for (int i = 0; i < 5; ++i)
@@ -148,7 +138,7 @@ TYPED_TEST(LFUCache, Partial_Remove_Test)
 
     for (const auto &key : access_order)
     {
-        EXPECT_NE(cache.Get(key), nullptr);
+        CHECK(cache.Get(key) != nullptr);
     }
 
     cache.Remove("key3");
@@ -157,11 +147,11 @@ TYPED_TEST(LFUCache, Partial_Remove_Test)
     {
         if (const auto key = "key" + std::to_string(i); key != "key3")
         {
-            EXPECT_TRUE(cache.Cached(key));
+            CHECK(cache.Cached(key));
         }
         else
         {
-            EXPECT_FALSE(cache.Cached(key));
+            CHECK_FALSE(cache.Cached(key));
         }
     }
 
@@ -174,15 +164,15 @@ TYPED_TEST(LFUCache, Partial_Remove_Test)
 
     for (const auto &key : access_order3)
     {
-        EXPECT_TRUE(cache.Cached(key));
-        EXPECT_NO_THROW(cache.Get(key));
+        CHECK(cache.Cached(key));
+        CHECK_NOTHROW(cache.Get(key));
     }
 }
 
-TYPED_TEST(LFUCache, TryGet)
+TEMPLATE_TEST_CASE("LFUCache TryGet", "[lfu]", StdBackend, PhmapBackend)
 {
     constexpr std::size_t TEST_CASE{10};
-    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, std::string, std::size_t>;
     cache_t cache{TEST_CASE};
 
     for (std::size_t i = 0; i < TEST_CASE; ++i)
@@ -193,20 +183,20 @@ TYPED_TEST(LFUCache, TryGet)
     for (std::size_t i = 0; i < TEST_CASE; ++i)
     {
         auto element = cache.TryGet(std::to_string(i));
-        EXPECT_TRUE(element.second);
-        EXPECT_EQ(*element.first, i);
+        CHECK(element.second);
+        CHECK(*element.first == i);
     }
 
     for (std::size_t i = TEST_CASE; i < TEST_CASE * 2; ++i)
     {
         auto element = cache.TryGet(std::to_string(i));
-        EXPECT_FALSE(element.second);
+        CHECK_FALSE(element.second);
     }
 }
 
-TYPED_TEST(LFUCache, GetWithReplacement)
+TEMPLATE_TEST_CASE("LFUCache GetWithReplacement", "[lfu]", StdBackend, PhmapBackend)
 {
-    using cache_t = typename TestFixture::template cache_t<std::string, std::size_t>;
+    using cache_t = typename TestType::template cache_t<caches::LFU, std::string, std::size_t>;
     cache_t cache{2};
 
     cache.Put("1", 1);
@@ -214,11 +204,11 @@ TYPED_TEST(LFUCache, GetWithReplacement)
 
     auto element1 = cache.Get("1");
     auto element2 = cache.Get("2");
-    EXPECT_EQ(*element1, 1);
-    EXPECT_EQ(*element2, 2);
+    CHECK(*element1 == 1);
+    CHECK(*element2 == 2);
     cache.Put("3", 3);
     auto element3 = cache.Get("3");
-    EXPECT_EQ(*element3, 3);
+    CHECK(*element3 == 3);
 
     std::string replaced_key;
 
@@ -232,16 +222,16 @@ TYPED_TEST(LFUCache, GetWithReplacement)
         }
     }
 
-    EXPECT_FALSE(cache.Cached(replaced_key));
-    EXPECT_FALSE(cache.TryGet(replaced_key).second);
-    EXPECT_THROW(cache.Get(replaced_key), std::range_error);
-    EXPECT_EQ(*element1, 1);
-    EXPECT_EQ(*element2, 2);
-    EXPECT_EQ(*element3, 3);
+    CHECK_FALSE(cache.Cached(replaced_key));
+    CHECK_FALSE(cache.TryGet(replaced_key).second);
+    CHECK_THROWS_AS(cache.Get(replaced_key), std::range_error);
+    CHECK(*element1 == 1);
+    CHECK(*element2 == 2);
+    CHECK(*element3 == 3);
 }
 
-TYPED_TEST(LFUCache, InvalidSize)
+TEMPLATE_TEST_CASE("LFUCache InvalidSize", "[lfu]", StdBackend, PhmapBackend)
 {
-    using test_type = typename TestFixture::template cache_t<std::string, int>;
-    EXPECT_THROW(test_type cache{0}, std::invalid_argument);
+    using test_type = typename TestType::template cache_t<caches::LFU, std::string, int>;
+    CHECK_THROWS_AS(test_type{0}, std::invalid_argument);
 }

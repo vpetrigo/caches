@@ -6,115 +6,115 @@
 
 #include "test_helper.hpp"
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <cstddef>
 #include <functional>
 #include <string>
 
-TEST(BasicCacheTest, SimplePutAndGet)
+TEST_CASE("SimplePutAndGet", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
     cache.Put("key1", 100);
     cache.Put("key2", 200);
 
-    EXPECT_EQ(*cache.Get("key1"), 100);
-    EXPECT_EQ(*cache.Get("key2"), 200);
+    CHECK(*cache.Get("key1") == 100);
+    CHECK(*cache.Get("key2") == 200);
 }
 
-TEST(BasicCacheTest, PutUpdatesExistingKey)
+TEST_CASE("PutUpdatesExistingKey", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
     cache.Put("key", 100);
-    EXPECT_EQ(*cache.Get("key"), 100);
+    CHECK(*cache.Get("key") == 100);
 
     cache.Put("key", 200);
-    EXPECT_EQ(*cache.Get("key"), 200);
-    EXPECT_EQ(cache.Size(), 1);
+    CHECK(*cache.Get("key") == 200);
+    CHECK(cache.Size() == 1);
 }
 
-TEST(BasicCacheTest, GetThrowsForMissingKey)
+TEST_CASE("GetThrowsForMissingKey", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
-    EXPECT_THROW(cache.Get("nonexistent"), std::range_error);
+    CHECK_THROWS_AS(cache.Get("nonexistent"), std::range_error);
 }
 
-TEST(BasicCacheTest, TryGetReturnsNullptrForMissingKey)
+TEST_CASE("TryGetReturnsNullptrForMissingKey", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
     auto result = cache.TryGet("nonexistent");
-    EXPECT_FALSE(result.second);
-    EXPECT_EQ(result.first, nullptr);
+    CHECK_FALSE(result.second);
+    CHECK(result.first == nullptr);
 }
 
-TEST(BasicCacheTest, TryGetReturnsValueForExistingKey)
+TEST_CASE("TryGetReturnsValueForExistingKey", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
     cache.Put("key", 42);
 
     auto result = cache.TryGet("key");
-    EXPECT_TRUE(result.second);
-    EXPECT_EQ(*result.first, 42);
+    CHECK(result.second);
+    CHECK(*result.first == 42);
 }
 
-TEST(BasicCacheTest, CachedReturnsCorrectStatus)
+TEST_CASE("CachedReturnsCorrectStatus", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
-    EXPECT_FALSE(cache.Cached("key"));
+    CHECK_FALSE(cache.Cached("key"));
     cache.Put("key", 100);
-    EXPECT_TRUE(cache.Cached("key"));
+    CHECK(cache.Cached("key"));
 }
 
-TEST(BasicCacheTest, RemoveDeletesEntry)
+TEST_CASE("RemoveDeletesEntry", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
     cache.Put("key", 100);
-    EXPECT_TRUE(cache.Cached("key"));
+    CHECK(cache.Cached("key"));
 
-    EXPECT_TRUE(cache.Remove("key"));
-    EXPECT_FALSE(cache.Cached("key"));
+    CHECK(cache.Remove("key"));
+    CHECK_FALSE(cache.Cached("key"));
 }
 
-TEST(BasicCacheTest, RemoveReturnsFalseForMissingKey)
+TEST_CASE("RemoveReturnsFalseForMissingKey", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
-    EXPECT_FALSE(cache.Remove("nonexistent"));
+    CHECK_FALSE(cache.Remove("nonexistent"));
 }
 
-TEST(BasicCacheTest, SizeReturnsCorrectCount)
+TEST_CASE("SizeReturnsCorrectCount", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
-    EXPECT_EQ(cache.Size(), 0);
+    CHECK(cache.Size() == 0);
     cache.Put("key1", 1);
-    EXPECT_EQ(cache.Size(), 1);
+    CHECK(cache.Size() == 1);
     cache.Put("key2", 2);
-    EXPECT_EQ(cache.Size(), 2);
+    CHECK(cache.Size() == 2);
     cache.Remove("key1");
-    EXPECT_EQ(cache.Size(), 1);
+    CHECK(cache.Size() == 1);
 }
 
-TEST(BasicCacheTest, MaxSizeReturnsCapacity)
+TEST_CASE("MaxSizeReturnsCapacity", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{42};
-    EXPECT_EQ(cache.MaxSize(), 42);
+    CHECK(cache.MaxSize() == 42);
 }
 
-TEST(BasicCacheTest, EmptyReturnsCorrectStatus)
+TEST_CASE("EmptyReturnsCorrectStatus", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
-    EXPECT_TRUE(cache.Empty());
+    CHECK(cache.Empty());
     cache.Put("key", 100);
-    EXPECT_FALSE(cache.Empty());
+    CHECK_FALSE(cache.Empty());
 }
 
-TEST(BasicCacheTest, ClearRemovesAllEntries)
+TEST_CASE("ClearRemovesAllEntries", "[BasicCacheTest]")
 {
     caches::cache<std::string, int> cache{10};
 
@@ -124,16 +124,16 @@ TEST(BasicCacheTest, ClearRemovesAllEntries)
 
     cache.Clear();
 
-    EXPECT_TRUE(cache.Empty());
-    EXPECT_EQ(cache.Size(), 0);
+    CHECK(cache.Empty());
+    CHECK(cache.Size() == 0);
 }
 
-TEST(BasicCacheTest, ZeroSizeThrows)
+TEST_CASE("ZeroSizeThrows", "[BasicCacheTest]")
 {
-    EXPECT_THROW((caches::cache<std::string, int>{0}), std::invalid_argument);
+    CHECK_THROWS_AS((caches::cache<std::string, int>{0}), std::invalid_argument);
 }
 
-TEST(LRUCacheTest, EvictsLeastRecentlyUsed)
+TEST_CASE("EvictsLeastRecentlyUsed", "[LRUCacheTest]")
 {
     caches::cache<std::string, int, caches::LRU> cache{2};
 
@@ -142,12 +142,12 @@ TEST(LRUCacheTest, EvictsLeastRecentlyUsed)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_TRUE(cache.Cached("A"));
-    EXPECT_FALSE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK(cache.Cached("A"));
+    CHECK_FALSE(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(LRUCacheTest, UpdateRefreshesAccessTime)
+TEST_CASE("UpdateRefreshesAccessTime", "[LRUCacheTest]")
 {
     caches::cache<std::string, int, caches::LRU> cache{2};
 
@@ -156,13 +156,13 @@ TEST(LRUCacheTest, UpdateRefreshesAccessTime)
     cache.Put("A", 10);
     cache.Put("C", 3);
 
-    EXPECT_TRUE(cache.Cached("A"));
-    EXPECT_FALSE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
-    EXPECT_EQ(*cache.Get("A"), 10);
+    CHECK(cache.Cached("A"));
+    CHECK_FALSE(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
+    CHECK(*cache.Get("A") == 10);
 }
 
-TEST(FIFOCacheTest, EvictsFirstInserted)
+TEST_CASE("EvictsFirstInserted", "[FIFOCacheTest]")
 {
     caches::cache<std::string, int, caches::FIFO> cache{2};
 
@@ -171,12 +171,12 @@ TEST(FIFOCacheTest, EvictsFirstInserted)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_FALSE(cache.Cached("A"));
-    EXPECT_TRUE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK_FALSE(cache.Cached("A"));
+    CHECK(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(LFUCacheTest, EvictsLeastFrequentlyUsed)
+TEST_CASE("EvictsLeastFrequentlyUsed", "[LFUCacheTest]")
 {
     caches::cache<std::string, int, caches::LFU> cache{2};
 
@@ -187,12 +187,12 @@ TEST(LFUCacheTest, EvictsLeastFrequentlyUsed)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_TRUE(cache.Cached("A"));
-    EXPECT_FALSE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK(cache.Cached("A"));
+    CHECK_FALSE(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(NoEvictionCacheTest, EvictsSomeEntry)
+TEST_CASE("EvictsSomeEntry", "[NoEvictionCacheTest]")
 {
     caches::cache<std::string, int, caches::NoEviction> cache{2};
 
@@ -200,9 +200,9 @@ TEST(NoEvictionCacheTest, EvictsSomeEntry)
     cache.Put("B", 2);
     cache.Put("C", 3);
 
-    EXPECT_EQ(cache.Size(), 2);
-    EXPECT_TRUE(cache.Cached("C"));
-    EXPECT_TRUE(cache.Cached("A") || cache.Cached("B"));
+    CHECK(cache.Size() == 2);
+    CHECK(cache.Cached("C"));
+    CHECK((cache.Cached("A") || cache.Cached("B")));
 }
 
 namespace custom_types
@@ -230,18 +230,18 @@ bool operator==(const MyKey &lhs, const MyKey &rhs)
 
 } // namespace custom_types
 
-TEST(CustomKeyADLTest, WorksWithADLHashAndEqual)
+TEST_CASE("WorksWithADLHashAndEqual", "[CustomKeyADLTest]")
 {
     caches::cache<custom_types::MyKey, std::string> cache{10};
 
     cache.Put(custom_types::MyKey{1, "one"}, "value1");
     cache.Put(custom_types::MyKey{2, "two"}, "value2");
 
-    EXPECT_EQ(*cache.Get(custom_types::MyKey{1, "one"}), "value1");
-    EXPECT_EQ(*cache.Get(custom_types::MyKey{2, "two"}), "value2");
+    CHECK(*cache.Get(custom_types::MyKey{1, "one"}) == "value1");
+    CHECK(*cache.Get(custom_types::MyKey{2, "two"}) == "value2");
 
-    EXPECT_TRUE(cache.Cached(custom_types::MyKey{1, "one"}));
-    EXPECT_FALSE(cache.Cached(custom_types::MyKey{3, "three"}));
+    CHECK(cache.Cached(custom_types::MyKey{1, "one"}));
+    CHECK_FALSE(cache.Cached(custom_types::MyKey{3, "three"}));
 }
 
 namespace explicit_traits_test
@@ -274,7 +274,7 @@ struct ExternalKeyEqual
 
 } // namespace explicit_traits_test
 
-TEST(CustomKeyExplicitTraitsTest, WorksWithMakeTraits)
+TEST_CASE("WorksWithMakeTraits", "[CustomKeyExplicitTraitsTest]")
 {
     using my_traits = caches::make_traits<explicit_traits_test::ExternalKeyHash,
                                           explicit_traits_test::ExternalKeyEqual>;
@@ -284,8 +284,8 @@ TEST(CustomKeyExplicitTraitsTest, WorksWithMakeTraits)
     cache.Put(explicit_traits_test::ExternalKey{1.5}, 100);
     cache.Put(explicit_traits_test::ExternalKey{2.5}, 200);
 
-    EXPECT_EQ(*cache.Get(explicit_traits_test::ExternalKey{1.5}), 100);
-    EXPECT_EQ(*cache.Get(explicit_traits_test::ExternalKey{2.5}), 200);
+    CHECK(*cache.Get(explicit_traits_test::ExternalKey{1.5}) == 100);
+    CHECK(*cache.Get(explicit_traits_test::ExternalKey{2.5}) == 200);
 }
 
 namespace specialized_traits_test
@@ -326,18 +326,18 @@ struct caches::key_traits<specialized_traits_test::SpecialKey>
     using allocator_type = std::allocator<specialized_traits_test::SpecialKey>;
 };
 
-TEST(CustomKeySpecializedTraitsTest, WorksWithSpecializedKeyTraits)
+TEST_CASE("WorksWithSpecializedKeyTraits", "[CustomKeySpecializedTraitsTest]")
 {
     caches::cache<specialized_traits_test::SpecialKey, std::string> cache{10};
 
     cache.Put(specialized_traits_test::SpecialKey{100ULL}, "hundred");
     cache.Put(specialized_traits_test::SpecialKey{200ULL}, "two hundred");
 
-    EXPECT_EQ(*cache.Get(specialized_traits_test::SpecialKey{100ULL}), "hundred");
-    EXPECT_EQ(*cache.Get(specialized_traits_test::SpecialKey{200ULL}), "two hundred");
+    CHECK(*cache.Get(specialized_traits_test::SpecialKey{100ULL}) == "hundred");
+    CHECK(*cache.Get(specialized_traits_test::SpecialKey{200ULL}) == "two hundred");
 }
 
-TEST(OnEraseCallbackTest, CallbackInvokedOnEviction)
+TEST_CASE("CallbackInvokedOnEviction", "[OnEraseCallbackTest]")
 {
     int callback_count = 0;
     std::string last_evicted_key;
@@ -352,12 +352,12 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnEviction)
 
     cache.Put("A", 1);
     cache.Put("B", 2);
-    EXPECT_EQ(callback_count, 0);
+    CHECK(callback_count == 0);
     cache.Put("C", 3);
-    EXPECT_EQ(callback_count, 1);
+    CHECK(callback_count == 1);
 }
 
-TEST(OnEraseCallbackTest, CallbackInvokedOnRemove)
+TEST_CASE("CallbackInvokedOnRemove", "[OnEraseCallbackTest]")
 {
     bool callback_called = false;
 
@@ -368,10 +368,10 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnRemove)
     cache.Put("key", 100);
     cache.Remove("key");
 
-    EXPECT_TRUE(callback_called);
+    CHECK(callback_called);
 }
 
-TEST(OnEraseCallbackTest, CallbackInvokedOnClear)
+TEST_CASE("CallbackInvokedOnClear", "[OnEraseCallbackTest]")
 {
     int callback_count = 0;
 
@@ -385,10 +385,10 @@ TEST(OnEraseCallbackTest, CallbackInvokedOnClear)
 
     cache.Clear();
 
-    EXPECT_EQ(callback_count, 3);
+    CHECK(callback_count == 3);
 }
 
-TEST(ValueLifetimeTest, ValueRemainsValidAfterEviction)
+TEST_CASE("ValueRemainsValidAfterEviction", "[ValueLifetimeTest]")
 {
     caches::cache<std::string, int> cache{1};
 
@@ -396,47 +396,47 @@ TEST(ValueLifetimeTest, ValueRemainsValidAfterEviction)
     auto value_a = cache.Get("A");
 
     cache.Put("B", 100);
-    EXPECT_EQ(*value_a, 42);
-    EXPECT_FALSE(cache.Cached("A"));
+    CHECK(*value_a == 42);
+    CHECK_FALSE(cache.Cached("A"));
 }
 
-TEST(PolicyCombinationsTest, AllPoliciesWithIntKey)
+TEST_CASE("AllPoliciesWithIntKey", "[PolicyCombinationsTest]")
 {
     {
         caches::cache<int, int, caches::LRU> lru{5};
         lru.Put(1, 100);
-        EXPECT_EQ(*lru.Get(1), 100);
+        CHECK(*lru.Get(1) == 100);
     }
     {
         caches::cache<int, int, caches::FIFO> fifo{5};
         fifo.Put(1, 100);
-        EXPECT_EQ(*fifo.Get(1), 100);
+        CHECK(*fifo.Get(1) == 100);
     }
     {
         caches::cache<int, int, caches::LFU> lfu{5};
         lfu.Put(1, 100);
-        EXPECT_EQ(*lfu.Get(1), 100);
+        CHECK(*lfu.Get(1) == 100);
     }
     {
         caches::cache<int, int, caches::NoEviction> no_eviction{5};
         no_eviction.Put(1, 100);
-        EXPECT_EQ(*no_eviction.Get(1), 100);
+        CHECK(*no_eviction.Get(1) == 100);
     }
 }
 
-TEST(CapacityTest, SingleElementCache)
+TEST_CASE("SingleElementCache", "[CapacityTest]")
 {
     caches::cache<int, int> cache{1};
 
     cache.Put(1, 100);
-    EXPECT_EQ(*cache.Get(1), 100);
+    CHECK(*cache.Get(1) == 100);
 
     cache.Put(2, 200);
-    EXPECT_FALSE(cache.Cached(1));
-    EXPECT_EQ(*cache.Get(2), 200);
+    CHECK_FALSE(cache.Cached(1));
+    CHECK(*cache.Get(2) == 200);
 }
 
-TEST(CapacityTest, LargeCacheStaysWithinCapacity)
+TEST_CASE("LargeCacheStaysWithinCapacity", "[CapacityTest]")
 {
     constexpr std::size_t CAPACITY = 100;
     caches::cache<int, int> cache{CAPACITY};
@@ -444,13 +444,13 @@ TEST(CapacityTest, LargeCacheStaysWithinCapacity)
     for (int i = 0; i < 1000; ++i)
     {
         cache.Put(i, i * 10);
-        EXPECT_LE(cache.Size(), CAPACITY);
+        CHECK(cache.Size() <= CAPACITY);
     }
 
-    EXPECT_EQ(cache.Size(), CAPACITY);
+    CHECK(cache.Size() == CAPACITY);
 }
 
-TEST(CustomHashMapTest, WorksWithPhmapNodeHashMap)
+TEST_CASE("WorksWithPhmapNodeHashMap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_node_hash_map>
@@ -459,12 +459,12 @@ TEST(CustomHashMapTest, WorksWithPhmapNodeHashMap)
     cache.Put("key1", 100);
     cache.Put("key2", 200);
 
-    EXPECT_EQ(*cache.Get("key1"), 100);
-    EXPECT_EQ(*cache.Get("key2"), 200);
-    EXPECT_EQ(cache.Size(), 2);
+    CHECK(*cache.Get("key1") == 100);
+    CHECK(*cache.Get("key2") == 200);
+    CHECK(cache.Size() == 2);
 }
 
-TEST(CustomHashMapTest, LRUEvictionWithPhmap)
+TEST_CASE("LRUEvictionWithPhmap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_node_hash_map>
@@ -475,12 +475,12 @@ TEST(CustomHashMapTest, LRUEvictionWithPhmap)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_TRUE(cache.Cached("A"));
-    EXPECT_FALSE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK(cache.Cached("A"));
+    CHECK_FALSE(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(CustomHashMapTest, FIFOEvictionWithPhmap)
+TEST_CASE("FIFOEvictionWithPhmap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::FIFO, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_node_hash_map>
@@ -491,12 +491,12 @@ TEST(CustomHashMapTest, FIFOEvictionWithPhmap)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_FALSE(cache.Cached("A"));
-    EXPECT_TRUE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK_FALSE(cache.Cached("A"));
+    CHECK(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(CustomHashMapTest, LFUEvictionWithPhmap)
+TEST_CASE("LFUEvictionWithPhmap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::LFU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_node_hash_map>
@@ -509,12 +509,12 @@ TEST(CustomHashMapTest, LFUEvictionWithPhmap)
     cache.Get("A");
     cache.Put("C", 3);
 
-    EXPECT_TRUE(cache.Cached("A"));
-    EXPECT_FALSE(cache.Cached("B"));
-    EXPECT_TRUE(cache.Cached("C"));
+    CHECK(cache.Cached("A"));
+    CHECK_FALSE(cache.Cached("B"));
+    CHECK(cache.Cached("C"));
 }
 
-TEST(CustomHashMapTest, CustomKeyWithPhmap)
+TEST_CASE("CustomKeyWithPhmap", "[CustomHashMapTest]")
 {
     using my_traits = caches::make_traits<explicit_traits_test::ExternalKeyHash,
                                           explicit_traits_test::ExternalKeyEqual>;
@@ -526,11 +526,11 @@ TEST(CustomHashMapTest, CustomKeyWithPhmap)
     cache.Put(explicit_traits_test::ExternalKey{1.5}, 100);
     cache.Put(explicit_traits_test::ExternalKey{2.5}, 200);
 
-    EXPECT_EQ(*cache.Get(explicit_traits_test::ExternalKey{1.5}), 100);
-    EXPECT_EQ(*cache.Get(explicit_traits_test::ExternalKey{2.5}), 200);
+    CHECK(*cache.Get(explicit_traits_test::ExternalKey{1.5}) == 100);
+    CHECK(*cache.Get(explicit_traits_test::ExternalKey{2.5}) == 200);
 }
 
-TEST(CustomHashMapTest, AllOperationsWithPhmap)
+TEST_CASE("AllOperationsWithPhmap", "[CustomHashMapTest]")
 {
     caches::cache<int, std::string, caches::LRU, caches::key_traits<int>,
                   caches::default_wrapper<std::string>, phmap_node_hash_map>
@@ -541,28 +541,28 @@ TEST(CustomHashMapTest, AllOperationsWithPhmap)
     cache.Put(2, "two");
     cache.Put(3, "three");
 
-    EXPECT_EQ(*cache.Get(1), "one");
-    EXPECT_EQ(*cache.Get(2), "two");
-    EXPECT_EQ(*cache.Get(3), "three");
+    CHECK(*cache.Get(1) == "one");
+    CHECK(*cache.Get(2) == "two");
+    CHECK(*cache.Get(3) == "three");
 
     auto result = cache.TryGet(1);
-    EXPECT_TRUE(result.second);
-    EXPECT_EQ(*result.first, "one");
+    CHECK(result.second);
+    CHECK(*result.first == "one");
 
     auto missing = cache.TryGet(99);
-    EXPECT_FALSE(missing.second);
-    EXPECT_TRUE(cache.Cached(1));
-    EXPECT_FALSE(cache.Cached(99));
-    EXPECT_EQ(cache.Size(), 3);
-    EXPECT_TRUE(cache.Remove(2));
-    EXPECT_FALSE(cache.Cached(2));
-    EXPECT_EQ(cache.Size(), 2);
+    CHECK_FALSE(missing.second);
+    CHECK(cache.Cached(1));
+    CHECK_FALSE(cache.Cached(99));
+    CHECK(cache.Size() == 3);
+    CHECK(cache.Remove(2));
+    CHECK_FALSE(cache.Cached(2));
+    CHECK(cache.Size() == 2);
     cache.Clear();
-    EXPECT_TRUE(cache.Empty());
-    EXPECT_EQ(cache.Size(), 0);
+    CHECK(cache.Empty());
+    CHECK(cache.Size() == 0);
 }
 
-TEST(CustomHashMapTest, WorksWithPhmapFlatHashMap)
+TEST_CASE("WorksWithPhmapFlatHashMap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
                   caches::default_wrapper<int>, phmap_flat_hash_map>
@@ -571,12 +571,12 @@ TEST(CustomHashMapTest, WorksWithPhmapFlatHashMap)
     cache.Put("key1", 100);
     cache.Put("key2", 200);
 
-    EXPECT_EQ(*cache.Get("key1"), 100);
-    EXPECT_EQ(*cache.Get("key2"), 200);
-    EXPECT_EQ(cache.Size(), 2);
+    CHECK(*cache.Get("key1") == 100);
+    CHECK(*cache.Get("key2") == 200);
+    CHECK(cache.Size() == 2);
 }
 
-TEST(CustomHashMapTest, CapacityWithPhmap)
+TEST_CASE("CapacityWithPhmap", "[CustomHashMapTest]")
 {
     constexpr std::size_t CAPACITY = 50;
     caches::cache<int, int, caches::LRU, caches::key_traits<int>, caches::default_wrapper<int>,
@@ -586,8 +586,8 @@ TEST(CustomHashMapTest, CapacityWithPhmap)
     for (int i = 0; i < 500; ++i)
     {
         cache.Put(i, i * 10);
-        EXPECT_LE(cache.Size(), CAPACITY);
+        CHECK(cache.Size() <= CAPACITY);
     }
 
-    EXPECT_EQ(cache.Size(), CAPACITY);
+    CHECK(cache.Size() == CAPACITY);
 }

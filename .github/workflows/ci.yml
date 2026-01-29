@@ -26,6 +26,7 @@ jobs:
         run: |
           cmake -E make_directory build
           cmake --version
+          cd build
           cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
           cmake --build . --parallel
           ctest -V --output-on-failure --repeat until-fail:10
@@ -83,13 +84,15 @@ jobs:
           cmake -E make_directory build
           cmake --version
 
-          if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+          if ( "${{ matrix.clang_cl_asan }}" -eq "true" )
+          {
             clang-cl --version
-          fi
+          }
 
           cd build
 
-          if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+          if ( "${{ matrix.clang_cl_asan }}" -eq "true" )
+          {
             # Prevent Git-Bash (MSYS2) from rewriting MSVC-style flags like /fsanitize=address.
             $env:MSYS2_ARG_CONV_EXCL="*"
             cmake -G Ninja .. \
@@ -106,9 +109,11 @@ jobs:
               -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib"
 
             $env:ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
+          }
           else
+          {
             cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
-          fi
+          }
 
           cmake --build . --parallel
           ctest -V --output-on-failure --repeat until-fail:10

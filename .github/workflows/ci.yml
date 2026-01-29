@@ -10,17 +10,33 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    name: Build (${{ matrix.name }})
+    name: Build (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
-            name: macos-clang
-            clang_cl_asan: false
           - os: ubuntu-latest
-            name: ubuntu-clang
-            clang_cl_asan: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: "true"
+      - name: "Run tests"
+        shell: bash
+        run: |
+          cmake -E make_directory build
+          cmake --version
+          cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
+          cmake --build . --parallel
+          ctest -V --output-on-failure --repeat until-fail:10
+
+  build-win:
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
           - os: windows-latest
             name: windows-mingw
             clang_cl_asan: false
@@ -62,22 +78,20 @@ jobs:
           "ASAN_RUNTIME_DIR=$asanDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "LIB=$asanDir;$env:LIB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: "Run tests"
-        shell: bash
+        shell: pwsh
         run: |
           cmake -E make_directory build
           cmake --version
-          if [[ "${{ runner.os }}" != "Windows" ]]; then
-            clang --version
-            clang++ --version
-            export CC=clang
-            export CXX=clang++
-          elif [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
+
+          if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
             clang-cl --version
           fi
+
           cd build
+
           if [[ "${{ matrix.clang_cl_asan }}" == "true" ]]; then
             # Prevent Git-Bash (MSYS2) from rewriting MSVC-style flags like /fsanitize=address.
-            export MSYS2_ARG_CONV_EXCL="*"
+            $env:MSYS2_ARG_CONV_EXCL="*"
             cmake -G Ninja .. \
               -DCACHES_BUILD_TEST=ON \
               -DCMAKE_C_COMPILER=clang-cl \
@@ -91,10 +105,11 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" \
               -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib"
 
-            export ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
+            $env:ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"
           else
             cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. -DCACHES_BUILD_TEST=ON
           fi
+
           cmake --build . --parallel
           ctest -V --output-on-failure --repeat until-fail:10
 

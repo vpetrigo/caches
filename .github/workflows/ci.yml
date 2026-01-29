@@ -95,17 +95,17 @@ jobs:
           {
             # Prevent Git-Bash (MSYS2) from rewriting MSVC-style flags like /fsanitize=address.
             $env:MSYS2_ARG_CONV_EXCL="*"
-            cmake -G Ninja .. \
-              -DCACHES_BUILD_TEST=ON \
-              -DCMAKE_C_COMPILER=clang-cl \
-              -DCMAKE_CXX_COMPILER=clang-cl \
-              -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
-              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL \
-              -DCMAKE_TRY_COMPILE_CONFIGURATION=Release \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_C_FLAGS="/fsanitize=address -Wno-unused-command-line-argument" \
-              -DCMAKE_CXX_FLAGS="/fsanitize=address /EHsc -Wno-unused-command-line-argument" \
-              -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" \
+            cmake -G Ninja .. `
+              -DCACHES_BUILD_TEST=ON `
+              -DCMAKE_C_COMPILER=clang-cl `
+              -DCMAKE_CXX_COMPILER=clang-cl `
+              -DCMAKE_POLICY_DEFAULT_CMP0091=NEW `
+              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL `
+              -DCMAKE_TRY_COMPILE_CONFIGURATION=Release `
+              -DCMAKE_BUILD_TYPE=Debug `
+              -DCMAKE_C_FLAGS="/fsanitize=address -Wno-unused-command-line-argument" `
+              -DCMAKE_CXX_FLAGS="/fsanitize=address /EHsc -Wno-unused-command-line-argument" `
+              -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" `
               -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /DEFAULTLIB:clang_rt.asan_dynamic-x86_64.lib /DEFAULTLIB:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib"
 
             $env:ASAN_OPTIONS="halt_on_error=1:abort_on_error=1:symbolize=1"

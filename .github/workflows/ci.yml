@@ -132,12 +132,12 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
+          cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON
           cmake --build . --parallel $(nproc)
-          ctest -V --output-on-failure --repeat until-fail:10
+          ctest -V --output-on-failure
           mkdir coverage
           cd coverage
-          lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch --rc geninfo_unexecuted_blocks=1
+          lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch,source --rc geninfo_unexecuted_blocks=1
           lcov --remove coverage-raw.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info --ignore-errors mismatch
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

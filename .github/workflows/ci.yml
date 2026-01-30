@@ -130,9 +130,9 @@ jobs:
           sudo apt-get install -y lcov gcc g++ llvm
       - name: Run tests with coverage options
         run: |
+          BASE_DIR="$(pwd)"
           mkdir build
           cd build
-          BASE_DIR="$(pwd)"
           cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON
           cmake --build . --parallel $(nproc)
           ctest -V --output-on-failure

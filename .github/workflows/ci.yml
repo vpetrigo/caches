@@ -133,7 +133,7 @@ jobs:
           BASE_DIR="$(pwd)"
           mkdir build
           cd build
-          cmake .. -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCACHES_BUILD_TEST=ON -DCACHES_ENABLE_COVERAGE=ON
           cmake --build . --parallel $(nproc)
           ctest -V --output-on-failure
           mkdir coverage

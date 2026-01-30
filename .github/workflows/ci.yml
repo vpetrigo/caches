@@ -140,13 +140,11 @@ jobs:
           cd coverage
           lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch,source --rc geninfo_unexecuted_blocks=1
           lcov --remove coverage-raw.info "/usr/*" "${BASE_DIR}/deps/*" "${BASE_DIR}/test/*" -o coverage.info --ignore-errors mismatch
-          ls .
-          rm coverage-raw.info
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./build/coverage
+          file: build/coverage/coverage.info
           fail_ci_if_error: false
 
   build-clang:

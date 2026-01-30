@@ -1,6 +1,6 @@
 [![CI](https://github.com/vpetrigo/caches/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/vpetrigo/caches/actions/workflows/ci.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/kawd812e48065r7a?svg=true)](https://ci.appveyor.com/project/vpetrigo/caches)
-[![codecov](https://codecov.io/gh/vpetrigo/caches/branch/master/graph/badge.svg?token=uExJPtyE0o)](https://codecov.io/gh/vpetrigo/caches)
+[![Coverage Status](https://coveralls.io/repos/github/vpetrigo/caches/badge.svg)](https://coveralls.io/github/vpetrigo/caches)
 [![version](https://img.shields.io/github/v/release/vpetrigo/caches)](https://github.com/vpetrigo/caches/releases)
 
 # C++ Cache implementation

@@ -121,7 +121,7 @@ jobs:
   build-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: "true"
       - name: Install dependencies
@@ -141,7 +141,7 @@ jobs:
           lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch,source --rc geninfo_unexecuted_blocks=1
           lcov --remove coverage-raw.info "/usr/*" "${BASE_DIR}/deps/*" "${BASE_DIR}/test/*" -o coverage.info --ignore-errors mismatch
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./build/coverage
@@ -161,6 +161,8 @@ jobs:
         uses: egor-tensin/setup-clang@v2
         with:
           version: ${{ matrix.tag }}
+      - name: Install libc++
+        run: sudo apt-get install -y libc++-${{ matrix.tag }}-dev libc++abi-${{ matrix.tag }}-dev
       - name: Set environment variables
         run: |
           echo "CC=clang-${{ matrix.tag }}" >> $GITHUB_ENV
@@ -172,7 +174,7 @@ jobs:
           ${{ env.CC }} --version
           ${{ env.CXX }} --version
           cd build
-          cmake .. -DCACHES_BUILD_TEST=ON
+          cmake .. -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCACHES_BUILD_TEST=ON
           cmake --build . --parallel
           ctest -V --output-on-failure --repeat until-fail:10
         shell: bash

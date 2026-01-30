@@ -21,7 +21,6 @@
 #ifndef CACHES_WRAPPER_POLICY_HPP
 #define CACHES_WRAPPER_POLICY_HPP
 
-#include <atomic>
 #include <memory>
 #include <utility>
 

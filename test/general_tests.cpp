@@ -388,6 +388,140 @@ TEST_CASE("CallbackInvokedOnClear", "[OnEraseCallbackTest]")
     CHECK(callback_count == 3);
 }
 
+TEST_CASE("CallbackInvokedOnEvictionFIFO", "[OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+    std::string last_evicted;
+
+    caches::cache<std::string, int, caches::FIFO> cache{
+        2, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &key, const auto &)
+        {
+            callback_count++;
+            last_evicted = key;
+        }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    CHECK(callback_count == 0);
+
+    cache.Put("C", 3); // Should evict A (FIFO)
+    CHECK(callback_count == 1);
+    CHECK(last_evicted == "A");
+}
+
+TEST_CASE("CallbackInvokedOnEvictionLFU", "[OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+
+    caches::cache<std::string, int, caches::LFU> cache{
+        2, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &, const auto &) { callback_count++; }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Get("A"); // Increase A's frequency
+    cache.Get("A");
+
+    cache.Put("C", 3); // Should evict B (LFU)
+    CHECK(callback_count == 1);
+    CHECK_FALSE(cache.Cached("B"));
+}
+
+TEST_CASE("CallbackInvokedOnEvictionNoEviction", "[OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+
+    caches::cache<std::string, int, caches::NoEviction> cache{
+        2, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &, const auto &) { callback_count++; }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3); // Evicts some entry
+    CHECK(callback_count == 1);
+    CHECK(cache.Size() == 2);
+}
+
+TEST_CASE("ClearWithCallbackFIFO", "[OnEraseCallbackTest]")
+{
+    int count = 0;
+    caches::cache<std::string, int, caches::FIFO> cache{
+        10, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &, const auto &) { count++; }};
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3);
+    cache.Clear();
+    CHECK(count == 3);
+}
+
+TEST_CASE("ClearWithCallbackLFU", "[OnEraseCallbackTest]")
+{
+    int count = 0;
+    caches::cache<std::string, int, caches::LFU> cache{
+        10, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &, const auto &) { count++; }};
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3);
+    cache.Clear();
+    CHECK(count == 3);
+}
+
+TEST_CASE("ClearWithCallbackNoEviction", "[OnEraseCallbackTest]")
+{
+    int count = 0;
+    caches::cache<std::string, int, caches::NoEviction> cache{
+        10, std::hash<std::string>{}, std::equal_to<std::string>{}, std::allocator<std::string>{},
+        [&](const std::string &, const auto &) { count++; }};
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3);
+    cache.Clear();
+    CHECK(count == 3);
+}
+
+TEST_CASE("RemoveWithCallbackAllPolicies", "[OnEraseCallbackTest]")
+{
+    {
+        int count = 0;
+        caches::cache<std::string, int, caches::LRU> cache{
+            10, std::hash<std::string>{}, std::equal_to<std::string>{},
+            std::allocator<std::string>{}, [&](const std::string &, const auto &) { count++; }};
+        cache.Put("key", 100);
+        cache.Remove("key");
+        CHECK(count == 1);
+    }
+    {
+        int count = 0;
+        caches::cache<std::string, int, caches::FIFO> cache{
+            10, std::hash<std::string>{}, std::equal_to<std::string>{},
+            std::allocator<std::string>{}, [&](const std::string &, const auto &) { count++; }};
+        cache.Put("key", 100);
+        cache.Remove("key");
+        CHECK(count == 1);
+    }
+    {
+        int count = 0;
+        caches::cache<std::string, int, caches::LFU> cache{
+            10, std::hash<std::string>{}, std::equal_to<std::string>{},
+            std::allocator<std::string>{}, [&](const std::string &, const auto &) { count++; }};
+        cache.Put("key", 100);
+        cache.Remove("key");
+        CHECK(count == 1);
+    }
+    {
+        int count = 0;
+        caches::cache<std::string, int, caches::NoEviction> cache{
+            10, std::hash<std::string>{}, std::equal_to<std::string>{},
+            std::allocator<std::string>{}, [&](const std::string &, const auto &) { count++; }};
+        cache.Put("key", 100);
+        cache.Remove("key");
+        CHECK(count == 1);
+    }
+}
+
 TEST_CASE("ValueRemainsValidAfterEviction", "[ValueLifetimeTest]")
 {
     caches::cache<std::string, int> cache{1};
@@ -450,18 +584,128 @@ TEST_CASE("LargeCacheStaysWithinCapacity", "[CapacityTest]")
     CHECK(cache.Size() == CAPACITY);
 }
 
-TEST_CASE("WorksWithPhmapNodeHashMap", "[CustomHashMapTest]")
+TEST_CASE("ConstructorWithPolicy", "[coverage]")
 {
-    caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
-                  caches::default_wrapper<int>, phmap_node_hash_map>
-        cache{10};
+    using cache_t = caches::cache<std::string, int, caches::LRU>;
+    using policy_t = cache_t::policy_type;
 
-    cache.Put("key1", 100);
-    cache.Put("key2", 200);
+    policy_t policy;
+    cache_t cache{10, std::move(policy)};
 
-    CHECK(*cache.Get("key1") == 100);
-    CHECK(*cache.Get("key2") == 200);
-    CHECK(cache.Size() == 2);
+    REQUIRE(cache.MaxSize() == 10);
+    REQUIRE(cache.Size() == 0);
+
+    cache.Put("test", 1);
+    REQUIRE(*cache.Get("test") == 1);
+}
+
+TEST_CASE("ConstructorWithPolicyThrows", "[coverage]")
+{
+    using cache_t = caches::cache<std::string, int, caches::LRU>;
+    using policy_t = cache_t::policy_type;
+
+    policy_t policy;
+    REQUIRE_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+}
+
+TEST_CASE("ConstructorWithPolicyAllPolicies", "[coverage]")
+{
+    // Test FIFO with policy constructor
+    {
+        using cache_t = caches::cache<std::string, int, caches::FIFO>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        cache_t cache{10, std::move(policy)};
+        REQUIRE(cache.MaxSize() == 10);
+        REQUIRE(cache.Size() == 0);
+        cache.Put("test", 1);
+        REQUIRE(*cache.Get("test") == 1);
+    }
+    // Test LFU with policy constructor
+    {
+        using cache_t = caches::cache<std::string, int, caches::LFU>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        cache_t cache{10, std::move(policy)};
+        REQUIRE(cache.MaxSize() == 10);
+        REQUIRE(cache.Size() == 0);
+        cache.Put("test", 1);
+        REQUIRE(*cache.Get("test") == 1);
+    }
+    // Test NoEviction with policy constructor
+    {
+        using cache_t = caches::cache<std::string, int, caches::NoEviction>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        cache_t cache{10, std::move(policy)};
+        REQUIRE(cache.MaxSize() == 10);
+        REQUIRE(cache.Size() == 0);
+        cache.Put("test", 1);
+        REQUIRE(*cache.Get("test") == 1);
+    }
+}
+
+TEST_CASE("ConstructorWithPolicyThrowsAllPolicies", "[coverage]")
+{
+    // FIFO
+    {
+        using cache_t = caches::cache<std::string, int, caches::FIFO>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        REQUIRE_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+    // LFU
+    {
+        using cache_t = caches::cache<std::string, int, caches::LFU>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        REQUIRE_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+    // NoEviction
+    {
+        using cache_t = caches::cache<std::string, int, caches::NoEviction>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        REQUIRE_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+}
+
+template <template <typename, typename> class Policy>
+void TestPolicyRuleOfFive()
+{
+    using key_type = std::string;
+    using traits_type = caches::key_traits<key_type>;
+    using policy_t = Policy<key_type, traits_type>;
+
+    // Default construction
+    policy_t p1;
+
+    // Copy construction
+    policy_t p2(p1);
+
+    // Copy assignment
+    policy_t p3;
+    p3 = p1;
+
+    // Move construction
+    policy_t p4(std::move(p2));
+
+    // Move assignment
+    policy_t p5;
+    p5 = std::move(p3);
+
+    // Basic operation to ensure valid state after moves
+    p5.Insert("test");
+    p5.Touch("test");
+    p5.Erase("test");
+}
+
+TEST_CASE("PolicyRuleOfFive", "[coverage]")
+{
+    TestPolicyRuleOfFive<caches::LRU>();
+    TestPolicyRuleOfFive<caches::FIFO>();
+    TestPolicyRuleOfFive<caches::LFU>();
+    TestPolicyRuleOfFive<caches::NoEviction>();
 }
 
 TEST_CASE("LRUEvictionWithPhmap", "[CustomHashMapTest]")
@@ -536,7 +780,6 @@ TEST_CASE("AllOperationsWithPhmap", "[CustomHashMapTest]")
                   caches::default_wrapper<std::string>, phmap_node_hash_map>
         cache{5};
 
-
     cache.Put(1, "one");
     cache.Put(2, "two");
     cache.Put(3, "three");
@@ -590,4 +833,87 @@ TEST_CASE("CapacityWithPhmap", "[CustomHashMapTest]")
     }
 
     CHECK(cache.Size() == CAPACITY);
+}
+
+TEST_CASE("CallbackWithPhmapBackendLRU", "[CustomHashMapTest][OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+    std::string last_evicted;
+
+    caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
+                  caches::default_wrapper<int>, phmap_node_hash_map>
+        cache{2, std::hash<std::string>{}, std::equal_to<std::string>{},
+              std::allocator<std::string>{}, [&](const std::string &key, const auto &)
+              {
+                  callback_count++;
+                  last_evicted = key;
+              }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Get("A");    // Touch A
+    cache.Put("C", 3); // Should evict B
+
+    CHECK(callback_count == 1);
+    CHECK(last_evicted == "B");
+}
+
+TEST_CASE("CallbackWithPhmapBackendFIFO", "[CustomHashMapTest][OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+    std::string last_evicted;
+
+    caches::cache<std::string, int, caches::FIFO, caches::key_traits<std::string>,
+                  caches::default_wrapper<int>, phmap_node_hash_map>
+        cache{2, std::hash<std::string>{}, std::equal_to<std::string>{},
+              std::allocator<std::string>{}, [&](const std::string &key, const auto &)
+              {
+                  callback_count++;
+                  last_evicted = key;
+              }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3); // Should evict A (FIFO)
+
+    CHECK(callback_count == 1);
+    CHECK(last_evicted == "A");
+}
+
+TEST_CASE("CallbackWithPhmapBackendLFU", "[CustomHashMapTest][OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+
+    caches::cache<std::string, int, caches::LFU, caches::key_traits<std::string>,
+                  caches::default_wrapper<int>, phmap_node_hash_map>
+        cache{2, std::hash<std::string>{}, std::equal_to<std::string>{},
+              std::allocator<std::string>{},
+              [&](const std::string &, const auto &) { callback_count++; }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Get("A");
+    cache.Get("A");
+    cache.Put("C", 3); // Should evict B (LFU)
+
+    CHECK(callback_count == 1);
+    CHECK_FALSE(cache.Cached("B"));
+}
+
+TEST_CASE("CallbackWithPhmapBackendNoEviction", "[CustomHashMapTest][OnEraseCallbackTest]")
+{
+    int callback_count = 0;
+
+    caches::cache<std::string, int, caches::NoEviction, caches::key_traits<std::string>,
+                  caches::default_wrapper<int>, phmap_node_hash_map>
+        cache{2, std::hash<std::string>{}, std::equal_to<std::string>{},
+              std::allocator<std::string>{},
+              [&](const std::string &, const auto &) { callback_count++; }};
+
+    cache.Put("A", 1);
+    cache.Put("B", 2);
+    cache.Put("C", 3); // Evicts some entry
+
+    CHECK(callback_count == 1);
+    CHECK(cache.Size() == 2);
 }

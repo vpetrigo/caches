@@ -239,3 +239,54 @@ TEMPLATE_TEST_CASE("LRUCache InvalidSize", "[lru]", StdBackend, PhmapBackend)
     using test_type = typename TestType::template cache_t<caches::LRU, std::string, int>;
     CHECK_THROWS_AS((test_type{0}), std::invalid_argument);
 }
+
+TEMPLATE_TEST_CASE("LRU ReplCandidate SingleElement", "[lru]", StdBackend, PhmapBackend)
+{
+    using cache_t = typename TestType::template cache_t<caches::LRU, std::string, int>;
+    cache_t cache(1);
+
+    cache.Put("only", 42);
+    cache.Put("new", 100);
+
+    CHECK_FALSE(cache.Cached("only"));
+    CHECK(cache.Cached("new"));
+    CHECK(*cache.Get("new") == 100);
+}
+
+TEMPLATE_TEST_CASE("LRU EvictionAfterMultipleTouches", "[lru]", StdBackend, PhmapBackend)
+{
+    using cache_t = typename TestType::template cache_t<caches::LRU, int, int>;
+    cache_t cache(3);
+
+    cache.Put(1, 10);
+    cache.Put(2, 20);
+    cache.Put(3, 30);
+    cache.Get(3);
+    cache.Get(1);
+    cache.Get(2);
+
+    // Next insert should evict 3 (LRU after touches)
+    cache.Put(4, 40);
+
+    CHECK_FALSE(cache.Cached(3));
+    CHECK(cache.Cached(1));
+    CHECK(cache.Cached(2));
+    CHECK(cache.Cached(4));
+}
+
+TEMPLATE_TEST_CASE("LRU RapidEvictions", "[lru]", StdBackend, PhmapBackend)
+{
+    using cache_t = typename TestType::template cache_t<caches::LRU, int, int>;
+    cache_t cache(2);
+
+    for (int i = 0; i < 10; ++i)
+    {
+        cache.Put(i, i * 10);
+        CHECK(cache.Size() <= 2);
+    }
+
+    CHECK(cache.Cached(8));
+    CHECK(cache.Cached(9));
+    CHECK(*cache.Get(8) == 80);
+    CHECK(*cache.Get(9) == 90);
+}

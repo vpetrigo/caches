@@ -153,6 +153,11 @@ jobs:
           disable_search: true
           files: build/coverage.info
           fail_ci_if_error: true
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          token: ${{ secrets.COVERALLS_TOKEN }}
+          files: build/coverage.info
 
   build-clang:
     runs-on: ubuntu-latest

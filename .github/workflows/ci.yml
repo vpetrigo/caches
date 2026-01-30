@@ -128,8 +128,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lcov gcc g++ llvm
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install gcovr
+        run: uv tool install gcovr
       - name: Run tests with coverage options
         run: |
+          export PATH=$HOME/.local/bin:$PATH
           BASE_DIR="$(pwd)"
           mkdir build
           cd build
@@ -138,13 +143,14 @@ jobs:
           ctest -V --output-on-failure
           mkdir coverage
           cd coverage
-          lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch,source --rc geninfo_unexecuted_blocks=1
-          lcov --remove coverage-raw.info "/usr/*" "${BASE_DIR}/deps/*" "${BASE_DIR}/test/*" -o coverage.info --ignore-errors mismatch
+          cmake --build . --target coverage
+          # lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch,source --rc geninfo_unexecuted_blocks=1
+          # lcov --remove coverage-raw.info "/usr/*" "${BASE_DIR}/deps/*" "${BASE_DIR}/test/*" -o coverage.info --ignore-errors mismatch
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: build/coverage/coverage.info
+          file: build/coverage.info
           fail_ci_if_error: false
 
   build-clang:

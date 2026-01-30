@@ -13,10 +13,6 @@ macro(add_coverage_flags target)
     endif ()
 endmacro()
 
-if (MSVC)
-    add_definitions(/MP)
-endif ()
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

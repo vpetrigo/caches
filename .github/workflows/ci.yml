@@ -150,8 +150,9 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          disable_search: true
           files: build/coverage.info
-          fail_ci_if_error: false
+          fail_ci_if_error: true
 
   build-clang:
     runs-on: ubuntu-latest

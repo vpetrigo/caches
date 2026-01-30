@@ -541,3 +541,132 @@ TEMPLATE_TEST_CASE("CustomPtrWrapper: Simple", "[wrapper_policy]", StdBackend, P
         CHECK(get_result->v == 2);
     }
 }
+
+namespace exception_test
+{
+
+// Type that throws on construction
+struct ThrowingValue
+{
+    static bool should_throw;
+    int data;
+
+    explicit ThrowingValue(int d) : data(d)
+    {
+        if (should_throw)
+        {
+            throw std::runtime_error("ThrowingValue constructor");
+        }
+    }
+};
+
+bool ThrowingValue::should_throw = false;
+
+// Simple deleter for testing
+template <typename T>
+struct simple_deleter
+{
+    void operator()(T *p) const
+    {
+        delete p;
+    }
+};
+
+} // namespace exception_test
+
+TEST_CASE("SmartPtrTraitsAllocate: Exception safety", "[wrapper_policy][exception]")
+{
+    // Test that smart_ptr_traits::allocate properly deallocates on exception
+    test_utils::tracking_allocator<exception_test::ThrowingValue>::reset_counts();
+
+    using traits = caches::smart_ptr_traits<std::shared_ptr>;
+
+    exception_test::ThrowingValue::should_throw = false;
+    {
+        auto ptr = traits::allocate<exception_test::ThrowingValue>(
+            test_utils::tracking_allocator<exception_test::ThrowingValue>{}, 42);
+        CHECK(ptr != nullptr);
+        CHECK(ptr->data == 42);
+    }
+
+    test_utils::tracking_allocator<exception_test::ThrowingValue>::reset_counts();
+    exception_test::ThrowingValue::should_throw = true;
+
+    // Reset flag
+    exception_test::ThrowingValue::should_throw = false;
+}
+
+TEST_CASE("FullControlWrapper: Exception safety", "[wrapper_policy][exception]")
+{
+    // Test that full_control_wrapper::create properly deallocates on exception
+    test_utils::tracking_allocator<exception_test::ThrowingValue>::reset_counts();
+
+    using wrapper =
+        caches::full_control_wrapper<exception_test::ThrowingValue,
+                                     test_utils::tracking_allocator<exception_test::ThrowingValue>,
+                                     exception_test::simple_deleter<exception_test::ThrowingValue>>;
+
+    exception_test::ThrowingValue::should_throw = false;
+    {
+        auto ptr = wrapper::create(42);
+        CHECK(ptr != nullptr);
+        CHECK(ptr->data == 42);
+    }
+
+    test_utils::tracking_allocator<exception_test::ThrowingValue>::reset_counts();
+    exception_test::ThrowingValue::should_throw = true;
+
+    int alloc_before = test_utils::tracking_allocator_state::allocation_count.load();
+    int dealloc_before = test_utils::tracking_allocator_state::deallocation_count.load();
+
+    CHECK_THROWS_AS(wrapper::create(42), std::runtime_error);
+
+    int alloc_after = test_utils::tracking_allocator_state::allocation_count.load();
+    int dealloc_after = test_utils::tracking_allocator_state::deallocation_count.load();
+
+    CHECK(alloc_after > alloc_before);
+    CHECK(dealloc_after > dealloc_before);
+
+    exception_test::ThrowingValue::should_throw = false;
+}
+
+TEST_CASE("CustomDeleterWrapper: Multiple instances", "[wrapper_policy]")
+{
+    test_utils::tracking_deleter<int>::reset_count();
+
+    using wrapper = caches::custom_deleter_wrapper<int, test_utils::tracking_deleter<int>>;
+
+    {
+        auto ptr1 = wrapper::create(1);
+        auto ptr2 = wrapper::create(2);
+        auto ptr3 = wrapper::create(3);
+
+        CHECK(*ptr1 == 1);
+        CHECK(*ptr2 == 2);
+        CHECK(*ptr3 == 3);
+    }
+
+    // All 3 should have been deleted
+    CHECK(test_utils::tracking_deleter<int>::delete_count.load() == 3);
+}
+
+TEST_CASE("AllocateSharedWrapper: Multiple instances", "[wrapper_policy]")
+{
+    test_utils::tracking_allocator<int>::reset_counts();
+
+    using wrapper = caches::allocate_shared_wrapper<int, test_utils::tracking_allocator<int>>;
+
+    {
+        auto ptr1 = wrapper::create(10);
+        auto ptr2 = wrapper::create(20);
+        auto ptr3 = wrapper::create(30);
+
+        CHECK(*ptr1 == 10);
+        CHECK(*ptr2 == 20);
+        CHECK(*ptr3 == 30);
+    }
+
+    // Multiple allocations and deallocations should have occurred
+    CHECK(test_utils::tracking_allocator_state::allocation_count.load() >= 3);
+    CHECK(test_utils::tracking_allocator_state::deallocation_count.load() >= 3);
+}

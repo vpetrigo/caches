@@ -708,6 +708,77 @@ TEST_CASE("PolicyRuleOfFive", "[coverage]")
     TestPolicyRuleOfFive<caches::NoEviction>();
 }
 
+TEST_CASE("PolicyEraseNonExistentKey", "[coverage][branch]")
+{
+    {
+        caches::LRU<std::string> policy;
+        policy.Erase("nonexistent"); // Should not crash
+        policy.Insert("key1");
+        policy.Erase("other_nonexistent");
+        policy.Erase("key1");
+    }
+
+    {
+        caches::FIFO<std::string> policy;
+        policy.Erase("nonexistent");
+        policy.Insert("key1");
+        policy.Erase("other_nonexistent");
+        policy.Erase("key1");
+    }
+
+    {
+        caches::LFU<std::string> policy;
+        policy.Erase("nonexistent");
+        policy.Insert("key1");
+        policy.Erase("other_nonexistent");
+        policy.Erase("key1");
+    }
+
+    {
+        caches::NoEviction<std::string> policy;
+        policy.Erase("nonexistent");
+        policy.Insert("key1");
+        policy.Erase("other_nonexistent");
+        policy.Erase("key1");
+    }
+}
+
+TEST_CASE("PolicyEraseNonExistentKeyIntType", "[coverage][branch]")
+{
+    // Same test but with int keys for different template instantiation
+    {
+        caches::LRU<int> policy;
+        policy.Erase(999);
+        policy.Insert(1);
+        policy.Erase(888);
+        policy.Erase(1);
+    }
+
+    {
+        caches::FIFO<int> policy;
+        policy.Erase(999);
+        policy.Insert(1);
+        policy.Erase(888);
+        policy.Erase(1);
+    }
+
+    {
+        caches::LFU<int> policy;
+        policy.Erase(999);
+        policy.Insert(1);
+        policy.Erase(888);
+        policy.Erase(1);
+    }
+
+    {
+        caches::NoEviction<int> policy;
+        policy.Erase(999);
+        policy.Insert(1);
+        policy.Erase(888);
+        policy.Erase(1);
+    }
+}
+
 TEST_CASE("LRUEvictionWithPhmap", "[CustomHashMapTest]")
 {
     caches::cache<std::string, int, caches::LRU, caches::key_traits<std::string>,
@@ -916,4 +987,791 @@ TEST_CASE("CallbackWithPhmapBackendNoEviction", "[CustomHashMapTest][OnEraseCall
 
     CHECK(callback_count == 1);
     CHECK(cache.Size() == 2);
+}
+
+TEST_CASE("ZeroSizeCacheThrowsIntKey", "[coverage][branch]")
+{
+    CHECK_THROWS_AS((caches::cache<int, int, caches::LRU>{0}), std::invalid_argument);
+    CHECK_THROWS_AS((caches::cache<int, int, caches::FIFO>{0}), std::invalid_argument);
+    CHECK_THROWS_AS((caches::cache<int, int, caches::LFU>{0}), std::invalid_argument);
+    CHECK_THROWS_AS((caches::cache<int, int, caches::NoEviction>{0}), std::invalid_argument);
+}
+
+TEST_CASE("ZeroSizeCacheThrowsWithPolicyIntKey", "[coverage][branch]")
+{
+    {
+        using cache_t = caches::cache<int, int, caches::LRU>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        CHECK_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+    {
+        using cache_t = caches::cache<int, int, caches::FIFO>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        CHECK_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+    {
+        using cache_t = caches::cache<int, int, caches::LFU>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        CHECK_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+    {
+        using cache_t = caches::cache<int, int, caches::NoEviction>;
+        using policy_t = cache_t::policy_type;
+        policy_t policy;
+        CHECK_THROWS_AS(cache_t(0, std::move(policy)), std::invalid_argument);
+    }
+}
+
+TEST_CASE("UpdateExistingKeyAllPolicies", "[coverage][branch]")
+{
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        cache.Put(1, 100);
+        cache.Put(1, 200); // Update - triggers Touch and value update
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Size() == 1);
+    }
+
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        cache.Put(1, 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Size() == 1);
+    }
+
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        cache.Put(1, 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Size() == 1);
+    }
+
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        cache.Put(1, 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Size() == 1);
+    }
+}
+
+TEST_CASE("UpdateExistingKeyWithEviction", "[coverage][branch]")
+{
+    // Test updating a key when cache is at capacity (both branches in Put)
+
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        // Cache full, now update existing key (should NOT evict)
+        cache.Put(1, 150);
+        CHECK(*cache.Get(1) == 150);
+        CHECK(*cache.Get(2) == 200);
+        CHECK(cache.Size() == 2);
+    }
+
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Get(1);      // Touch 1
+        cache.Put(3, 300); // New key - evicts 2
+        CHECK(cache.Cached(1));
+        CHECK_FALSE(cache.Cached(2));
+        CHECK(cache.Cached(3));
+    }
+}
+
+TEST_CASE("GetTouchesKeyAllPolicies", "[coverage][branch]")
+{
+    // Covers the Get path that touches the key
+
+    {
+        caches::cache<int, int, caches::LRU> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Get(1);      // Touch key 1
+        cache.Put(4, 400); // Evict key 2 (LRU)
+        CHECK(cache.Cached(1));
+        CHECK_FALSE(cache.Cached(2));
+    }
+
+    {
+        caches::cache<int, int, caches::FIFO> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Get(1);      // Touch (no effect for FIFO)
+        cache.Put(4, 400); // Evict key 1 (first in)
+        CHECK_FALSE(cache.Cached(1));
+        CHECK(cache.Cached(2));
+    }
+
+    {
+        caches::cache<int, int, caches::LFU> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Get(1);
+        cache.Get(1);      // Key 1 has high frequency
+        cache.Put(4, 400); // Evict key 2 or 3 (low frequency)
+        CHECK(cache.Cached(1));
+    }
+}
+
+TEST_CASE("TryGetTouchesKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests TryGet path for existing keys
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        auto [ptr, found] = cache.TryGet(1); // Touch 1
+        CHECK(found);
+        CHECK(*ptr == 100);
+        cache.Put(3, 300); // Should evict 2
+        CHECK(cache.Cached(1));
+        CHECK_FALSE(cache.Cached(2));
+    }
+
+    {
+        caches::cache<int, int, caches::FIFO> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        auto [ptr, found] = cache.TryGet(1);
+        CHECK(found);
+        cache.Put(3, 300); // Should evict 1 (FIFO)
+        CHECK_FALSE(cache.Cached(1));
+    }
+
+    {
+        caches::cache<int, int, caches::LFU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.TryGet(1);
+        cache.TryGet(1);
+        cache.TryGet(1);   // High frequency
+        cache.Put(3, 300); // Evict 2
+        CHECK(cache.Cached(1));
+        CHECK_FALSE(cache.Cached(2));
+    }
+}
+
+TEST_CASE("TryGetMissingKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests TryGet path for missing keys (early return branch)
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        auto [ptr, found] = cache.TryGet(999);
+        CHECK_FALSE(found);
+        CHECK(ptr == nullptr);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        auto [ptr, found] = cache.TryGet(999);
+        CHECK_FALSE(found);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        auto [ptr, found] = cache.TryGet(999);
+        CHECK_FALSE(found);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        auto [ptr, found] = cache.TryGet(999);
+        CHECK_FALSE(found);
+    }
+}
+
+TEST_CASE("CachedCheckBothBranches", "[coverage][branch]")
+{
+    // Tests Cached() for both existing and non-existing keys
+
+    caches::cache<int, int, caches::LRU> cache{5};
+
+    // Key doesn't exist
+    CHECK_FALSE(cache.Cached(1));
+
+    // Key exists
+    cache.Put(1, 100);
+    CHECK(cache.Cached(1));
+
+    // Another key doesn't exist
+    CHECK_FALSE(cache.Cached(2));
+}
+
+TEST_CASE("RemoveKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests Remove() for existing keys
+
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        cache.Put(1, 100);
+        CHECK(cache.Remove(1));
+        CHECK_FALSE(cache.Cached(1));
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        cache.Put(1, 100);
+        CHECK(cache.Remove(1));
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        cache.Put(1, 100);
+        CHECK(cache.Remove(1));
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        cache.Put(1, 100);
+        CHECK(cache.Remove(1));
+    }
+}
+
+TEST_CASE("RemoveMissingKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests Remove() for non-existing keys (line 290 return false branch)
+
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        CHECK_FALSE(cache.Remove(999));
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        CHECK_FALSE(cache.Remove(999));
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        CHECK_FALSE(cache.Remove(999));
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        CHECK_FALSE(cache.Remove(999));
+    }
+}
+
+TEST_CASE("ClearEmptyCacheAllPolicies", "[coverage][branch]")
+{
+    // Tests Clear() on empty cache (loop doesn't execute)
+
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+}
+
+TEST_CASE("ClearNonEmptyCacheAllPolicies", "[coverage][branch]")
+{
+    // Tests Clear() on non-empty cache (loop executes)
+
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(cache.Empty());
+    }
+}
+
+TEST_CASE("EvictionCallbackWithIntKey", "[coverage][branch]")
+{
+    // Tests eviction callback invocation with int keys
+
+    int count = 0;
+    int last_key = -1;
+    caches::cache<int, int, caches::LRU> cache{2, std::hash<int>{}, std::equal_to<int>{},
+                                               std::allocator<int>{},
+                                               [&](const int &key, const auto &)
+                                               {
+                                                   count++;
+                                                   last_key = key;
+                                               }};
+
+    cache.Put(1, 100);
+    cache.Put(2, 200);
+    cache.Get(1);      // Touch 1
+    cache.Put(3, 300); // Evict 2
+
+    CHECK(count == 1);
+    CHECK(last_key == 2);
+}
+
+TEST_CASE("EmptyCheckAllPolicies", "[coverage][branch]")
+{
+    // Tests Empty() for both empty and non-empty states
+
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        CHECK(cache.Empty());
+        cache.Put(1, 100);
+        CHECK_FALSE(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        CHECK(cache.Empty());
+        cache.Put(1, 100);
+        CHECK_FALSE(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        CHECK(cache.Empty());
+        cache.Put(1, 100);
+        CHECK_FALSE(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        CHECK(cache.Empty());
+        cache.Put(1, 100);
+        CHECK_FALSE(cache.Empty());
+    }
+}
+
+TEST_CASE("MaxSizeAllPolicies", "[coverage][branch]")
+{
+    // Tests MaxSize() returns correct value
+
+    {
+        caches::cache<int, int, caches::LRU> cache{42};
+        CHECK(cache.MaxSize() == 42);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{42};
+        CHECK(cache.MaxSize() == 42);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{42};
+        CHECK(cache.MaxSize() == 42);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{42};
+        CHECK(cache.MaxSize() == 42);
+    }
+}
+
+TEST_CASE("MultipleEvictionsAllPolicies", "[coverage][branch]")
+{
+    // Tests multiple evictions in sequence
+
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        for (int i = 0; i < 10; i++)
+        {
+            cache.Put(i, i * 10);
+        }
+        CHECK(cache.Size() == 2);
+        CHECK(cache.Cached(8));
+        CHECK(cache.Cached(9));
+    }
+
+    {
+        caches::cache<int, int, caches::FIFO> cache{2};
+        for (int i = 0; i < 10; i++)
+        {
+            cache.Put(i, i * 10);
+        }
+        CHECK(cache.Size() == 2);
+    }
+
+    {
+        caches::cache<int, int, caches::LFU> cache{2};
+        for (int i = 0; i < 10; i++)
+        {
+            cache.Put(i, i * 10);
+        }
+        CHECK(cache.Size() == 2);
+    }
+
+    {
+        caches::cache<int, int, caches::NoEviction> cache{2};
+        for (int i = 0; i < 10; i++)
+        {
+            cache.Put(i, i * 10);
+        }
+        CHECK(cache.Size() == 2);
+    }
+}
+
+// Additional edge case tests for branch coverage
+
+TEST_CASE("CacheWithStringValueAllPolicies", "[coverage][branch]")
+{
+    // Tests with string values to cover more template instantiations
+    {
+        caches::cache<int, std::string, caches::LRU> cache{3};
+        cache.Put(1, "one");
+        cache.Put(2, "two");
+        CHECK(*cache.Get(1) == "one");
+        CHECK(*cache.Get(2) == "two");
+        cache.Put(1, "ONE"); // Update
+        CHECK(*cache.Get(1) == "ONE");
+    }
+    {
+        caches::cache<int, std::string, caches::FIFO> cache{3};
+        cache.Put(1, "one");
+        cache.Put(2, "two");
+        CHECK(*cache.Get(1) == "one");
+        cache.Put(1, "ONE");
+        CHECK(*cache.Get(1) == "ONE");
+    }
+    {
+        caches::cache<int, std::string, caches::LFU> cache{3};
+        cache.Put(1, "one");
+        cache.Put(2, "two");
+        CHECK(*cache.Get(1) == "one");
+        cache.Put(1, "ONE");
+        CHECK(*cache.Get(1) == "ONE");
+    }
+    {
+        caches::cache<int, std::string, caches::NoEviction> cache{3};
+        cache.Put(1, "one");
+        cache.Put(2, "two");
+        CHECK(*cache.Get(1) == "one");
+        cache.Put(1, "ONE");
+        CHECK(*cache.Get(1) == "ONE");
+    }
+}
+
+TEST_CASE("GetThrowsAllPolicies", "[coverage][branch]")
+{
+    // Tests Get() throwing for missing keys across all policies
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        CHECK_THROWS_AS(cache.Get(999), std::range_error);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        CHECK_THROWS_AS(cache.Get(999), std::range_error);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        CHECK_THROWS_AS(cache.Get(999), std::range_error);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        CHECK_THROWS_AS(cache.Get(999), std::range_error);
+    }
+}
+
+TEST_CASE("CacheFullThenUpdateAllPolicies", "[coverage][branch]")
+{
+    // Tests updating a key when cache is exactly at capacity
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        CHECK(cache.Size() == 2);
+        cache.Put(1, 150); // Update, not evict
+        CHECK(cache.Size() == 2);
+        CHECK(*cache.Get(1) == 150);
+        CHECK(*cache.Get(2) == 200);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(1, 150);
+        CHECK(cache.Size() == 2);
+        CHECK(*cache.Get(1) == 150);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(1, 150);
+        CHECK(cache.Size() == 2);
+        CHECK(*cache.Get(1) == 150);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(1, 150);
+        CHECK(cache.Size() == 2);
+        CHECK(*cache.Get(1) == 150);
+    }
+}
+
+TEST_CASE("SingleEntryOperationsAllPolicies", "[coverage][branch]")
+{
+    // Tests all operations on single-entry cache
+    {
+        caches::cache<int, int, caches::LRU> cache{1};
+        CHECK(cache.Empty());
+        cache.Put(1, 100);
+        CHECK_FALSE(cache.Empty());
+        CHECK(cache.Size() == 1);
+        CHECK(*cache.Get(1) == 100);
+        auto [ptr, found] = cache.TryGet(1);
+        CHECK(found);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Remove(1));
+        CHECK(cache.Empty());
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{1};
+        cache.Put(1, 100);
+        CHECK(*cache.Get(1) == 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Remove(1));
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{1};
+        cache.Put(1, 100);
+        CHECK(*cache.Get(1) == 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Remove(1));
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{1};
+        cache.Put(1, 100);
+        CHECK(*cache.Get(1) == 100);
+        cache.Put(1, 200);
+        CHECK(*cache.Get(1) == 200);
+        CHECK(cache.Remove(1));
+    }
+}
+
+TEST_CASE("EvictThenInsertSameKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests evicting a key then re-inserting it
+    {
+        caches::cache<int, int, caches::LRU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300); // Evict 1
+        CHECK_FALSE(cache.Cached(1));
+        cache.Put(1, 101); // Re-insert 1
+        CHECK(cache.Cached(1));
+        CHECK(*cache.Get(1) == 101);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Put(1, 101);
+        CHECK(cache.Cached(1));
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Put(1, 101);
+        CHECK(cache.Cached(1));
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{2};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        // NoEviction may evict any key
+        cache.Put(1, 101);
+    }
+}
+
+TEST_CASE("ClearThenReuseAllPolicies", "[coverage][branch]")
+{
+    // Tests clearing and reusing the cache
+    {
+        caches::cache<int, int, caches::LRU> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(cache.Empty());
+        cache.Put(3, 300);
+        CHECK(cache.Size() == 1);
+        CHECK(*cache.Get(3) == 300);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        cache.Put(3, 300);
+        CHECK(*cache.Get(3) == 300);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        cache.Put(3, 300);
+        CHECK(*cache.Get(3) == 300);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{3};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        cache.Put(3, 300);
+        CHECK(*cache.Get(3) == 300);
+    }
+}
+
+TEST_CASE("TryGetAndGetOnSameKeyAllPolicies", "[coverage][branch]")
+{
+    // Tests both TryGet and Get on same key
+    {
+        caches::cache<int, int, caches::LRU> cache{5};
+        cache.Put(1, 100);
+        auto [ptr1, found1] = cache.TryGet(1);
+        CHECK(found1);
+        CHECK(*ptr1 == 100);
+        auto ptr2 = cache.Get(1);
+        CHECK(*ptr2 == 100);
+    }
+    {
+        caches::cache<int, int, caches::FIFO> cache{5};
+        cache.Put(1, 100);
+        auto [ptr, found] = cache.TryGet(1);
+        CHECK(found);
+        CHECK(*cache.Get(1) == 100);
+    }
+    {
+        caches::cache<int, int, caches::LFU> cache{5};
+        cache.Put(1, 100);
+        auto [ptr, found] = cache.TryGet(1);
+        CHECK(found);
+        CHECK(*cache.Get(1) == 100);
+    }
+    {
+        caches::cache<int, int, caches::NoEviction> cache{5};
+        cache.Put(1, 100);
+        auto [ptr, found] = cache.TryGet(1);
+        CHECK(found);
+        CHECK(*cache.Get(1) == 100);
+    }
+}
+
+TEST_CASE("CallbackInvokedOnClearAllPolicies", "[coverage][branch]")
+{
+    // Tests callback invocation during Clear()
+    {
+        int count = 0;
+        caches::cache<int, int, caches::LRU> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                   std::allocator<int>{},
+                                                   [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Put(3, 300);
+        cache.Clear();
+        CHECK(count == 3);
+    }
+    {
+        int count = 0;
+        caches::cache<int, int, caches::FIFO> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                    std::allocator<int>{},
+                                                    [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(count == 2);
+    }
+    {
+        int count = 0;
+        caches::cache<int, int, caches::LFU> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                   std::allocator<int>{},
+                                                   [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(count == 2);
+    }
+    {
+        int count = 0;
+        caches::cache<int, int, caches::NoEviction> cache{
+            5, std::hash<int>{}, std::equal_to<int>{}, std::allocator<int>{},
+            [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+        cache.Clear();
+        CHECK(count == 2);
+    }
+}
+
+TEST_CASE("CallbackInvokedOnDestructorAllPolicies", "[coverage][branch]")
+{
+    // Tests callback invocation during destructor
+    int count = 0;
+    {
+        caches::cache<int, int, caches::LRU> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                   std::allocator<int>{},
+                                                   [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+        cache.Put(2, 200);
+    }
+    CHECK(count == 2);
+
+    count = 0;
+    {
+        caches::cache<int, int, caches::FIFO> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                    std::allocator<int>{},
+                                                    [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+    }
+    CHECK(count == 1);
+
+    count = 0;
+    {
+        caches::cache<int, int, caches::LFU> cache{5, std::hash<int>{}, std::equal_to<int>{},
+                                                   std::allocator<int>{},
+                                                   [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+    }
+    CHECK(count == 1);
+
+    count = 0;
+    {
+        caches::cache<int, int, caches::NoEviction> cache{
+            5, std::hash<int>{}, std::equal_to<int>{}, std::allocator<int>{},
+            [&](const int &, const auto &) { count++; }};
+        cache.Put(1, 100);
+    }
+    CHECK(count == 1);
 }

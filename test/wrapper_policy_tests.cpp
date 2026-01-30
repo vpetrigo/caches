@@ -86,7 +86,11 @@ class tracking_allocator
     void deallocate(T *p, std::size_t) noexcept
     {
         tracking_allocator_state::deallocation_count.fetch_add(1, std::memory_order_relaxed);
-        ::operator delete(p);
+
+        if (p != nullptr)
+        {
+            ::operator delete(p);
+        }
     }
 
     static void reset_counts()
@@ -134,7 +138,7 @@ struct TestValue
     int data;
     std::string name;
 
-    explicit TestValue(int d = 0, std::string n = "") : data(d), name(std::move(n))
+    explicit TestValue(int d = 0, std::string n = "") : data{d}, name{std::move(n)}
     {
     }
 };
@@ -256,8 +260,12 @@ struct test_deleter
     void operator()(T *p) const
     {
         count.fetch_add(1, std::memory_order_relaxed);
-        // Note: In real usage, this would need to match the allocator
-        delete p;
+        // Note: In full_control_wrapper, the allocator handles deallocation.
+        // The deleter is responsible for destruction only.
+        if (p)
+        {
+            p->~T();
+        }
     }
 
     static void reset()
@@ -562,13 +570,17 @@ struct ThrowingValue
 
 bool ThrowingValue::should_throw = false;
 
-// Simple deleter for testing
+// Simple deleter for testing - destruction only, no deallocation
+// (allocator handles deallocation in full_control_wrapper)
 template <typename T>
 struct simple_deleter
 {
     void operator()(T *p) const
     {
-        delete p;
+        if (p)
+        {
+            p->~T(); // Destroy only, do not deallocate
+        }
     }
 };
 

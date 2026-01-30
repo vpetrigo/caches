@@ -21,15 +21,81 @@
 #ifndef CACHES_WRAPPER_POLICY_HPP
 #define CACHES_WRAPPER_POLICY_HPP
 
+#include <atomic>
 #include <memory>
 #include <utility>
 
 namespace caches
 {
 
-//=============================================================================
-// Smart Pointer Creation Traits
-//=============================================================================
+namespace detail
+{
+/**
+ * \brief Allocator-aware deleter that destroys and deallocates
+ *
+ * Used by generic
+ * smart_ptr_traits::allocate to ensure memory allocated
+ * with a custom allocator is properly
+ * deallocated using the same allocator.
+ *
+ * \tparam T The value type
+ * \tparam Allocator The
+ * allocator type
+ */
+template <typename T, typename Allocator>
+struct allocator_destroy_deleter
+{
+    Allocator allocator;
+
+    explicit allocator_destroy_deleter(Allocator a) : allocator{std::move(a)}
+    {
+    }
+
+    void operator()(T *ptr)
+    {
+        if (ptr != nullptr)
+        {
+            using alloc_traits = std::allocator_traits<Allocator>;
+            alloc_traits::destroy(allocator, ptr);
+            alloc_traits::deallocate(allocator, ptr, 1);
+        }
+    }
+};
+
+/**
+ * \brief Allocator-aware deleter wrapper for full_control_wrapper
+ *
+ * Wraps a user-provided deleter and an allocator. When invoked:
+ * 1. Calls the user's deleter to destroy the object
+ *
+ * (destructor only)
+ * 2. Uses the allocator to deallocate memory
+ *
+ * \tparam T The value type
+ * \tparam Allocator The allocator type
+ * \tparam Deleter The deleter type (destruction only)
+ */
+template <typename T, typename Allocator, typename Deleter>
+struct allocator_deleter
+{
+    Allocator allocator;
+    Deleter deleter;
+
+    allocator_deleter(Allocator a, Deleter d) : allocator{std::move(a)}, deleter{std::move(d)}
+    {
+    }
+
+    void operator()(T *ptr)
+    {
+        if (ptr != nullptr)
+        {
+            deleter(ptr); // User's deleter: destroy only
+            using alloc_traits = std::allocator_traits<Allocator>;
+            alloc_traits::deallocate(allocator, ptr, 1);
+        }
+    }
+};
+} // namespace detail
 
 /**
  * \brief Traits for smart pointer creation functions
@@ -53,6 +119,11 @@ struct smart_ptr_traits
 
     /**
      * \brief Create a smart pointer using custom allocator
+     *
+     * Uses
+     * allocator_destroy_deleter to ensure proper deallocation
+     * through the same allocator
+     * that was used for allocation.
      */
     template <typename T, typename Alloc, typename... Args>
     static SmartPtr<T> allocate(Alloc alloc, Args &&...args)
@@ -68,7 +139,8 @@ struct smart_ptr_traits
             alloc_traits::deallocate(alloc, ptr, 1);
             throw;
         }
-        return SmartPtr<T>(ptr);
+
+        return SmartPtr<T>(ptr, detail::allocator_destroy_deleter<T, Alloc>{alloc});
     }
 };
 
@@ -93,10 +165,6 @@ struct smart_ptr_traits<std::shared_ptr>
     }
 };
 
-//=============================================================================
-// Primary Template
-//=============================================================================
-
 /**
  * \brief Primary wrapper policy template with default std::shared_ptr behavior
  *
@@ -105,7 +173,7 @@ struct smart_ptr_traits<std::shared_ptr>
  * 2. Use pre-built policy templates (allocate_shared_wrapper, etc.)
  * 3. Define their own policy and pass it as a template argument to cache
  *
- * \par Example: Specialization for a custom type
+ * \b Example: Specialization for a custom type
  * \code
  * template<>
  * struct caches::wrapper_policy<MyValue> {
@@ -131,17 +199,14 @@ struct wrapper_policy
     }
 };
 
-//=============================================================================
-// Helper for Inline Policies
-//=============================================================================
-
 /**
  * \brief Helper to create custom wrapper policies inline
  *
  * Use this when you have a template that defines a wrapper policy and want
  * to use it with the cache without specializing wrapper_policy.
  *
- * \par Example
+ * \b Example
+ *
  * \code
  * template <typename T>
  * struct my_wrapper_policy {
@@ -165,10 +230,6 @@ struct make_wrapper_policy
     template <typename Value>
     using policy = WrapperPolicyTemplate<Value>;
 };
-
-//=============================================================================
-// Pre-built Wrapper Policies
-//=============================================================================
 
 /**
  * \brief Wrapper policy using std::allocate_shared with a custom allocator
@@ -214,10 +275,19 @@ struct custom_deleter_wrapper
 /**
  * \brief Wrapper policy combining custom allocator and deleter
  *
- * \tparam Value The value type to wrap
- * \tparam Allocator The allocator type to use
- * \tparam Deleter The deleter type to use
- * \tparam SmartPtr The smart pointer template to use (default: std::shared_ptr)
+ * The allocator is used for
+ * memory allocation and deallocation.
+ * The deleter is responsible for object destruction only
+ * (calling destructor
+ * or custom cleanup logic) - it should NOT deallocate memory.
+ *
+ * \tparam
+ * Value The value type to wrap
+ * \tparam Allocator The allocator type to use for memory
+ * management
+ * \tparam Deleter The deleter type (destruction only, NOT deallocation)
+ * \tparam
+ * SmartPtr The smart pointer template to use (default: std::shared_ptr)
  */
 template <typename Value, typename Allocator, typename Deleter,
           template <typename> class SmartPtr = std::shared_ptr>
@@ -227,43 +297,49 @@ struct full_control_wrapper
     using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<Value>;
     using deleter_type = Deleter;
 
+  private:
+    // RAII guard for allocated but not yet constructed memory
+    struct alloc_guard
+    {
+        allocator_type &alloc;
+        Value *ptr;
+        bool released{false};
+
+        alloc_guard(allocator_type &a, Value *p) : alloc{a}, ptr{p}
+        {
+        }
+
+        ~alloc_guard()
+        {
+            if (!released && (ptr != nullptr))
+            {
+                using alloc_traits = std::allocator_traits<allocator_type>;
+                alloc_traits::deallocate(alloc, ptr, 1);
+            }
+        }
+
+        void release() noexcept
+        {
+            released = true;
+        }
+    };
+
+  public:
     template <typename... Args>
     static type create(Args &&...args)
     {
         allocator_type alloc{};
         using alloc_traits = std::allocator_traits<allocator_type>;
         Value *ptr = alloc_traits::allocate(alloc, 1);
-        try
-        {
-            alloc_traits::construct(alloc, ptr, std::forward<Args>(args)...);
-        }
-        catch (...)
-        {
-            alloc_traits::deallocate(alloc, ptr, 1);
-            throw;
-        }
-        return type(ptr, Deleter{}, alloc);
+        alloc_guard guard(alloc, ptr);
+
+        alloc_traits::construct(alloc, ptr, std::forward<Args>(args)...);
+        guard.release();
+
+        return type{
+            ptr, detail::allocator_deleter<Value, allocator_type, deleter_type>{alloc, Deleter{}},
+            alloc};
     }
-};
-
-//=============================================================================
-// Backward Compatibility Aliases (to be removed in future versions)
-//=============================================================================
-
-// NOTE: These aliases are provided for backward compatibility during migration.
-// New code should use wrapper_policy directly.
-
-template <typename Value>
-using default_wrapper = wrapper_policy<Value>;
-
-/**
- * \brief Backward compatibility helper (deprecated, use make_wrapper_policy)
- */
-template <template <typename> class WrapperPolicyTemplate>
-struct make_wrapper_traits
-{
-    template <typename Value>
-    using traits = WrapperPolicyTemplate<Value>;
 };
 
 } // namespace caches

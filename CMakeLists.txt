@@ -59,13 +59,13 @@ if (CACHES_BUILD_TEST)
     add_custom_target(coverage
             COMMAND gcovr
                 -r ${CMAKE_CURRENT_LIST_DIR}
-                --filter "${CMAKE_CURRENT_LIST_DIR}/include"
+                --filter "${CMAKE_CURRENT_LIST_DIR}/include" --exclude-throw-branches --merge-lines
                 -x coverage.info
     )
     add_custom_target(coverage-html
             COMMAND gcovr
                 -r ${CMAKE_CURRENT_LIST_DIR}
-                --filter "${CMAKE_CURRENT_LIST_DIR}/include"
+                --filter "${CMAKE_CURRENT_LIST_DIR}/include" --exclude-throw-branches --merge-lines
                 --html-details ${CMAKE_BINARY_DIR}/report/report.html
     )
 endif ()

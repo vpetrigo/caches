@@ -156,7 +156,7 @@ jobs:
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
-          token: ${{ secrets.COVERALLS_TOKEN }}
+          github-token: ${{ secrets.COVERALLS_TOKEN }}
           files: build/coverage.info
 
   build-clang:

@@ -8,8 +8,13 @@ def _copy_license(project_root: pathlib.Path) -> None:
 
 
 def _copy_doxygen(project_root: pathlib.Path, docs_dir: pathlib.Path) -> None:
+    out_dir = docs_dir.joinpath("doxygen")
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
     shutil.copytree(
-        project_root.joinpath("docs", "doxygen", "html"), docs_dir.joinpath("doxygen")
+        project_root.joinpath("docs", "doxygen", "html"),
+        out_dir,
+        dirs_exist_ok=True,
     )
 
 
@@ -20,5 +25,4 @@ def copy_files(*_, **kwargs):
     if not docs_dir.joinpath("LICENSE.md").exists():
         _copy_license(project_root)
 
-    if not docs_dir.joinpath("doxygen").exists():
-        _copy_doxygen(project_root, docs_dir)
+    _copy_doxygen(project_root, docs_dir)

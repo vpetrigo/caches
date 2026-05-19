@@ -19,3 +19,4 @@ docs/mkdocs/site/
 
 # Python
 **/__pycache__/
+**/.venv/

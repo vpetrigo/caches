@@ -1,4 +1,4 @@
-<img alt="Open Source Initiative Approved License" src="https://opensource.org/trademarks/opensource/OSI-Approved-License-100x137.png" style="float: right" />
+<img alt="Open Source Initiative Approved License" src="https://i0.wp.com/opensource.org/wp-content/uploads/2006/09/OSIApproved.png?w=137&quality=80&ssl=1" style="float: right" />
 BSD 3-Clause License
 
 Copyright (c) 2015-2021, Vladimir Petrigo

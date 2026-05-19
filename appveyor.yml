@@ -3,15 +3,16 @@ branches:
     - master
 
 init:
+  - choco upgrade cmake -y
+  - refreshenv
   - git config --global core.autocrlf input
 
 image:
-  - Visual Studio 2017
   - Visual Studio 2019
   - Visual Studio 2022
 
 matrix:
-  fast_finish: true
+  fast_finish: false
 
 platform:
   - Win32
@@ -37,7 +38,6 @@ for:
         - image: Visual Studio 2022
     environment:
       CMAKE_GENERATOR: "Visual Studio 17 2022"
-
 
 before_build:
   - git submodule update --init --recursive

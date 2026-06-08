@@ -15,7 +15,7 @@ jobs:
         os: [ macos-latest, ubuntu-latest, windows-latest ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - name: Set compiler variables
@@ -43,7 +43,7 @@ jobs:
   build-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - name: Install dependencies
@@ -62,7 +62,7 @@ jobs:
           lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch --rc geninfo_unexecuted_blocks=1
           lcov --remove coverage-raw.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info --ignore-errors mismatch
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./build/coverage
@@ -76,7 +76,7 @@ jobs:
         tag: [ 14, 15, 16, 17, 18, 19, 20 ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - name: Install Clang
@@ -107,7 +107,7 @@ jobs:
         tag: [ 9, 10, 11, 12, 13, 14 ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - name: Setup GCC

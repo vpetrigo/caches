@@ -15,7 +15,7 @@ jobs:
         os: [ macos-latest, ubuntu-latest, windows-latest ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - name: Set compiler variables
@@ -43,7 +43,7 @@ jobs:
   build-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - name: Install dependencies
@@ -73,14 +73,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 14, 15, 16, 17, 18, 19, 20 ]
+        tag: [ 21, 22, 23 ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - name: Install Clang
-        uses: egor-tensin/setup-clang@v1
+        uses: egor-tensin/setup-clang@v2
         with:
           version: ${{ matrix.tag }}
       - name: Set environment variables
@@ -104,10 +104,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 9, 10, 11, 12, 13, 14 ]
+        tag: [ 11, 12, 13, 14, 15 ]
         custom-hash-map: [ OFF, ON ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - name: Setup GCC

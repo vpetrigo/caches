@@ -50,6 +50,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lcov gcc g++ llvm
+          gcc --version
+          gcov --version
+          lcov --version
       - name: Run tests with coverage options
         run: |
           mkdir build
@@ -59,8 +62,9 @@ jobs:
           ctest
           mkdir coverage
           cd coverage
-          lcov --directory ../ -c -o coverage-raw.info --ignore-errors mismatch --rc geninfo_unexecuted_blocks=1
-          lcov --remove coverage-raw.info "/usr/*" "*/deps/*" "*/test/*" -o coverage.info --ignore-errors mismatch
+          lcov --directory ../ -c --include "$GITHUB_WORKSPACE/include/*" -o coverage.info --rc geninfo_unexecuted_blocks=1
+          grep -q "^SF:$GITHUB_WORKSPACE/include/" coverage.info
+          grep -q '^LH:[1-9][0-9]*$' coverage.info
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
